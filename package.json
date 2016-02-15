@@ -1,0 +1,24 @@
+{
+  "name": "proto-node",
+  "version": "0.0.1",
+  "description": "Another proto.",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify src/index.js -o dist/bundle.js -d",
+    "watch": "watchify src/index.js -o dist/bundle.js   -d -v",
+    "serve": "http-server ./dist"
+  },
+  "author": "pafalium",
+  "license": "ISC",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "watchify": "^3.7.0"
+  },
+  "dependencies": {
+    "brace": "^0.7.0",
+    "esprima": "^2.7.2",
+    "estraverse": "^4.1.1",
+    "three": "^0.74.0",
+    "three-orbit-controls": "^72.0.0"
+  }
+}
