@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "brace": "^0.7.0",
+    "escodegen": "^1.8.0",
     "esprima": "^2.7.2",
     "estraverse": "^4.1.1",
     "three": "^0.74.0",
