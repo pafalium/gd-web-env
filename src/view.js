@@ -6,6 +6,7 @@ var OrbitControls = require('three-orbit-controls')(THREE);
 function decorateScene(scene) {
 	function helperScene() {
 		var axisHelper = new THREE.AxisHelper(5);
+		axisHelper.quaternion.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI / 2);
 		var gridHelper = new THREE.GridHelper(30, 1);
 		var sunLight = new THREE.DirectionalLight(0xFFEEA3, 0.8);
 		var hemiLight = new THREE.HemisphereLight(0x67D5EB, 0xA9C0C4, 0.2);
