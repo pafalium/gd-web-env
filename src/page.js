@@ -44,3 +44,5 @@ codeEditor.setValue(initProgram);
 codeEditor.clearSelection();
 
 
+var resultViewing = require('./results-viewer');
+resultViewing.doIt(realView, codeEditor);
