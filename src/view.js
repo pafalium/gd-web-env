@@ -95,7 +95,16 @@ function View(domElement) {
 		redraw();
 	};
 
+	var getCamera = function getCamera() {return _camera; };
+
+	//To change the scene currently displayed.
 	this.setScene = setScene;
+	//For performing raycasts/hittests from the outside.
+	this.getCamera = getCamera;
+	//To signal that the view should be redrawn.
+	this.redraw = redraw;
+	//To listen for event on the dom delement
+	this.container = _renderer.domElement;
 }
 
 module.exports = {
