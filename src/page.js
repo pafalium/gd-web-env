@@ -5,7 +5,9 @@ require('brace/mode/javascript');
 require('brace/theme/monokai');
 var view = require('./view');
 var style = require('./utils/styling');
-var initProgram = require('./initialProgram');
+
+var fs = require('fs');
+var initProgram = fs.readFileSync(__dirname + "/example-programs/initialProgram.js", "utf8");
 
 
 var viewDiv = document.createElement("div");

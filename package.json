@@ -11,6 +11,7 @@
   "author": "pafalium",
   "license": "ISC",
   "devDependencies": {
+    "brfs": "^1.4.3",
     "browserify": "^13.0.0",
     "watchify": "^3.7.0"
   },
@@ -21,5 +22,9 @@
     "estraverse": "^4.1.1",
     "three": "^0.74.0",
     "three-orbit-controls": "^72.0.0"
+  "browserify": {
+    "transform": [
+      "brfs"
+    ]
   }
 }
