@@ -2,7 +2,7 @@
 var THREE = require('three'),
 	ace = require('brace'),
 	aceRange = ace.acequire('ace/range').Range,
-	runProgram = require('./running-idea'),
+	running = require('./running-idea'),
 	toThree = require('./to-three');
 
 function resultLocation(resultId) {
@@ -30,7 +30,7 @@ module.exports = {
 
 
 function doIt(view3D, codeEditor) {
-	var results = runProgram(codeEditor.getValue());
+	var results = running.runProgram(codeEditor.getValue());
 
 	//display results in the 3d view
 	var resultsThreejsObjects = computeThreejsObjects(results);
