@@ -3,15 +3,16 @@
 function house(width, height, depth) {
 	return group([
 		box(width, height-2, depth), 
-		sphere(2/1)]);
+		sphere(2/1)
+	]);
 }
-var c1 = cylinder( 2, 5 );
-var s1 = sphere( 5 );
-move( s1, 0, 0, 10 );
-var b1 = box( 4, 4, 4 );
-var s2 = sphere( 2.5 );
-var gr1 = group([ b1, s2 ]);
-move( gr1, 10, 0, 10 );
+var c1 = cylinder(2, 5);
+var s1 = sphere(5);
+move(s1, 0, 0, 10);
+var b1 = box(4, 4, 4);
+var s2 = sphere(2.5);
+var gr1 = group([b1, s2]);
+move(gr1, 10, 0, 10);
 c1;
 20;
 
@@ -29,3 +30,8 @@ while(i<num) {
 	i++;
 }
 group(cyls);
+
+
+var b3 = box(5,5,5);
+move(b3, 20, 0, 0);
+move(b3, 0, 30, 0);
