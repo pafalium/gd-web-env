@@ -1,13 +1,9 @@
 
 //This file defines the set of primitives that programs written in the IDE can use.
 
-var THREE = require('three'),
-	Vector3 = THREE.Vector3,
-	BoxGeometry = THREE.BoxGeometry;
-
 var p = {
 	primitives: [],
-	defPrimitive: function(name, args, threeFunc) {
+	defPrimitive: function(name, args) {
 		this.primitives.push({
 			name: name,
 			args: args,
@@ -29,29 +25,12 @@ var p = {
 //No points when creating things
 //Functional behavior
 
-p.defPrimitive("xyz", ["x", "y", "z"], function(x,y,z){
-	return new Vector3(x,z,-y);
-});
-p.defPrimitive("polar", ["radius", "phi"], function(radius, phi){
-	return new Vector3(Math.cos(phi)*radius, 0, -Math.sin(phi)*radius);
-});
-p.defPrimitive("cylindrical", ["radius", "phi", "z"], function(radius,phi,z){
-	return new Vector3(Math.cos(phi)*radius, z, -Math.sin(phi)*radius);
-});
-p.defPrimitive("spherical", ["radius", "longitude", "azimuth"], function(radius, longitude, azimuth){
-	var sinAzimuth = Math.sin(azimuth);
-	return new Vector3(
-		radius*Math.cos(longitude)*sinAzimuth, 
-		radius*Math.cos(azimuth), 
-		-radius*Math.sin(longitude)*sinAzimuth);
-});
+p.defPrimitive("xyz", ["x", "y", "z"]);
+p.defPrimitive("polar", ["radius", "phi"]);
+p.defPrimitive("cylindrical", ["radius", "phi", "z"]);
+p.defPrimitive("spherical", ["radius", "longitude", "azimuth"]);
 
-p.defPrimitive("box", ["width", "height", "depth"], (function(){
-	var geom = new BoxGeometry(1,1,1);
-	return function(width, height, depth) {
-		
-	};
-})());
+p.defPrimitive("box", ["width", "height", "depth"]);
 p.defPrimitive("cylinder", ["radius", "height"]);
 p.defPrimitive("sphere", ["radius"]);
 p.defPrimitive("cone", ["radius", "height"]);
