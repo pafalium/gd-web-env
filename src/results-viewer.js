@@ -47,20 +47,17 @@ function doIt(view3D, codeEditor) {
 
 
 function computeThreejsObjects(results) {
-	var res = {};
-	for(var prop in results) {
-		if(toThree.isRenderable(results[prop])) {
-			res[prop] = toThree.resultToThree(results[prop]);
+	var res = new Map();
+	for(var entry of results) {
+		if(toThree.isRenderable(entry[1])) {
+			res.set(entry[0], toThree.resultToThree(entry[1]));
 		}
-	}
+	}	
 	return res;
 }
 
 function addThreejsObjectsToView(resultsThreejsObjects, view3D) {
-	var objects = [];
-	for(var prop in resultsThreejsObjects) {
-		objects.push(resultsThreejsObjects[prop]);
-	}
+	var objects = Array.from(resultsThreejsObjects.values());
 	var scene = new THREE.Scene();
 	scene.add.apply(scene, objects);
 	view3D.setScene(scene);
@@ -68,7 +65,7 @@ function addThreejsObjectsToView(resultsThreejsObjects, view3D) {
 
 function markResultSourcesInEditor(results, codeEditor) {
 
-	for(var prop in results) {
+	for(var prop of results.keys()) {
 		var range = resultRange(prop);
 		codeEditor.getSession().addMarker(range, "ace_selected-word", "text", false);
 	}
@@ -76,7 +73,6 @@ function markResultSourcesInEditor(results, codeEditor) {
 
 function setupResultHighlighting(highlightingPairs, codeEditor, view3D) {
 	var highlighter = new ResultHighlighter(codeEditor, view3D);
-	//TODO add code marker css class
 	//codeEditor.onmouseover... detect pair, set highlighted pair
 	codeEditor.renderer.container.addEventListener("mousemove", function(e){
 		//hit test mouse position against code that produced each result
@@ -84,7 +80,7 @@ function setupResultHighlighting(highlightingPairs, codeEditor, view3D) {
 		var aceScreenPos = codeEditor.renderer.pixelToScreenCoordinates(mousePos[0], mousePos[1]);
 		var aceDocumentPos = codeEditor.getSession().screenToDocumentPosition(aceScreenPos.row, aceScreenPos.column);
 		var resultBelowMouse = null;
-		for(var result in highlightingPairs) {
+		for(var result of highlightingPairs.keys()) {
 			var range = resultRange(result);
 			if(range.contains(aceDocumentPos.row, aceDocumentPos.column)) {
 				resultBelowMouse = result;
@@ -94,7 +90,7 @@ function setupResultHighlighting(highlightingPairs, codeEditor, view3D) {
 		if(resultBelowMouse !== null) {
 			highlighter.setHighlightedPair({
 				code: resultBelowMouse,
-				value: highlightingPairs[resultBelowMouse]
+				value: highlightingPairs.get(resultBelowMouse)
 			});
 		} else {
 			highlighter.removeHighlighting();
@@ -113,15 +109,15 @@ function setupResultHighlighting(highlightingPairs, codeEditor, view3D) {
 			-((e.clientY / viewRect.height) * 2 - 1));
 		var raycaster = new THREE.Raycaster();
 		raycaster.setFromCamera(mouseDeviceCoords, view3D.getCamera());
-		for(var result in highlightingPairs) {
-			var threeObj = highlightingPairs[result];
+		for(var pair of highlightingPairs) {
+			var threeObj = pair[1];
 			var intersections = raycaster.intersectObject(threeObj, true);
 			var didIntersect = intersections.length !== 0;
 			if(didIntersect) {
 				var intersectionIsCloser = intersections[0].distance < hittedDistance;
 				if(intersectionIsCloser) {
 					hittedDistance = intersections[0].distance;
-					hittedResult = result;
+					hittedResult = pair[0];
 				}
 			}
 		}
@@ -129,7 +125,7 @@ function setupResultHighlighting(highlightingPairs, codeEditor, view3D) {
 		if(hittedResult !== null) {
 			highlighter.setHighlightedPair({
 				code: hittedResult,
-				value: highlightingPairs[hittedResult]
+				value: highlightingPairs.get(hittedResult)
 			});
 		} else {
 			highlighter.removeHighlighting();

@@ -23,9 +23,9 @@ var primitiveImportCode = generatePrimitiveImportCode(primitives);
 function runProgram(program) {
 	//TODO receive environment object?
 	//TODO hide variables that shouldn't be available to program
-	var results = {};
+	var results = new Map();
 	var saveResult = function(nodeID, result) {
-		results[nodeID] = result;
+		results.set(nodeID, result);
 	};
 	(function () {
 		eval(primitiveImportCode+captureResults(program));
@@ -146,9 +146,6 @@ function instrumentProgram(program) {
 		}
 	});
 	var expressions = new Set();
-	/*var recordedExpressions = new Set([
-		"CallExpression"
-	]);*/
 	estraverse.traverse(programAst, {
 		enter: function(node, parent) {
 			if(NodeP.isExpression(node) &&
