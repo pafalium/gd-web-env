@@ -64,11 +64,13 @@ function addThreejsObjectsToView(resultsThreejsObjects, view3D) {
 }
 
 function markResultSourcesInEditor(results, codeEditor) {
-
+	var resultMarkers = new Map();
 	for(var prop of results.keys()) {
 		var range = resultRange(prop);
-		codeEditor.getSession().addMarker(range, "ace_selected-word", "text", false);
+		var marker = codeEditor.getSession().addMarker(range, "ace_selected-word", "text", false);
+		resultMarkers.set(prop, marker);
 	}
+	return resultMarkers;
 }
 
 function setupResultHighlighting(highlightingPairs, codeEditor, view3D) {
@@ -150,6 +152,7 @@ var ResultHighlighter = (function (){
 		this.addHighlighting(newPair);
 	}
 	ResultHighlighter.prototype.removeHighlighting = function() {
+		if(!this.isHighlighting()) return;
 		this.codeEditor.getSession().removeMarker(this.currentCodeEditorHighlightMarker);
 		this.currentCodeEditorHighlightMarker = null;
 		var highlightedObjects = this.currentHighlightedThreeObjects;
@@ -189,6 +192,9 @@ var ResultHighlighter = (function (){
 			object.material = highlightMaterial;
 		});
 		this.currentHighlightedThreeObjects = highlighteds;
+	}
+	ResultHighlighter.prototype.isHighlighting = function() {
+		return this.currentCodeEditorHighlightMarker !== null;
 	}
 
 	var codeHighlightCss = ".code-highlight {background-color: red; position: absolute;}"

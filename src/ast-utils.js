@@ -1,6 +1,9 @@
 "use strict";
 
 var u = {
+	isProgram: function(node) {
+		return node.type === "Program";
+	},
 	isFunction: function(node) {
 		return node.type === "FunctionExpression" || node.type === "FunctionDeclaration";
 	},
@@ -99,6 +102,40 @@ var n = {
 			operator: op,
 			left: left,
 			right: right
+		};
+	},
+	varDeclaration: function(declarations, kind) {
+		return {
+			type: "VariableDeclaration",
+			declarations: declarations,
+			kind: kind
+		};
+	},
+	varDeclarator: function(id, init) {
+		return {
+			type: "VariableDeclarator",
+			id: id,
+			init: init
+		};
+	},
+	retStmt: function(expr) {
+		return {
+			type: "ReturnStatement",
+			argument: expr
+		};
+	},
+	arrExpr: function(elems) {
+		return {
+			type: "ArrayExpression",
+			elements: elems
+		};
+	},
+	memberExpr: function(obj, prop, computed) {
+		return {
+			type: "MemberExpression",
+			object: obj,
+			property: prop,
+			computed: computed
 		};
 	}
 };
