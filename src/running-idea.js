@@ -9,7 +9,7 @@ var astUtils = require('./ast-utils'),
 	idGenerator = require('./id-generator').idGenerator,
 	nodeId = require('./node-id').nodeId;
 
-var primitives = require('./primitives');
+var primitives = require('./SceneGraph/primitives');
 var primitiveImportCode = generatePrimitiveImportCode(primitives);
 
 /*results :: {(nodeId, jsValue)}*/
