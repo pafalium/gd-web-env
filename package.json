@@ -21,7 +21,9 @@
     "esprima": "^2.7.2",
     "estraverse": "^4.1.1",
     "three": "^0.74.0",
-    "three-orbit-controls": "^72.0.0"
+    "three-orbit-controls": "^72.0.0",
+    "underscore": "^1.8.3"
+  },
   "browserify": {
     "transform": [
       "brfs"
