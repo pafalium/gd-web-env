@@ -1,12 +1,6 @@
 
 var THREE = require('three');
 
-//TODO This code shouldn't be here.
-//TODO Make it pretty.
-//TODO Avoid repeating work, eg, creating THREE.Geometries that don't change.
-//TODO Memoize if possible.(can't do if parent-child relation is bidirectional)
-//TODO Work on the 3D result structure.
-//TODO Make it possible to highlight 3D results.
 /*
 	THREE representation generation code.
 */
@@ -14,8 +8,15 @@ function isRenderable(result) {
 	return renderableFunctions[result.name] !== undefined;
 }
 
+const resultsThreeObjects = new WeakMap();
+
 function resultToThree(result) {
-	return renderableFunctions[result.name](result);
+	if(!resultsThreeObjects.has(result)) {
+		resultsThreeObjects.set(result, []);
+	}
+	var threeObj = renderableFunctions[result.name](result);
+	resultsThreeObjects.get(result).push(threeObj);
+	return threeObj;
 }
 
 
@@ -73,5 +74,6 @@ function group(result) {
 
 module.exports = {
 	isRenderable: isRenderable,
-	resultToThree: resultToThree
+	resultToThree: resultToThree,
+	resultsThreeObjects: resultsThreeObjects
 };
