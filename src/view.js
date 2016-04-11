@@ -34,7 +34,7 @@ function View(domElement) {
 	// Rendering and control setup
 	//
 	var _domElement = domElement;
-	var _renderer = new THREE.WebGLRenderer();
+	var _renderer = new THREE.WebGLRenderer({antialias: true});
 	_domElement.appendChild(_renderer.domElement);
 	var _camera = new
 	THREE.PerspectiveCamera(
