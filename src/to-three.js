@@ -25,6 +25,7 @@ var renderableFunctions = {
 	cylinder: cylinder,
 	box: box,
 	move: move,
+	rotate: rotate,
 	group: group
 };
 
@@ -62,6 +63,16 @@ function move(result) {
 	var obj = new THREE.Object3D();
 	obj.position.set(x, y, z);
 	obj.add(objToMove);
+	return obj;
+}
+function rotate(result) {
+	var objToMove = resultToThree(result.args.object);
+	var axis = result.args.axis,
+		angle = result.args.angle;
+	var yUpAxis = new THREE.Vector3(axis.x, axis.z, -axis.y);
+	var obj = new THREE.Object3D();
+	obj.add(objToMove);
+	obj.quaternion.setFromAxisAngle(yUpAxis, angle);
 	return obj;
 }
 function group(result) {

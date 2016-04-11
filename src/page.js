@@ -8,7 +8,7 @@ var style = require('./utils/styling');
 var _ = require('underscore');
 
 var fs = require('fs');
-var initProgram = fs.readFileSync(__dirname + "/example-programs/initialProgram.js", "utf8");
+var initProgram = fs.readFileSync(__dirname + "/example-programs/ex6_trelica_mobius.js", "utf8");
 
 
 var viewDiv = document.createElement("div");
