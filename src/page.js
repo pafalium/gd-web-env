@@ -146,15 +146,21 @@ function unsetHighlighted() {
 		currTHREEObjs = null;
 	}
 }
+
+var lastHighlightable = null;
 function handleMouseMove(e) {
 	var screenCoords = codeEditor.renderer.pixelToScreenCoordinates(e.clientX, e.clientY);
 	var docCoords = codeEditor.getSession().screenToDocumentPosition(screenCoords.row, screenCoords.column);
 	var highlightable = deepestHighlightableContainingCoord(docCoords.row, docCoords.column);
+	if(highlightable === lastHighlightable) {
+		return;
+	}
 	if(highlightable !== null) {
 		setHighlighted(highlightable);
 	} else {
 		unsetHighlighted();
 	}
+	lastHighlightable = highlightable;
 	realView.redraw();
 }
 codeEditor.renderer.container.addEventListener("mousemove", _.throttle(handleMouseMove, 100));
