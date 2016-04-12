@@ -54,9 +54,9 @@ var barra_trelica = function ( p0, p1, radius ) {
 };
 
 var nos_trelica = function ( pts, radius ) {
-  return group.call(null, pts.map( function(pt) { 
+  return pts.map( function(pt) { 
       return no_trelica( pt, radius );
-  }));
+  });
 };
 
 var barras_trelica = function ( ps, qs, radius ) {
@@ -66,7 +66,7 @@ var barras_trelica = function ( ps, qs, radius ) {
     function (p, index, arr) {
       return barra_trelica( ps[index], qs[index], radius );
     });
-  return group.call(null, barras);
+  return barras;
 };
 
 var trelica = function ( curves, knot_radius, bar_radius ) {
@@ -85,14 +85,12 @@ var trelica = function ( curves, knot_radius, bar_radius ) {
     barras_trelica( as.slice(1), as.slice(0, as.length-1), bar_radius ),
     barras_trelica( bs.slice(1), bs.slice(0, bs.length-1), bar_radius ),
     curves.length - 3 === 0 ?
-      group( 
         [nos_trelica( cs, knot_radius ),
-                 barras_trelica( cs.slice(1), cs.slice(0, cs.length-1), bar_radius )] )
-     :group( 
-        [barras_trelica( bs, curves[3], bar_radius ),
-                 trelica( curves.slice(2), knot_radius, bar_radius )] )
+                 barras_trelica( cs.slice(1), cs.slice(0, cs.length-1), bar_radius )] 
+     : [barras_trelica( bs, curves[3], bar_radius ),
+                 trelica( curves.slice(2), knot_radius, bar_radius )] 
     ];
-  return group.call(null, elems);
+  return elems;
 
 };
 

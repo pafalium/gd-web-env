@@ -68,6 +68,5 @@ p.defPrimitive("regularPolygon", ["radius", "sides"]);
 
 p.defPrimitive("move", ["object", "x", "y", "z"]);
 p.defPrimitive("rotate", ["object", "axis", "angle"]);
-p.defPrimitive("group", ["objects"]);
 
 module.exports = p.primitives;

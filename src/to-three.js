@@ -5,7 +5,9 @@ var THREE = require('three');
 	THREE representation generation code.
 */
 function isRenderable(result) {
-	return renderableFunctions[result.name] !== undefined;
+	var isPrimitive = renderableFunctions[result.name] !== undefined,
+		isArrayOfRenderables = Array.isArray(result) && result.every(isRenderable);
+	return isPrimitive || isArrayOfRenderables;
 }
 
 const resultsThreeObjects = new WeakMap();
@@ -14,19 +16,29 @@ function resultToThree(result) {
 	if(!resultsThreeObjects.has(result)) {
 		resultsThreeObjects.set(result, []);
 	}
-	var threeObj = renderableFunctions[result.name](result);
+	var threeObj; 
+	if(Array.isArray(result)) {
+		threeObj = arrayToThree(result);
+	} else {
+		threeObj = renderableFunctions[result.name](result);
+	}
 	resultsThreeObjects.get(result).push(threeObj);
 	return threeObj;
 }
 
+function arrayToThree(array) {
+	var objs = array.map(resultToThree);
+	var parent = new THREE.Object3D();
+	parent.add.apply(parent, objs);
+	return parent;
+}
 
 var renderableFunctions = {
 	sphere: sphere,
 	cylinder: cylinder,
 	box: box,
 	move: move,
-	rotate: rotate,
-	group: group
+	rotate: rotate
 };
 
 var solidMat = new THREE.MeshPhongMaterial();
@@ -73,13 +85,6 @@ function rotate(result) {
 	var obj = new THREE.Object3D();
 	obj.add(objToMove);
 	obj.quaternion.setFromAxisAngle(yUpAxis, angle);
-	return obj;
-}
-function group(result) {
-	var objs = result.args.objects;
-	var threeObjs = objs.map(resultToThree);
-	var obj = new THREE.Object3D();
-	obj.add.apply(obj, threeObjs);
 	return obj;
 }
 
