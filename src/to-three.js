@@ -64,7 +64,7 @@ function box(result) {
 		height = result.args.height,
 		depth = result.args.depth;
 	var obj = new THREE.Mesh(boxGeom, solidMat);
-	obj.scale.set(width, height, depth);
+	obj.scale.set(width, depth, height);
 	return obj;
 }
 function move(result) {
