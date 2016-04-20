@@ -99,10 +99,10 @@ function facades(length, width, height, n0, n1, m) {
 facades(buildingLength, buildingWidth, buildingHeight, 50, 20, 40);
 
 function rightCuboid(p1, r, p2) {
-  var newAxis = normalize(sub(p2, p1));
-  var rotAxis = normalize(cross(xyz(0, 0, 1), newAxis));
-  var rotAngle = Math.acos(dot(xyz(0, 0, 1), newAxis));
   var height = length(sub(p2, p1));
-  var b = move(box(r, r, height), 0, 0, height/2.0);
+  var b = move(box(r, height, r), 0, height/2.0, 0);
+  var newAxis = normalize(sub(p2, p1));
+  var rotAxis = normalize(cross(xyz(0, 1, 0), newAxis));
+  var rotAngle = Math.acos(dot(xyz(0, 1, 0), newAxis));
   return move(rotate(b, rotAxis, rotAngle), p1.x, p1.y, p1.z);
 }
