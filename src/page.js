@@ -161,6 +161,10 @@ var currTHREEObjs = null;
 var threeObjToOldMaterial = new Map();
 var highlightMaterial = new THREE.MeshPhongMaterial();
 highlightMaterial.emissive.setHSL(52/360.0, 0.92, 0.49);
+highlightMaterial.depthTest = false;
+highlightMaterial.depthWrite = false;
+highlightMaterial.transparent = true;
+highlightMaterial.opacity = 0.8;
 function setHighlighted(highlightable) {
 	//highlight code
 	if(currMarker !== null) {
