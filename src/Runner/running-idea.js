@@ -1,23 +1,22 @@
 "use strict";
 
-var astUtils = require('../ast-utils'),
-	Nodes = astUtils.constructors,
-	NodeP = astUtils.recognizers,
-	esprima = require('esprima'),
-	estraverse = require('estraverse'),
-	escodegen = require('escodegen'),
-	idGenerator = require('../id-generator').idGenerator;
+import _ from 'lodash';
+import esprima from 'esprima';
+import estraverse from 'estraverse';
+import escodegen from 'escodegen';
 
-var primitives = require('../SceneGraph/primitives');
-var primitiveImportCode = generatePrimitiveImportCode(primitives);
+import {constructors as Nodes, recognizers as NodeP} from '../ast-utils.js';
+import {idGenerator} from '../id-generator.js';
 
+import primitives, {PrimitiveProp} from '../SceneGraph/primitives.js';
 
 
+const primitiveImportCode = generatePrimitiveImportCode(primitives);
 function generatePrimitiveImportCode(primitives) {
 	return (
 		"var " + 
 		primitives.map(function(primitive, i){
-			return ""+primitive.name+"="+"primitives["+i+"].fn";
+			return ""+primitive[PrimitiveProp]+"="+"primitives["+i+"].fn";
 		}).join(",") +
 		";");
 }

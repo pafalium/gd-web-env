@@ -1,20 +1,24 @@
 
+import THREE from 'three';
+
 //This file defines the set of primitives that programs written in the IDE can use.
 
-var p = {
+const PrimitiveProp = Symbol("PrimitiveName");
+
+const r = {
 	primitives: [],
 	defPrimitive: function(name, args, fn) {
 		this.primitives.push({
-			name: name,
+			[PrimitiveProp]: name,
 			args: args,
-			fn: fn ? fn : function() {
+			fn: fn ? fn : function delayedPrimitive() {
 				var realArguments = arguments;
 				var callArgs = {};
 				args.forEach(function(paramName, i){
 						callArgs[paramName] = i<realArguments.length ? realArguments[i] : undefined;
 					});
 				return {
-					name: name,
+					[PrimitiveProp]: name,
 					args: callArgs
 				};
 			}
@@ -25,74 +29,78 @@ var p = {
 //No points when creating things
 //Functional behavior
 
-var THREE = require('three');
-
 // vectors
-p.defPrimitive("xyz", ["x", "y", "z"], function(x,y,z) {
+r.defPrimitive("xyz", ["x", "y", "z"], function(x,y,z) {
 	return new THREE.Vector3(x,y,z);
 });
-p.defPrimitive("polar", ["radius", "phi"]);
-p.defPrimitive("cylindrical", ["radius", "phi", "z"]);
-p.defPrimitive("spherical", ["radius", "longitude", "azimuth"]);
+r.defPrimitive("polar", ["radius", "phi"]);
+r.defPrimitive("cylindrical", ["radius", "phi", "z"]);
+r.defPrimitive("spherical", ["radius", "longitude", "azimuth"]);
 
-p.defPrimitive("point_distance", ["p1", "p2"], function(p1, p2){
+r.defPrimitive("point_distance", ["p1", "p2"], function(p1, p2){
 	return p2.clone().sub( p1 ).length();
 });
-p.defPrimitive("dot", ["v1", "v2"], function(v1, v2) {
+r.defPrimitive("dot", ["v1", "v2"], function(v1, v2) {
 	return v1.dot(v2);
 });
-p.defPrimitive("cross", ["v1", "v2"], function(v0, v1){
+r.defPrimitive("cross", ["v1", "v2"], function(v0, v1){
 	return v0.clone().cross( v1 );
 });
-p.defPrimitive("direction_from_to", ["p0", "p1"], function(p0, p1){
+r.defPrimitive("direction_from_to", ["p0", "p1"], function(p0, p1){
 	return p1.clone().sub( p0 ).normalize();
 });
-p.defPrimitive("linear_interpolation", ["p0", "p1", "t"], function(p0, p1, t) {
+r.defPrimitive("linear_interpolation", ["p0", "p1", "t"], function(p0, p1, t) {
 	return p0.clone().lerp( p1, t );
 });
-p.defPrimitive("add", ["v1", "v2"], function(v1, v2){
+r.defPrimitive("add", ["v1", "v2"], function(v1, v2){
 	return v1.clone().add(v2);
 });
-p.defPrimitive("sub", ["v1", "v2"], function(v1, v2) {
+r.defPrimitive("sub", ["v1", "v2"], function(v1, v2) {
 	return v1.clone().sub(v2);
 });
-p.defPrimitive("mult", ["v1", "v2"], function(v1, v2) {
+r.defPrimitive("mult", ["v1", "v2"], function(v1, v2) {
 	return v1.clone().multiply(v2);
 });
-p.defPrimitive("multScalar", ["v", "s"], function(v, s) {
+r.defPrimitive("multScalar", ["v", "s"], function(v, s) {
 	return v.clone().multiplyScalar(s);
 });
-p.defPrimitive("normalize", "v", function(v) {
+r.defPrimitive("normalize", "v", function(v) {
 	return v.clone().normalize();
 });
-p.defPrimitive("length", ["v"], function(v) {
+r.defPrimitive("length", ["v"], function(v) {
 	return v.length();
 });
 
 // shapes
-p.defPrimitive("box", ["width", "height", "depth"]);
-p.defPrimitive("cylinder", ["radius", "height"]);
-p.defPrimitive("sphere", ["radius"]);
-p.defPrimitive("cone", ["radius", "height"]);
-p.defPrimitive("coneFrustum", ["bottomRadius", "topRadius", "height"]);
-p.defPrimitive("regularPyramid", ["sides", "height"]);
+r.defPrimitive("box", ["width", "height", "depth"]);
+r.defPrimitive("cylinder", ["radius", "height"]);
+const sphere = (function sphere(radius){
+	return {[PrimitiveProp]: "sphere", args: {radius}};
+});
+sphere.withCenter = (function withCenter(vec) {
+	return {[PrimitiveProp]: "move", args: {object: this(1.0), x: vec.x, y: vec.y, z: vec.z}};
+}).bind(sphere);
+r.defPrimitive("sphere", ["radius"], sphere);
+r.defPrimitive("cone", ["radius", "height"]);
+r.defPrimitive("coneFrustum", ["bottomRadius", "topRadius", "height"]);
+r.defPrimitive("regularPyramid", ["sides", "height"]);
 
-p.defPrimitive("line", ["origin", "direction"]);
-p.defPrimitive("polyline", ["coordinates", "closed"]);
-p.defPrimitive("spline", ["coordinates", "closed"]);
-p.defPrimitive("arc", ["radius", "angle"]);
+r.defPrimitive("line", ["origin", "direction"]);
+r.defPrimitive("polyline", ["coordinates", "closed"]);
+r.defPrimitive("spline", ["coordinates", "closed"]);
+r.defPrimitive("arc", ["radius", "angle"]);
 
-p.defPrimitive("circle", ["radius"]);
-p.defPrimitive("plane", ["origin", "normal"]);
-p.defPrimitive("polygon", ["coordinates"]);
-p.defPrimitive("regularPolygon", ["radius", "sides"]);
+r.defPrimitive("circle", ["radius"]);
+r.defPrimitive("plane", ["origin", "normal"]);
+r.defPrimitive("polygon", ["coordinates"]);
+r.defPrimitive("regularPolygon", ["radius", "sides"]);
 
 // transforms
-p.defPrimitive("move", ["object", "x", "y", "z"]);
-p.defPrimitive("rotate", ["object", "axis", "angle"]);
+r.defPrimitive("move", ["object", "x", "y", "z"]);
+r.defPrimitive("rotate", ["object", "axis", "angle"]);
 
 // sequences
-p.defPrimitive("division", ["start", "end", "divisions"], function(start, end, divisions) {
+r.defPrimitive("division", ["start", "end", "divisions"], function(start, end, divisions) {
 	var arr = [];
 	var stepSize = (end-start) / divisions;
 	var i = 0;
@@ -102,7 +110,7 @@ p.defPrimitive("division", ["start", "end", "divisions"], function(start, end, d
 	}
 	return arr;
 });
-p.defPrimitive("count", ["n"], function(n) {
+r.defPrimitive("count", ["n"], function(n) {
 	var arr = [];
 	var i = 0;
 	while(i<n) {
@@ -111,7 +119,7 @@ p.defPrimitive("count", ["n"], function(n) {
 	}
 	return arr;
 });
-p.defPrimitive("zip", ["l1", "l2"], function(l1, l2) {
+r.defPrimitive("zip", ["l1", "l2"], function(l1, l2) {
 	var arr = [];
 	var i = 0;
 	while(i<l1.length) {
@@ -120,7 +128,7 @@ p.defPrimitive("zip", ["l1", "l2"], function(l1, l2) {
 	}
 	return arr;
 });
-p.defPrimitive("cartesianProduct", ["l1", "l2"], function(l1, l2) {
+r.defPrimitive("cartesianProduct", ["l1", "l2"], function(l1, l2) {
 	var arr = [];
 	for(let i=0; i<l1.length; i++) {
 		for(let j=0; j<l2.length; j++) {
@@ -129,7 +137,7 @@ p.defPrimitive("cartesianProduct", ["l1", "l2"], function(l1, l2) {
 	}
 	return arr;
 });
-p.defPrimitive("rot", ["lst", "forwardSteps"], function(lst, forwardSteps) {
+r.defPrimitive("rot", ["lst", "forwardSteps"], function(lst, forwardSteps) {
 	function posModulo(dividend, divisor) {
 		return ((dividend%divisor)+divisor)%divisor;
 	}
@@ -140,4 +148,35 @@ p.defPrimitive("rot", ["lst", "forwardSteps"], function(lst, forwardSteps) {
 	return arr;
 });
 
-module.exports = p.primitives;
+/*
+vec = {}; 
+{_threeVec: new THREE.Vector3(0,0,0),
+ cartesianCoords: [x,y,z],
+ dir: [alpha, beta],
+ magntitude: num
+ }
+vec.byXYZ = vecbyXYZ;
+vec.byCylindrical = vecbyCylindrical;
+vec.byPolar
+vec.bySpherical
+vec.add
+vec.sub
+vec.scale
+vec.mul
+vec.dot
+vec.cross
+vec.length
+vec.lengthSqr 
+*/
+
+/*
+shape.move.byXYZ(x,y,z)
+shape.move.byZ(z)
+shape.move.byVector(vector)
+shape.rotate.byAxisAngle(axis,angle)
+shape.scale.uniform(scale)
+shape.mirror.byPlane
+*/
+
+export default r.primitives;
+export {PrimitiveProp};

@@ -1,5 +1,6 @@
 
-var THREE = require('three');
+import THREE from 'three';
+import {PrimitiveProp} from './primitives.js';
 
 /*
 	THREE representation generation code.
@@ -10,7 +11,7 @@ function isRenderable(result) {
 }
 
 function isPrimitive(result) {
-	return renderableFunctions[result.name] !== undefined;
+	return renderableFunctions[result[PrimitiveProp]] !== undefined;
 }
 
 // The THREEObject generated for non-renderable results.
@@ -21,7 +22,7 @@ function nullThreeObj() {
 function resultToThree(result, callback) {
 	var threeObj; 
 	if(isPrimitive(result)){
-		threeObj = renderableFunctions[result.name](result, callback);
+		threeObj = renderableFunctions[result[PrimitiveProp]](result, callback);
 	} else if(Array.isArray(result)) {
 		threeObj = arrayToThree(result, callback);
 	} else {
