@@ -11,8 +11,8 @@ function floorPlans() {
   var slab = move(
     box(buildingLength, buildingWidth, slabHeight), 
     0, 0, slabHeight*0.5);
-  return division(0, buildingHeight, buildingFloors).map(
-    h=>move(slab, 0, 0, h));
+  return division(0, buildingHeight, buildingFloors)
+    .map(h=>move(slab, 0, 0, h));
 }
 
 floorPlans();
@@ -37,16 +37,16 @@ function facade(length, height, n, m) {
     elementHeight = height / m;
   return cartesianProduct(
     division(0, length-elementLength, n),
-    division(0, height-elementHeight, m)).
-  map(
-    ([r, z])=>
-      move(
-        facadeElement(
-          elementLength, 
-          elementHeight, 
-          2.000 + (1.000 * Math.cos((z*(1.0/height)*2*Math.PI)+
-                                    (r*(1.0/length)*4*Math.PI)))),
-      r, 0, z+elementHeight/2.0));
+    division(0, height-elementHeight, m))
+    .map(
+      ([r, z])=>
+        move(
+          facadeElement(
+            elementLength, 
+            elementHeight, 
+            2.000 + (1.000 * Math.cos((z*(1.0/height)*2*Math.PI)+
+                                      (r*(1.0/length)*4*Math.PI)))),
+        r, 0, z+elementHeight/2.0));
 }
 
 function facadeElement(width, height, dist) {
