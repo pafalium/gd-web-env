@@ -23,11 +23,11 @@
     "escodegen": "^1.8.0",
     "esprima": "^2.7.2",
     "estraverse": "^4.1.1",
+    "lodash": "^4.11.2",
     "react": "^15.0.1",
     "react-ace": "^3.3.0",
     "react-dom": "^15.0.1",
     "three": "^0.74.0",
-    "underscore": "^1.8.3"
     "three-orbit-controls": "^72.0.0"
   },
   "browserify": {

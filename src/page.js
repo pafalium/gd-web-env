@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require('underscore');
+var _ = require('lodash');
 var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/monokai');
@@ -24,7 +24,7 @@ The page has a code editor may have a view of the results of that program.
 The layout of the page is as follows.
 The logic of the UI is ...
 */
-
+/*
 //
 // Layout (and components)
 //
@@ -36,7 +36,7 @@ var codeEditorDiv = document.createElement("div");
 //They will have these styles.
 var bodyStyle = {
 	"margin": "0",
-	"overflow": "hidden"
+	//"overflow": "hidden"
 };
 var divStyle = {
 	"width": "50%",
@@ -93,7 +93,7 @@ var {threeObjects, resultToTHREEObjects} = toThree.convert.keepingCorrespondence
 console.timeEnd("THREE conversion");
 var scene = new THREE.Scene();
 scene.add.apply(scene, threeObjects);
-realView.setScene(scene);
+//realView.setScene(scene);
 
 
 
@@ -219,13 +219,94 @@ function handleMouseMove(e) {
 	if(highlightable === lastHighlightable) {
 		return;
 	}
+	console.time("highlight change");
 	if(highlightable !== null) {
 		setHighlighted(highlightable);
 	} else {
 		unsetHighlighted();
 	}
 	lastHighlightable = highlightable;
+	console.timeEnd("highlight change");
 	realView.redraw();
 }
 codeEditor.renderer.container.addEventListener("mousemove", _.throttle(handleMouseMove, 100));
 
+
+//
+// React Three canvas experiment.
+//
+import React from 'react';
+import ReactDOM from 'react-dom';
+import OrbitThreeView from './ReactComponents/OrbitThreeView.jsx';
+
+const reactContainer = document.createElement("div");
+document.body.appendChild(reactContainer);
+
+//const nyCam = new THREE.PerspectiveCamera(90, 1.0/1.0, 0.1, 1000);
+//nyCam.position.set(0.0, 20.0, 30.0);
+const nyScene = new THREE.Scene();
+nyScene.add(scene);
+const dirLight = new THREE.DirectionalLight(0xffffaa, 0.5);
+dirLight.position.set(0.1, 1, 0.2);
+nyScene.add(dirLight);
+nyScene.add(new THREE.GridHelper(100, 1));
+nyScene.add(new THREE.AxisHelper(5));
+
+ReactDOM.render(
+	React.createElement(
+		OrbitThreeView, 
+		{width:512, height:512, scene: nyScene}), 
+	reactContainer);
+*/
+
+/*
+//
+// React ProgramTextView test.
+//
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ProgramTextView from './ReactComponents/ProgramTextView.jsx';
+
+const programViewContainer = document.createElement("div");
+document.body.appendChild(programViewContainer);
+
+programViewContainer.style.width = "512px";
+programViewContainer.style.height = "512px";
+
+ReactDOM.render(
+	<ProgramTextView 
+		program={{getSourceCode: ()=>initProgramSourceCode}}/>, 
+	programViewContainer);
+*/
+
+/*
+//
+//
+//
+import React from 'react';
+import ReactDOM from 'react-dom';
+import RealTimeRunEditor from './ReactComponents/RealTimeRunEditor.jsx';
+
+const realtimeEditorContainer = document.createElement("div");
+document.body.appendChild(realtimeEditorContainer);
+ReactDOM.render(<RealTimeRunEditor/>, realtimeEditorContainer);
+*/
+
+
+/*
+//
+//
+//
+import React from 'react';
+import ReactDOM from 'react-dom';
+import TextEditor from './ReactComponents/TextEditor.jsx';
+const textEditorContainer = document.createElement("div");
+document.body.appendChild(textEditorContainer);
+ReactDOM.render(<TextEditor value={"sphere(5);\n"} onChange={function(){console.log(arguments)}}/>, textEditorContainer);
+*/
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './ReactComponents/App.jsx';
+
+ReactDOM.render(<App/>, document.getElementById("container"));
