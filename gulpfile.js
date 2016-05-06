@@ -5,7 +5,6 @@
 
 var gulp         = require('gulp');
 var browserify   = require('browserify');
-//var handleErrors = require('../util/handleErrors');
 var source       = require('vinyl-source-stream');
 
 var packageJson = require('./package.json');
@@ -13,11 +12,13 @@ var dependencies = Object.keys(packageJson && packageJson.dependencies || {});
 
 function handleErrors(error) {
   console.error(error.stack);
+  // Emit 'end' as the stream wouldn't do it itself.
+  // Without this, the gulp task won't end and the watch stops working.
   this.emit('end');
 }
 
 gulp.task('libs', function () {
-  return browserify()
+  return browserify({debug: true})
     .require(dependencies)
     .bundle()
     .on('error', handleErrors)
@@ -26,7 +27,7 @@ gulp.task('libs', function () {
 });
 
 gulp.task('scripts', function () {
-  return browserify('./src/index.js')
+  return browserify('./src/index.js', {debug: true})
     .external(dependencies)
     .bundle()
     .on('error', handleErrors)
