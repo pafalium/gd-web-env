@@ -29,12 +29,13 @@ function generatePrimitiveImportCode(primitives) {
 //
 function runProgramPrime2(program, transforms) {
 	//
-	// TODO: Do not change program. Change a copy instead.
 	// TODO: Map nodeIds to AstNodes.
 	//       - Option 1: Convert nodeIds to AstNodes after running.
 	//       - Option 2: Provide a function to get the AstNode when running the program.
+	//       - Option 3: Provide a function and an array with AstNodes in preorder.
+	// TODO: Handle runtime exceptions.
 	//
-	var programAst = program;
+	var programAst = _.cloneDeep(program.getAST());
 
 	//gather nodes affected by each transform
 	var nodesToInstrument = new Map(transforms.map(t=>[t,new Set()]));
