@@ -6,12 +6,19 @@ import {PrimitiveProp} from './primitives.js';
 	THREE representation generation code.
 */
 function isRenderable(result) {
-	var isArrayOfRenderables = Array.isArray(result) && result.every(isRenderable);
-	return isPrimitive(result) || isArrayOfRenderables;
+	return isPrimitive(result) || isArrayOfRenderables(result);
 }
 
 function isPrimitive(result) {
-	return renderableFunctions[result[PrimitiveProp]] !== undefined;
+	return isSomething(result) && renderableFunctions[result[PrimitiveProp]] !== undefined;
+}
+
+function isSomething(result) {
+	return result !== undefined && result !== null;
+}
+
+function isArrayOfRenderables(result) {
+	return Array.isArray(result) && result.every(isRenderable);
 }
 
 // The THREEObject generated for non-renderable results.
