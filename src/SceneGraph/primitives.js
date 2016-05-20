@@ -278,6 +278,33 @@ sphere.byCenterRadius = function(vec, radius) {
 r.provide("sphere", sphere);
 
 
+const cylinder = {};
+cylinder.byRadiusHeight = function(radius, height) {
+	return cylinderPrimitive(radius, height);
+};
+cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
+	let cylinderAxis = point.pointMinusPoint(topCenter, baseCenter);
+	let worldZAxis = coordinates.with(coordinates.world, ()=>vector.byXYZ(0.0,0.0,1.0));
+	let angleBetweenAxes = Math.acos(vector.dot(worldZAxis, vector.normalized(cylinderAxis)));
+	let rotationAxis = vector.normalized(vector.cross(worldZAxis, cylinderAxis));
+	let rotationTransform = transform.rotation.aroundAxisVectorByAngle(rotationAxis, angleBetweenAxes);
+
+	let worldOrigin = coordinates.with(coordinates.world, ()=>point.byXYZ(0.0,0.0,0.0));
+	let midPoint = point.pointPlusVector(
+		baseCenter, 
+		vector.scale(
+			point.pointMinusPoint(topCenter, baseCenter),
+			0.5));
+	let translationVector = point.pointMinusPoint(midPoint, worldOrigin);
+	let translationTransform = transform.translation.byVector(translationVector);
+
+	let transformation = transform.compose(translationTransform, rotationTransform);
+	let cylinder = cylinderPrimitive(radius, vector.length(cylinderAxis));
+	return transformObjectPrimitive(cylinder, transformation);
+};
+r.provide("cylinder", cylinder);
+
+
 const sequence = {};
 sequence.map = function(fn, seq) {
 	return seq.map(fn);
