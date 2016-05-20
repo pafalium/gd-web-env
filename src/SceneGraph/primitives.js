@@ -356,6 +356,18 @@ sequence.rotate = function(lst, offset) {
 	}
 	return arr;
 };
+sequence.repeatTimes = function(elem, n) {
+	let i=0;
+	let arr = [];
+	while(i<n) {
+		arr.push(elem);
+		i++;
+	}
+	return arr;
+}
+sequence.concat = function(lst1, lst2) {
+	return lst1.concat(lst2);
+}
 
 r.provide("sequence", sequence);
 
