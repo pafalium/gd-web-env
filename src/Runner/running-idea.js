@@ -16,7 +16,7 @@ function generatePrimitiveImportCode(primitives) {
 	return (
 		"var " + 
 		primitives.map(function(primitive, i){
-			return ""+primitive[PrimitiveProp]+"="+"primitives["+i+"].fn";
+			return ""+primitive[PrimitiveProp]+"="+"primitives["+i+"].value";
 		}).join(",") +
 		";");
 }

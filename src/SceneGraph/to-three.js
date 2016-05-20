@@ -1,6 +1,7 @@
 
 import THREE from 'three';
 import {PrimitiveProp} from './primitives.js';
+import makeMatrixTransformedObject3D from './makeMatrixTransformedObject3D.js';
 
 /*
 	THREE representation generation code.
@@ -50,8 +51,7 @@ var renderableFunctions = {
 	sphere: sphere,
 	cylinder: cylinder,
 	box: box,
-	move: move,
-	rotate: rotate
+	transformObjectWith: transformObjectWith
 };
 
 var solidMat = new THREE.MeshPhongMaterial();
@@ -88,24 +88,11 @@ function box(result, callback) {
 	obj.scale.set(width, height, depth);
 	return obj;
 }
-function move(result, callback) {
-	var objToMove = resultToThree(result.args.object, callback);
-	var x = result.args.x,
-		y = result.args.y,
-		z = result.args.z;
-	var obj = new THREE.Object3D();
-	obj.position.set(x, y, z);
-	obj.add(objToMove);
-	return obj;
-}
-function rotate(result, callback) {
-	var objToMove = resultToThree(result.args.object, callback);
-	var axis = result.args.axis,
-		angle = result.args.angle;
-	var obj = new THREE.Object3D();
-	obj.add(objToMove);
-	obj.quaternion.setFromAxisAngle(axis, angle);
-	return obj;
+function transformObjectWith(result, callback) {
+	var objToTransform = resultToThree(result.args.object, callback);
+	var matrix = result.args.transform;
+	var obj = makeMatrixTransformedObject3D(matrix);
+	obj.add(objToTransform);
 	return obj;
 }
 
