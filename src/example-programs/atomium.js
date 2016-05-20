@@ -3,9 +3,9 @@
 //a cube with spheres in vertices and geometric center, with cylinders in diagonals and edges
 
 //
-// TODO Get the prototype to run the atomium example.
 // TODO Implement richer primitives.
 //
+const xyz = point.byXYZ;
 
 function atomium() {
 	var c0 = xyz(0,0,0),
@@ -24,19 +24,30 @@ function atomium() {
 }
 
 function atomiumSpheres(cs) {
-	return cs.map(c=>sphere.withCenter(c));
+	return sequence.map(c=>sphere.byCenterRadius(c, 0.3), cs);
 }
 
 function atomiumFrame(c0, upCs, downCs) {
-	return box(0.1,0.1,0.1);
-	/*return [
-		upCs.zipWith(upCs.rotate(1)).map([c1,c2]=>cylinder.withCenters(c1, c2)),
-		downCs.zipWith(downCs.rotate(1)).map([c1,c2]=>cylinder.withCenters(c1,c2)),
-		upCs.zipWith(downCs).map([c1,c2]=>cylinder.withCenters(c1,c2)),
-		repeat(c0).zipWith(upCs.concat(downCs)).map([c1,c2]=>cylinder.withCenters(c1,c2))
-	];*/
+	return [
+		sequence.map(
+			([p1,p2])=>atomiumTube(p1,p2),
+			sequence.zip(upCs, sequence.rotate(upCs, 1))),
+		sequence.map(
+			([p1,p2])=>atomiumTube(p1,p2),
+			sequence.zip(downCs, sequence.rotate(downCs, 1))),
+		sequence.map(
+			([p1,p2])=>atomiumTube(p1,p2),
+			sequence.zip(upCs, downCs)),
+		sequence.map(
+			([p1,p2])=>atomiumTube(p1,p2),
+			sequence.zip(
+				sequence.repeatTimes(c0, 8), sequence.concat(upCs, downCs)))
+	];
 }
 
+function atomiumTube(p1, p2) {
+	return cylinder.byCentersRadius([p1, p2], 0.1);
+}
 
 atomium();
 
