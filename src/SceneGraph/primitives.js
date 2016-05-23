@@ -263,12 +263,6 @@ box.byWidthHeightDepth = function(width, height, depth) {
 	return boxPrimitive(width, height, depth);
 };
 box.byCentersAxes = function([baseCenter, topCenter], [xVector, yVector]) {
-	//let boxCenter = point.pointPlusVector(
-	//	baseCenter, 
-	//	vector.scale(
-	//		point.pointMinusPoint(topCenter, baseCenter), 
-	//		0.5));
-	//let translationTransform = matrix.translation(boxCenter.x, boxCenter.y, boxCenter.z);
 	let translateBaseToOrigin = matrix.translation(0.0, 0.0, 0.5);
 
 	let zVector = point.pointMinusPoint(topCenter, baseCenter);
@@ -279,7 +273,6 @@ box.byCentersAxes = function([baseCenter, topCenter], [xVector, yVector]) {
 	let completeTransform = matrix.multiply(
 		translateToBaseCenter, 
 		matrix.multiply(basisTransform, translateBaseToOrigin));
-	//let completeTransform = matrix.multiply(basisTransform, translateBaseToOrigin);
 	//transform: move base to wanted base * apply basis * move base to origin
 
 	return transformObjectPrimitive(boxPrimitive(1.0, 1.0, 1.0), completeTransform);
