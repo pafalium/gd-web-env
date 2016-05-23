@@ -287,9 +287,7 @@ box.byCentersAxes = function([baseCenter, topCenter], [xVector, yVector]) {
 box.byCentersWidthHeight = function([baseCenter, topCenter], [width, height]) {
 	let boxAxis = point.pointMinusPoint(topCenter, baseCenter);
 	let worldZAxis = coordinates.with(coordinates.world, ()=>vector.byXYZ(0.0,0.0,1.0));
-	let angleBetweenAxes = Math.acos(vector.dot(worldZAxis, vector.normalized(boxAxis)));
-	let rotationAxis = vector.normalized(vector.cross(worldZAxis, boxAxis));
-	let rotationTransform = transform.rotation.aroundAxisVectorByAngle(rotationAxis, angleBetweenAxes);
+	let orientAxisTransform = matrix.alignFromAxisToAxis(worldZAxis, vector.normalized(boxAxis));
 
 	let worldOrigin = coordinates.with(coordinates.world, ()=>point.byXYZ(0.0,0.0,0.0));
 	let midPoint = point.pointPlusVector(
@@ -300,7 +298,7 @@ box.byCentersWidthHeight = function([baseCenter, topCenter], [width, height]) {
 	let translationVector = point.pointMinusPoint(midPoint, worldOrigin);
 	let translationTransform = transform.translation.byVector(translationVector);
 
-	let transformation = transform.compose(translationTransform, rotationTransform);
+	let transformation = transform.compose(translationTransform, orientAxisTransform);
 	let box = boxPrimitive(width, height, vector.length(boxAxis));
 	return transformObjectPrimitive(box, transformation);
 };
@@ -322,9 +320,7 @@ cylinder.byRadiusHeight = function(radius, height) {
 cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
 	let cylinderAxis = point.pointMinusPoint(topCenter, baseCenter);
 	let worldZAxis = coordinates.with(coordinates.world, ()=>vector.byXYZ(0.0,0.0,1.0));
-	let angleBetweenAxes = Math.acos(vector.dot(worldZAxis, vector.normalized(cylinderAxis)));
-	let rotationAxis = vector.normalized(vector.cross(worldZAxis, cylinderAxis));
-	let rotationTransform = transform.rotation.aroundAxisVectorByAngle(rotationAxis, angleBetweenAxes);
+	let orientAxisTransform = matrix.alignFromAxisToAxis(worldZAxis, vector.normalized(cylinderAxis));
 
 	let worldOrigin = coordinates.with(coordinates.world, ()=>point.byXYZ(0.0,0.0,0.0));
 	let midPoint = point.pointPlusVector(
@@ -335,7 +331,7 @@ cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
 	let translationVector = point.pointMinusPoint(midPoint, worldOrigin);
 	let translationTransform = transform.translation.byVector(translationVector);
 
-	let transformation = transform.compose(translationTransform, rotationTransform);
+	let transformation = transform.compose(translationTransform, orientAxisTransform);
 	let cylinder = cylinderPrimitive(radius, vector.length(cylinderAxis));
 	return transformObjectPrimitive(cylinder, transformation);
 };
