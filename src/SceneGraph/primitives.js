@@ -56,6 +56,43 @@ matrix.basis = function(xVector, yVector, zVector) {
 	tmp.makeBasis(xVector, yVector, zVector);
 	return tmp;
 };
+matrix.axisCosSinAngle = function(axisVector, cosAngle, sinAngle) {
+	//Based on http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/index.htm
+	let a = axisVector, c = cosAngle, s = sinAngle;
+	let t = 1.0 - c;
+
+	let tmp1 = a.x*a.y*t,
+		tmp2 = a.z*s,
+		tmp3 = a.x*a.z*t,
+		tmp4 = a.y*s,
+		tmp5 = a.y*a.z*t,
+		tmp6 = a.x*s;
+
+	let matr = new THREE.Matrix4();
+	matr.set(
+		c + a.x*a.x*t, tmp1 - tmp2,   tmp3 + tmp4,   0.0,
+		tmp1 + tmp2,   c + a.y*a.y*t, tmp5 - tmp6,   0.0,
+		tmp3 - tmp4,   tmp5 + tmp6,   c + a.z*a.z*t, 0.0,
+		0.0,           0.0,           0.0,           1.0);
+
+	return matr;
+};
+matrix.alignFromAxisToAxis = function(fromAxis, toAxis) {
+	let dot = fromAxis.dot(toAxis),
+		cross = (new THREE.Vector3()).crossVectors(fromAxis, toAxis),
+		crossLength = cross.length();
+	//TODO Improve vector colinearity check. Use approximate equality.
+	let areColinear = crossLength === 0.0;
+	if(areColinear) {
+		let axis = new THREE.Vector4(1.0, 0.0, 0.0, 0.0);
+		return dot < 0.0
+			?	matrix.axisCosSinAngle(axis, -1.0, 0.0)
+			: matrix.axisCosSinAngle(axis, 1.0, 0.0);
+	}	else {
+		let axis = cross.clone().multiplyScalar(1.0/crossLength);
+		return matrix.axisCosSinAngle(axis, dot, crossLength);
+	}
+};
 
 
 const transform = {};
