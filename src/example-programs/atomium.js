@@ -2,9 +2,6 @@
 //atomium
 //a cube with spheres in vertices and geometric center, with cylinders in diagonals and edges
 
-//
-// TODO Implement richer primitives.
-//
 const xyz = point.byXYZ;
 
 function atomium() {
@@ -51,11 +48,3 @@ function atomiumTube(p1, p2) {
 
 atomium();
 
-//extended arrays: zipWith, rotate
-//lazy seqs: repeat
-//mixing arrays and lazy seqs
-//destructuring assignment: var [c1, c2] = [xyz(0,0,0), cylindric(10, 90deg, 0)];
-
-//spheres and cylinders: 
-//--constructors: withCenters, withCenter
-//--modifiers: translate, rotate
