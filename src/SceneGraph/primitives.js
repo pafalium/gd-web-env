@@ -97,6 +97,8 @@ matrix.alignFromAxisToAxis = function(fromAxis, toAxis) {
 };
 
 
+//TODO Add transform to rotate from one axis to other axis.
+//TODO Make transforms functions that can be applied to objects.
 const transform = {};
 transform.translation = {};
 transform.translation.byVector = function(vector) {
@@ -123,7 +125,6 @@ transform.scaling.byFactor = function(scaleFactor) {
 transform.compose = function(t1, t2) {
 	return matrix.multiply(t1, t2);
 };
-
 r.provide("transform", transform);
 
 
@@ -223,21 +224,9 @@ point.pointMinusPoint = point.sub;
 r.provide("point", point);
 //TODO Check if all vector operations are implemented and available.
 // vectors
-//r.defPrimitive("xyz", ["x", "y", "z"], function(x,y,z) {
-//	return new THREE.Vector3(x,y,z);
-//});
-//r.defPrimitive("polar", ["radius", "phi"]);
-//r.defPrimitive("cylindrical", ["radius", "phi", "z"]);
-//r.defPrimitive("spherical", ["radius", "longitude", "azimuth"]);
 //
 //r.defPrimitive("point_distance", ["p1", "p2"], function(p1, p2){
 //	return p2.clone().sub( p1 ).length();
-//});
-//r.defPrimitive("dot", ["v1", "v2"], function(v1, v2) {
-//	return v1.dot(v2);
-//});
-//r.defPrimitive("cross", ["v1", "v2"], function(v0, v1){
-//	return v0.clone().cross( v1 );
 //});
 //r.defPrimitive("direction_from_to", ["p0", "p1"], function(p0, p1){
 //	return p1.clone().sub( p0 ).normalize();
@@ -245,23 +234,8 @@ r.provide("point", point);
 //r.defPrimitive("linear_interpolation", ["p0", "p1", "t"], function(p0, p1, t) {
 //	return p0.clone().lerp( p1, t );
 //});
-//r.defPrimitive("add", ["v1", "v2"], function(v1, v2){
-//	return v1.clone().add(v2);
-//});
-//r.defPrimitive("sub", ["v1", "v2"], function(v1, v2) {
-//	return v1.clone().sub(v2);
-//});
 //r.defPrimitive("mult", ["v1", "v2"], function(v1, v2) {
 //	return v1.clone().multiply(v2);
-//});
-//r.defPrimitive("multScalar", ["v", "s"], function(v, s) {
-//	return v.clone().multiplyScalar(s);
-//});
-//r.defPrimitive("normalize", ["v"], function(v) {
-//	return v.clone().normalize();
-//});
-//r.defPrimitive("length", ["v"], function(v) {
-//	return v.length();
 //});
 /*
 vec = {}; 
@@ -270,17 +244,8 @@ vec = {};
  dir: [alpha, beta],
  magntitude: num
  }
-vec.byXYZ = vecbyXYZ;
-vec.byCylindrical = vecbyCylindrical;
 vec.byPolar
-vec.bySpherical
-vec.add
-vec.sub
-vec.scale
 vec.mul
-vec.dot
-vec.cross
-vec.length
 vec.lengthSqr 
 */
 
@@ -477,6 +442,21 @@ rotate.aroundZByAngle = function(radians) {
 r.provide("rotate", rotate);
 
 
+//////////////////////////////////
+//////////////////////////////////
+//////////////////////////////////
+//TODO Make shapes objects that can have methods.
+//TODO Consider whether to extend shape objects with methods to transform them.
+/*
+shape.translate.byXYZ(x,y,z)
+shape.translate.byZ(z)
+shape.translate.byVector(vector)
+shape.rotate.byAxisAngle(axis,angle)
+shape.scale.uniform(scale)
+shape.mirror.byPlane
+*/
+
+
 const sequence = {};
 sequence.map = function(fn, seq) {
 	return seq.map(fn);
@@ -570,14 +550,6 @@ r.provide("sequence", sequence);
 
 
 
-/*
-shape.move.byXYZ(x,y,z)
-shape.move.byZ(z)
-shape.move.byVector(vector)
-shape.rotate.byAxisAngle(axis,angle)
-shape.scale.uniform(scale)
-shape.mirror.byPlane
-*/
 
 export default r.primitives;
 export {PrimitiveProp};
