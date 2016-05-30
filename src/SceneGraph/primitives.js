@@ -1,5 +1,6 @@
 
 import THREE from 'three';
+import _ from 'lodash';
 
 //This file defines the set of primitives that programs written in the IDE can use.
 
@@ -51,9 +52,10 @@ matrix.scaling = function(xFactor, yFactor, zFactor) {
 matrix.multiply = function(m1, m2) {
 	return m1.clone().multiply(m2);
 };
-matrix.basis = function(xVector, yVector, zVector) {
+matrix.basis = function(xVector, yVector, zVector, origin=point.byXYZ(0,0,0)) {
 	let tmp = new THREE.Matrix4();
 	tmp.makeBasis(xVector, yVector, zVector);
+	tmp.setPosition(origin);
 	return tmp;
 };
 matrix.axisCosSinAngle = function(axisVector, cosAngle, sinAngle) {
@@ -105,6 +107,15 @@ transform.rotation.aroundAxisVectorByAngle = function(axisVector, radians) {
 	let normalizedAxis = axisVector.clone().normalize();
 	return matrix.rotation(normalizedAxis, radians);
 };
+transform.rotation.aroundXByAngle = function(radians) {
+	return matrix.rotation(vector.byX(1.0), radians);
+};
+transform.rotation.aroundYByAngle = function(radians) {
+	return matrix.rotation(vector.byY(1.0), radians);
+};
+transform.rotation.aroundZByAngle = function(radians) {
+	return matrix.rotation(vector.byZ(1.0), radians);
+};
 transform.scaling = {};
 transform.scaling.byFactor = function(scaleFactor) {
 	return matrix.scaling(scaleFactor, scaleFactor, scaleFactor);
@@ -131,6 +142,25 @@ const vector = {};
 vector.byXYZ = function(x, y, z) {
 	return (new THREE.Vector4(x, y, z, 0.0)).applyMatrix4(coordinates.current);
 };
+vector.byX = function(x) {
+	return vector.byXYZ(x, 0.0, 0.0);
+};
+vector.byY = function(y) {
+	return vector.byXYZ(0.0, y, 0.0);
+};
+vector.byZ = function(z) {
+	return vector.byXYZ(0.0, 0.0, z);
+};
+vector.byCylindrical = function(radius, theta, height) {
+	return vector.byXYZ(radius*Math.cos(theta), radius*Math.sin(theta), height);
+};
+vector.bySpherical = function(radius, azimuthAngle, polarAngle) {
+	let sinPolar = Math.sin(polarAngle);
+	return vector.byXYZ(
+		radius*Math.cos(azimuthAngle)*sinPolar,
+		radius*Math.sin(azimuthAngle)*sinPolar,
+		radius*Math.cos(polarAngle));
+};
 vector.add = function(v1, v2) {
 	return v1.clone().add(v2);
 };
@@ -153,7 +183,6 @@ vector.length = function(vec) {
 vector.normalized = function(vec) {
 	return vec.clone().normalize();
 };
-
 r.provide("vector", vector);
 
 
@@ -161,16 +190,36 @@ const point = {};
 point.byXYZ = function(x, y, z) {
 	return (new THREE.Vector4(x, y, z, 1.0)).applyMatrix4(coordinates.current);
 };
+point.byX = function(x) {
+	return point.byXYZ(x, 0.0, 0.0);
+};
+point.byY = function(y) {
+	return point.byXYZ(0.0, y, 0.0);
+};
+point.byZ = function(z) {
+	return point.byXYZ(0.0, 0.0, z);
+};
+point.byCylindrical = function(radius, theta, height) {
+	return point.byXYZ(radius*Math.cos(theta), radius*Math.sin(theta), height);
+};
+point.bySpherical = function(radius, azimuthAngle, polarAngle) {
+	let sinPolar = Math.sin(polarAngle);
+	return point.byXYZ(
+		radius*Math.cos(azimuthAngle)*sinPolar,
+		radius*Math.sin(azimuthAngle)*sinPolar,
+		radius*Math.cos(polarAngle));
+};
 point.origin = function() {
 	return point.byXYZ(0, 0, 0);
 }
-point.pointPlusVector = function(point, vec) {
+point.add = function(point, vec) {
 	return point.clone().add(vec);
 };
-point.pointMinusPoint = function(p1, p2) {
+point.sub = function(p1, p2) {
 	return p1.clone().sub(p2);
 };
-
+point.pointPlusVector = point.add;
+point.pointMinusPoint = point.sub;
 r.provide("point", point);
 //TODO Check if all vector operations are implemented and available.
 // vectors
@@ -256,7 +305,6 @@ const transformObjectPrimitive = r.defPrimitiveAndProvide("transformObjectWith",
 //r.defPrimitiveAndProvide("polygon", ["coordinates"]);
 //r.defPrimitiveAndProvide("regularPolygon", ["radius", "sides"]);
 
-
 // shapes
 const box = {};
 box.byWidthHeightDepth = function(width, height, depth) {
@@ -278,27 +326,37 @@ box.byCentersAxes = function([baseCenter, topCenter], [xVector, yVector]) {
 	return transformObjectPrimitive(boxPrimitive(1.0, 1.0, 1.0), completeTransform);
 };
 box.byCentersWidthHeight = function([baseCenter, topCenter], [width, height]) {
-	let boxAxis = point.pointMinusPoint(topCenter, baseCenter);
-	let worldZAxis = coordinates.with(coordinates.world, ()=>vector.byXYZ(0.0,0.0,1.0));
-	let orientAxisTransform = matrix.alignFromAxisToAxis(worldZAxis, vector.normalized(boxAxis));
+	function sphPhi(vec) {
+		let {x, y} = vec;
+		if(x == 0 && y == 0) {
+			return 0;
+		} else {
+			return Math.atan2(y, x);
+		}
+	}
 
-	let worldOrigin = coordinates.with(coordinates.world, ()=>point.byXYZ(0.0,0.0,0.0));
+	let boxAxis = point.pointMinusPoint(topCenter, baseCenter);
+	let worldXAxis = vector.byCylindrical(1, sphPhi(boxAxis) + Math.PI/2, 0);
+	let worldYAxis = vector.normalized(vector.cross(boxAxis, worldXAxis));
+	let worldZAxis = vector.normalized(boxAxis);
 	let midPoint = point.pointPlusVector(
 		baseCenter, 
 		vector.scale(
 			point.pointMinusPoint(topCenter, baseCenter),
 			0.5));
-	let translationVector = point.pointMinusPoint(midPoint, worldOrigin);
-	let translationTransform = transform.translation.byVector(translationVector);
 
-	let transformation = transform.compose(translationTransform, orientAxisTransform);
-	let box = boxPrimitive(width, height, vector.length(boxAxis));
+	let transformation = matrix.basis(worldXAxis, worldYAxis, boxAxis, midPoint);
+
+	let box = boxPrimitive(width, height, 1.0);
 	return transformObjectPrimitive(box, transformation);
 };
 r.provide("box", box);
 
 
 const sphere = {};
+sphere.byRadius = function(radius) {
+	return spherePrimitive(radius);
+};
 sphere.byCenterRadius = function(vec, radius) {
 	let translation = transform.translation.byVector(vec);
 	return transformObjectPrimitive(spherePrimitive(radius), translation);
@@ -331,11 +389,106 @@ cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
 r.provide("cylinder", cylinder);
 
 
+function translateAux(object, vec) {
+	return transformObjectPrimitive(object, 
+				transform.translation.byVector(vec));
+}
+const translate = function(object) {
+	return {
+		byVector: (vec)=>{
+			return translateAux(object, vec);
+		},
+		byXYZ: (x, y, z)=>{
+			return translateAux(object, vector.byXYZ(x, y, z));
+		},
+		byX: (x)=>{
+			return translateAux(object, vector.byX(x));
+		},
+		byY: (y)=>{
+			return translateAux(object, vector.byY(y));
+		},
+		byZ: (z)=>{
+			return translateAux(object, vector.byZ(z));
+		}
+	};
+};
+translate.byVector = function(vec) {
+	return _.partial(translateAux, _, vec);
+}
+translate.byXYZ = function(x, y, z) {
+	return _.partial(translateAux, _, vector.byXYZ(x, y, z));
+};
+translate.byX = function(x){
+	return _.partial(translateAux, _, vector.byX(x));
+};
+translate.byY = function(y){
+	return _.partial(translateAux, _, vector.byY(y));
+};
+translate.byZ = function(z){
+	return _.partial(translateAux, _, vector.byZ(z));
+};
+r.provide("translate", translate);
+
+
+const rotate = function(object) {
+	return {
+		aroundAxisVectorByAngle: function(axis, radians) {
+			return transformObjectPrimitive(object,
+				transform.rotation.aroundAxisVectorByAngle(axis, radians));
+		},
+		aroundXByAngle: function(radians) {
+			return transformObjectPrimitive(object,
+				transform.rotation.aroundXByAngle(radians));
+		},
+		aroundYByAngle: function(radians) {
+			return transformObjectPrimitive(object,
+				transform.rotation.aroundZYByAngle(radians));
+		},
+		aroundZByAngle: function(radians) {
+			return transformObjectPrimitive(object,
+				transform.rotation.aroundZByAngle(radians));
+		}
+	};
+};
+rotate.aroundAxisVectorByAngle = function(axis, radians) {
+	return function(object) {
+		return transformObjectPrimitive(object,
+			transform.rotation.aroundAxisVectorByAngle(axis, radians));
+	};
+};
+rotate.aroundXByAngle = function(radians) {
+	return function(object) {
+		return transformObjectPrimitive(object,
+				transform.rotation.aroundXByAngle(radians));
+	};
+};
+rotate.aroundYByAngle = function(radians) {
+	return function(object) {
+		return transformObjectPrimitive(object,
+				transform.rotation.aroundYByAngle(radians));
+	};
+};
+rotate.aroundZByAngle = function(radians) {
+	return function(object) {
+		return transformObjectPrimitive(object,
+				transform.rotation.aroundZByAngle(radians));
+	};
+};
+r.provide("rotate", rotate);
+
+
 const sequence = {};
 sequence.map = function(fn, seq) {
 	return seq.map(fn);
 };
+sequence.reduce = function(fn, seq, initialValue) {
+	return seq.reduce(fn, initialValue);
+};
 sequence.division = function(start, end, divisions) {
+	// Divide directed interval defined by 'start' and 'end' into 'divisions' segments.
+	//    Return return the sequence of numbers that define those segments.
+	// Return a sequence of equally spaced numbers between start and end.
+	// [x_1=start, ..., x_divisions, x_divisions+1=end]
 	var arr = [];
 	var stepSize = (end-start) / divisions;
 	var i = 0;
@@ -345,6 +498,15 @@ sequence.division = function(start, end, divisions) {
 	}
 	return arr;
 };
+sequence.intervalDivision = function(a, b, n) {
+	//[x_1=start, ..., x_n=end]
+  var spacing = (b-a)/(n-1);
+  var res = [];
+  for(var i=0; i<n; i++) {
+    res.push(a+i*spacing);
+  }
+  return res;
+}; 
 sequence.count = function(n) {
 	var arr = [];
 	var i = 0;
@@ -355,9 +517,10 @@ sequence.count = function(n) {
 	return arr;
 };
 sequence.zip = function(l1, l2) {
+	const smallerLength = Math.min(l1.length, l2.length);
 	var arr = [];
 	var i = 0;
-	while(i<l1.length) {
+	while(i<smallerLength) {
 		arr.push([l1[i], l2[i]]);
 		i++;
 	}
@@ -390,11 +553,19 @@ sequence.repeatTimes = function(elem, n) {
 		i++;
 	}
 	return arr;
-}
+};
 sequence.concat = function(lst1, lst2) {
 	return lst1.concat(lst2);
-}
-
+};
+sequence.length = function(lst) {
+	return lst.length;
+};
+sequence.drop = function(lst, n) {
+	return lst.slice(n);
+};
+sequence.dropRight = function(lst, n) {
+	return lst.slice(0, lst.length-n);
+};
 r.provide("sequence", sequence);
 
 
