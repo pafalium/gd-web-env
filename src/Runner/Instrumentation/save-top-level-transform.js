@@ -1,11 +1,9 @@
 
-var astUtils = require('../../ast-utils'),
-	Nodes = astUtils.constructors,
-	NodeP = astUtils.recognizers,
-	idGenerator = require('../../id-generator').idGenerator,
-	nodeId = require('../../node-id').nodeId;
+import {constructors as Nodes, recognizers as NodeP} from '../Parsing/ast-utils.js';
+import {idGenerator} from '../../id-generator.js';
+import {nodeId} from '../Parsing/node-id.js';
 
-var saveTopLevelExprsTransform = {
+const saveTopLevelExprsTransform = {
 	select: function(node, parent) {
 		return NodeP.isExpressionStatement(node) && NodeP.isProgram(parent);
 	},
@@ -28,7 +26,4 @@ var saveTopLevelExprsTransform = {
 	}
 };
 
-
-module.exports = {
-	transform: saveTopLevelExprsTransform
-};
+export {saveTopLevelExprsTransform as transform};

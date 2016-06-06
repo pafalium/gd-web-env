@@ -9,7 +9,8 @@ var saveTopLevel = require('./Instrumentation/save-top-level-transform').transfo
 //
 
 function runWithTraceability(program) {
-	var [results, traceabilityInfo] = running.runProgramPrime2(program, [saveTopLevel, traceCall]);
+	var [results, traceabilityInfo] = running.runProgramPrime2(
+		program, [saveTopLevel, traceCall]);
 	return {results, traceabilityInfo};
 }
 

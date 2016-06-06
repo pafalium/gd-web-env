@@ -5,7 +5,6 @@ var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/monokai');
 var Range = ace.acequire('ace/range').Range;
-var View = require('./view');
 var style = require('./utils/styling');
 var Program = require('./Runner/Parsing/Program').Program;
 var run = require('./Runner/run');

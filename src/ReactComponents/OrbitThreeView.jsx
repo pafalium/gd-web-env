@@ -41,6 +41,7 @@ class OrbitThreeView extends React.Component {
 		let aspect = this.state.canvasSize.width / this.state.canvasSize.height;
 		let camera = new THREE.PerspectiveCamera(70.0/*deg*/, aspect, 0.1, 1000.0);
 		camera.applyMatrix(cameraWorldMatrix);
+		camera.updateMatrixWorld();
 		return camera;
 	}
 	getInitialDragState() {
@@ -110,6 +111,9 @@ class OrbitThreeView extends React.Component {
 		this.setState({
 			canvasSize: {width, height}
 		});
+	}
+	getCurrentCamera() {
+		return this.computeCamera();
 	}
 	render() {
 		return (

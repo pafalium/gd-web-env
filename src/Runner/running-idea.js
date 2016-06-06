@@ -5,7 +5,7 @@ import esprima from 'esprima';
 import estraverse from 'estraverse';
 import escodegen from 'escodegen';
 
-import {constructors as Nodes, recognizers as NodeP} from '../ast-utils.js';
+import {constructors as Nodes, recognizers as NodeP} from './Parsing/ast-utils.js';
 import {idGenerator} from '../id-generator.js';
 
 import primitives, {PrimitiveProp} from '../SceneGraph/primitives.js';

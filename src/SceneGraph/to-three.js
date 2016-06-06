@@ -104,11 +104,13 @@ function transformObjectWith(result, callback) {
 function convertKeepingCorrespondence(resultsIterable) {
 
 	let resultToTHREEObjects = new Map();
+	let threeObjectToResult = new Map();
 	function keepCorrespondence({result, threeObj}) {
 		if(!resultToTHREEObjects.has(result)) {
 			resultToTHREEObjects.set(result, []);
 		}
 		resultToTHREEObjects.get(result).push(threeObj);
+		threeObjectToResult.set(threeObj, result);
 	}
 
 	var threeObjects = [];
@@ -119,7 +121,8 @@ function convertKeepingCorrespondence(resultsIterable) {
 
 	return {
 		threeObjects,
-		resultToTHREEObjects
+		resultToTHREEObjects,
+		threeObjectToResult
 	};
 }
 
@@ -128,7 +131,7 @@ function convertNormally(resultsIterable) {
 	for(let result of resultsIterable) {
 		threeObjects.push(resultToThree(result, function({result, threeObj}){}));
 	}
-	return threeObjects;
+	return {threeObjects};
 }
 
 module.exports = {

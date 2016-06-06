@@ -1,9 +1,7 @@
 
-var astUtils = require('../../ast-utils'),
-	Nodes = astUtils.constructors,
-	NodeP = astUtils.recognizers,
-	idGenerator = require('../../id-generator').idGenerator,
-	nodeId = require('../../node-id').nodeId;
+import {constructors as Nodes, recognizers as NodeP} from '../Parsing/ast-utils.js';
+import {idGenerator} from '../../id-generator.js';
+import {nodeId} from '../Parsing/node-id.js';
 
 var traceCallTransform = {
 	/*
@@ -59,7 +57,4 @@ var traceCallTransform = {
 	}
 };
 
-
-module.exports = {
-	transform: traceCallTransform
-};
+export {traceCallTransform as transform};
