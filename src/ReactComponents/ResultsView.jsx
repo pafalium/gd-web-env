@@ -3,7 +3,7 @@ import React from 'react';
 import OrbitThreeView from './OrbitThreeView.jsx';
 import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
-import _ from 'lodash';
+import {noop, isEqual} from 'lodash';
 
 class ResultsView extends React.Component {
 	/*
@@ -95,7 +95,7 @@ class ResultsView extends React.Component {
 			const belongsToPath = path => threeObject => {
 				//threeObject parents match each path's elements three objects
 				const parents = parentChain(threeObject).filter(hasAssociatedResult);
-				return _.isEqual(parents.map(getResult), path);
+				return isEqual(parents.map(getResult), path);
 			};
 			let leafResult = path[0];
 			let leafObjects = resultToTHREEObjects.get(leafResult);
@@ -176,7 +176,6 @@ class ResultsView extends React.Component {
 	}
 }
 
-function noop(){}
 
 function parentChain(threeObject) {
 	let res = [];
@@ -197,4 +196,12 @@ function getMeshes(threeObject) {
 	return res;
 }
 
+class ResultInstanceDecoration {
+	constructor(path, color) {
+		this.path = path;
+		this.color = color;
+	}
+}
+
+export {ResultInstanceDecoration};
 export default ResultsView;
