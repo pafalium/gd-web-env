@@ -49,7 +49,11 @@ var traceCallTransform = {
 				if(!this.callTraces.has(nodeId)) {
 					this.callTraces.set(nodeId, []);
 				}
-				var traceEntry = {nodeId: nodeId, arguments: callArgs, result: callRes};
+				var traceEntry = {
+					nodeId: nodeId, 
+					arguments: callArgs, 
+					result: callRes
+				};
 				this.callTraces.get(nodeId).push(traceEntry);
 			},
 			callTraces: new Map()
