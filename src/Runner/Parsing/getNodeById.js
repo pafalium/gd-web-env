@@ -1,6 +1,6 @@
 
 import {traverse, VisitorOption} from 'estraverse';
-import {nodeId} from './node-id.js';
+import {nodeId as getNodeId} from './node-id.js';
 
 /*
 	Searches for a EsprimaNode in Program's AST that has nodeId as its id.
@@ -12,7 +12,7 @@ function getNodeById(program, nodeId) {
 	let searchResult = null;
 	traverse(program.getAST(), {
 		enter(node, parent) {
-			if(nodeId(node) === nodeId) {
+			if(getNodeId(node) === nodeId) {
 				searchResult = node;
 				return VisitorOption.Break;
 			}
@@ -21,4 +21,4 @@ function getNodeById(program, nodeId) {
 	return searchResult;
 }
 
-export getNodeById;
+export {getNodeById};
