@@ -1,6 +1,7 @@
 
 import React from 'react';
 import {Color} from 'three';
+import {noop} from 'lodash';
 import ProgramEditor, {NodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {ResultInstanceDecoration} from './ResultsView.jsx';
 import {Program} from '../Runner/Parsing/Program.js';
