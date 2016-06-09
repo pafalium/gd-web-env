@@ -31,12 +31,11 @@ Cursors
 // TODO Hide ace editor disorientation when the program is updated.
 //   Adding text by pasting or typing on top of a selection will cause 
 //  two change events instead of one.
-// TODO Add support for node decorations.
-//   Should this component be responsible for that?
-//   Currently, it displays the program as text and calls a callback when it
-//  changes into a syntatically correct program.
-//   Decorations are garantied to refer nodes that belong to the current 
-//  program.
+// TODO Remove loop of ace editor changes.
+//  AceEditor calls onChange both when the user changes the editor and when React re-renders
+//  It emits a "delete everything" change followed by a "this is the new contents" change.
+//  This behavior breaks Ace's javascript linting.
+// TODO Convert ace editor changes into program changes.
 
 class ProgramEditor extends React.Component {
 	/*
@@ -48,11 +47,6 @@ class ProgramEditor extends React.Component {
 		State:
 			*not-specified*
 	*/
-	//TODO Remove loop of ace editor changes.
-	// AceEditor calls onChange both when the user changes the editor and when React re-renders
-	// It emits a "delete everything" change followed by a "this is the new contents" change.
-	// This behavior breaks Ace's javascript linting.
-	// TODO Convert ace editor changes into program changes.
 	handleChange(newValue) {
 		if(Program.isSyntaticallyCorrect(newValue)) {
 			this.props.onValidProgram(Program.fromSourceCode(newValue));
@@ -76,17 +70,17 @@ class ProgramEditor extends React.Component {
 	}
 	constructor(props) {
 		super(props);
-		this.initializeDecorations(props.nodeDecorations);
+		this.initializeDecorations();
 	}
 	componentDidMount() {
 		this.aceEditor = this.refs["aceEditor"].editor;
+		this.updateDecorations(this.props.nodeDecorations);
 	}
 	componentDidUpdate() {
 		this.updateDecorations(this.props.nodeDecorations);
 	}
-	initializeDecorations(initialDecorations) {
+	initializeDecorations() {
 		this.decorationsToMarkers = new Map();
-		this.updateDecorations(initialDecorations);
 	}
 	updateDecorations(newDecorations) {
 		let currentDecorations = Array.from(this.decorationsToMarkers.keys());
