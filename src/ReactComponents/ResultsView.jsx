@@ -3,7 +3,7 @@ import React from 'react';
 import OrbitThreeView from './OrbitThreeView.jsx';
 import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
-import {noop, isEqual} from 'lodash';
+import {noop, isEqual, difference, flatten, map, forEach} from 'lodash';
 
 class ResultsView extends React.Component {
 	/*
@@ -22,25 +22,30 @@ class ResultsView extends React.Component {
 		//Initialize bound methods.
 		this.handleMouseMove = this.handleMouseMove.bind(this);
 		//Initialize state.
-		this.state = this.computeState(props);
+		this.initializeResultInstanceDecorations();
+		this.state = this.computeState({}, props);
 	}
 	componentWillReceiveProps(newProps) {
-		this.setState(this.computeState(newProps));
+		const oldProps = this.props;
+		this.setState(this.computeState(oldProps, newProps));
 	}
-	computeState(props) {
-		//TODO Do not recompute threeObjects if results haven't changed.
-		//TODO Do not reapply decorations if the haven't changed.
-		//TODO Keep record of last decorations to remove them when new ones come in.
-		let shouldHandleHovers = !!props.onHoveredResultInstance;
+	computeState(oldProps, newProps) {
 		// Compute threeObjects and relations between threeObjects and results.
-		let programResults = props.results.results.topLevelExprResults.values();
+		let shouldComputeObjects = oldProps.results !== newProps.results;
+		let programResults = newProps.results.results.topLevelExprResults.values();
 		let {
-			threeObjects, 
+		 threeObjects, 
 			resultToTHREEObjects, 
-			threeObjectToResult } = toThree.convert.keepingCorrespondence(programResults);
+			threeObjectToResult } = shouldComputeObjects
+				? toThree.convert.keepingCorrespondence(programResults)
+				: this.state;
 		// Apply resultInstance decorations.
-		this.applyResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, props.resultInstanceDecorations);
+		let shouldUpdateDecorations = oldProps.resultInstanceDecorations !== newProps.resultInstanceDecorations
+		if(shouldUpdateDecorations) {
+			this.updateResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, newProps.resultInstanceDecorations);
+		}
 		// Return the new complete state.
+		let shouldHandleHovers = !!newProps.onHoveredResultInstance;
 		return {
 			threeObjects,
 			resultToTHREEObjects,
@@ -84,7 +89,11 @@ class ResultsView extends React.Component {
 		staticRoot.add(sunLight, belowLight, hemiLight, gridHelper, axisHelper);
 		return staticRoot;
 	}
-	applyResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, decorations) {
+	initializeResultInstanceDecorations() {
+		this.decorationToObjects = new Map();
+		this.objectToOldMaterial = new Map();
+	}
+	updateResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, decorations) {
 		function threeObjectsFromPath(path) {
 			function hasAssociatedResult(threeObject) {
 				return threeObjectToResult.has(threeObject);
@@ -110,15 +119,39 @@ class ResultsView extends React.Component {
 			mat.depthWrite = false;
 			return mat;
 		}
-		decorations.forEach(d=>{
-			let material = decorationMaterial(d);
-			threeObjectsFromPath(d.path)
-				.map(getMeshes)
-				.forEach(meshes=>{
-					meshes.forEach(mesh=>{
-						mesh.material = material;
-					});
-				});
+		const decorationToObjects = this.decorationToObjects;
+		const objectToOldMaterial = this.objectToOldMaterial;
+
+		let prevDecorations = Array.from(decorationToObjects.keys());
+		let enteringDecorations = difference(decorations, prevDecorations);
+		let leavingDecorations = difference(prevDecorations, decorations);
+
+		forEach(leavingDecorations, d=>{
+			//Restore decoration's objects materials.
+			forEach(decorationToObjects.get(d), obj=>{
+				obj.material = objectToOldMaterial.get(obj);
+				objectToOldMaterial.delete(obj);
+			});
+			//Clear decorationToObjects entry.
+			decorationToObjects.delete(d);
+		});
+
+		forEach(enteringDecorations, d=>{
+			//Get objects affected by decoration.
+			let decMeshes = flatten(map(threeObjectsFromPath(d.path), getMeshes));
+			//Add decorationToObjects entry.
+			decorationToObjects.set(d, decMeshes);
+			//Save decoration's objects original materials.
+			forEach(decMeshes, mesh=>{
+				if(!objectToOldMaterial.has(mesh)) {
+					objectToOldMaterial.set(mesh, mesh.material);
+				}
+			});
+			//Set affected objects' materials to the one from the decoration.
+			let decMaterial = decorationMaterial(d);
+			forEach(decMeshes, mesh=>{
+				mesh.material = decMaterial;
+			});
 		});
 	}
 	/*
