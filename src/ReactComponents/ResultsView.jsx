@@ -94,21 +94,33 @@ class ResultsView extends React.Component {
 		this.objectToOldMaterial = new Map();
 	}
 	updateResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, decorations) {
-		function threeObjectsFromPath(path) {
-			function hasAssociatedResult(threeObject) {
-				return threeObjectToResult.has(threeObject);
+		function threeObjectsForDecoration(dec) {
+			function threeObjectsFromPath(path) {
+				function hasAssociatedResult(threeObject) {
+					return threeObjectToResult.has(threeObject);
+				}
+				function getResult(threeObject) {
+					return threeObjectToResult.get(threeObject);
+				}
+				const belongsToPath = path => threeObject => {
+					//threeObject parents match each path's elements three objects
+					const parents = parentChain(threeObject).filter(hasAssociatedResult);
+					return isEqual(parents.map(getResult), path);
+				};
+				let leafResult = path[0];
+				let leafObjects = resultToTHREEObjects.get(leafResult);
+				return leafObjects.filter(belongsToPath(path));
 			}
-			function getResult(threeObject) {
-				return threeObjectToResult.get(threeObject);
+			function threeObjectsFromResult(result) {
+				return resultToTHREEObjects.get(result);
 			}
-			const belongsToPath = path => threeObject => {
-				//threeObject parents match each path's elements three objects
-				const parents = parentChain(threeObject).filter(hasAssociatedResult);
-				return isEqual(parents.map(getResult), path);
-			};
-			let leafResult = path[0];
-			let leafObjects = resultToTHREEObjects.get(leafResult);
-			return leafObjects.filter(belongsToPath(path));
+			if (dec instanceof ResultInstanceDecoration) {
+				return threeObjectsFromPath(dec.path);
+			} else if (dec instanceof ResultOcorrencesDecoration) {
+				return threeObjectsFromResult(dec.result);
+			} else {
+				throw new Error("Unkown ResultDecoration type.");
+			}
 		}
 		function decorationMaterial(decoration) {
 			let mat = new THREE.MeshPhongMaterial();
@@ -138,7 +150,7 @@ class ResultsView extends React.Component {
 
 		forEach(enteringDecorations, d=>{
 			//Get objects affected by decoration.
-			let decMeshes = flatten(map(threeObjectsFromPath(d.path), getMeshes));
+			let decMeshes = flatten(map(threeObjectsForDecoration(d), getMeshes));
 			//Add decorationToObjects entry.
 			decorationToObjects.set(d, decMeshes);
 			//Save decoration's objects original materials.
@@ -229,12 +241,24 @@ function getMeshes(threeObject) {
 	return res;
 }
 
-class ResultInstanceDecoration {
+class ResultDecoration {
+}
+
+class ResultInstanceDecoration extends ResultDecoration {
 	constructor(path, color) {
+		super();
 		this.path = path;
 		this.color = color;
 	}
 }
 
-export {ResultInstanceDecoration};
+class ResultOcorrencesDecoration extends ResultDecoration {
+	constructor(result, color) {
+		super();
+		this.result = result;
+		this.color = color;
+	}
+}
+
+export {ResultInstanceDecoration, ResultOcorrencesDecoration};
 export default ResultsView;
