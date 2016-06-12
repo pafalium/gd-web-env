@@ -124,6 +124,7 @@ function addColoredMarker(aceEditor, range, color) {
 	return marker.id;
 }
 function drawColoredMarker(htmlStringArray, range, left, top, config) {
+  //Based on: ace/layer/marker - drawTextMarker().
 	//push html string into htmlstringarray that represents the marker as DOM objects.
 	function drawLine(range, clazz, extraLength, extraStyle) {
 		var height = lineHeight;
@@ -148,7 +149,9 @@ function drawColoredMarker(htmlStringArray, range, left, top, config) {
   let row = start;
   let prev = 0; 
   let curr = 0;
-  let next = session.getScreenLastRowColumn(row);
+  let next = start != end 
+    ? session.getScreenLastRowColumn(row) 
+    : range.end.column;
   let lineRange = new Range(row, range.start.column, row, curr);
   for (; row <= end; row++) {
     lineRange.start.row = lineRange.end.row = row;
@@ -173,7 +176,7 @@ function getBorderClass(tl, tr, br, bl) {
 }
 function getTop(row, layerConfig) {
 	return (row - layerConfig.firstRowScreen) * layerConfig.lineHeight;
-};
+}
 
 
 
