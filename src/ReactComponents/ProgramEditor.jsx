@@ -9,6 +9,7 @@ import 'brace/mode/javascript';
 import 'brace/theme/monokai';
 import 'brace/ext/language_tools';// this module is imported to get rid of "mispelled options" warning from react-ace
 
+import {traverse} from 'estraverse';
 import {Program} from '../Runner/Parsing/Program.js';
 
 /*
@@ -36,6 +37,8 @@ Cursors
 //  It emits a "delete everything" change followed by a "this is the new contents" change.
 //  This behavior breaks Ace's javascript linting.
 // TODO Convert ace editor changes into program changes.
+// TODO Figure out how to keep the changes made by using Ace Editor without
+//sending a syntatically invalid program to the onValidProgram callback.
 
 class ProgramEditor extends React.Component {
 	/*
@@ -56,16 +59,18 @@ class ProgramEditor extends React.Component {
 	}
 	render() {
 		return (
-			<AceEditor
-				ref="aceEditor"
-				onChange={this.handleChange.bind(this)}
-				onPaste={this.handlePaste.bind(this)}
-				value={this.props.program.getSourceCode()}
-				mode="javascript"
-				theme="monokai"
-				width="100%"
-				height="100%"
-				editorProps={{$blockScrolling: Infinity}}/>
+			<div onMouseMove={this.handleMouseMove.bind(this)}>
+				<AceEditor
+					ref="aceEditor"
+					onChange={this.handleChange.bind(this)}
+					onPaste={this.handlePaste.bind(this)}
+					value={this.props.program.getSourceCode()}
+					mode="javascript"
+					theme="monokai"
+					width="100%"
+					height="100%"
+					editorProps={{$blockScrolling: Infinity}}/>
+			</div>
 		);
 	}
 	constructor(props) {
@@ -103,12 +108,40 @@ class ProgramEditor extends React.Component {
 			this.decorationsToMarkers.set(dec, marker);
 		});
 	}
+  handleMouseMove(mouseMoveEvent) {
+    let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
+    let {deepestNode, path} = nodesContainingCoords(programCoords, this.props.program);
+    this.props.onHoveredNode({
+      node: deepestNode,
+      path
+    });
+  }
+  mouseEventToEsprimaCoords(mouseEvent) {
+    //this.aceEditor
+    let {clientX, clientY} = mouseEvent;
+    let screenCoords = this.aceEditor.renderer.pixelToScreenCoordinates(clientX, clientY);
+    let documentCoords = this.aceEditor.getSession().screenToDocumentPosition(screenCoords.row, screenCoords.column);
+    let programCoords = documentCoordsToEsprimaCoords(documentCoords);
+    return programCoords;
+  }
 }
 
 // dependencies: Program + ace
 function getNodeRange(astNode) {
 	const {start, end} = astNode.loc;
 	return new Range(start.line-1, start.column, end.line-1, end.column);
+}
+function documentCoordsToEsprimaCoords(documentCoords) {
+  return {
+    line: documentCoords.row + 1,
+    column: documentCoords.column
+  };
+}
+function esprimaCoordsToDocumentCoords(esprimaCoords) {
+  return {
+    row: esprimaCoords.line - 1,
+    column: esprimaCoords.column
+  };
 }
 
 
@@ -178,6 +211,36 @@ function getTop(row, layerConfig) {
 	return (row - layerConfig.firstRowScreen) * layerConfig.lineHeight;
 }
 
+
+// dependencies: Program + lodash
+function nodesContainingCoords(esprimaCoords, program) {
+  const ast = program.getAST();
+  let path = [];
+  traverse(ast, {
+    enter(node, parent) {
+      if(nodeContainsCoord(node, esprimaCoords)) {
+        path.push(node);
+      }
+    }
+  });
+  path.reverse();
+  return {
+    path: path, 
+    deepestNode: path[0]
+  };
+}
+function nodeContainsCoord(node, esprimaCoords) {
+  function ifThen(premise, consequence) {
+    return !premise || consequence;
+  }
+  const {start, end} = node.loc;
+  let betweenLines = esprimaCoords.line >= start.line && esprimaCoords.line <= end.line;
+  let onStartLine = esprimaCoords.line === start.line;
+  let onEndLine = esprimaCoords.line === end.line;
+  return betweenLines 
+    && ifThen(onStartLine, esprimaCoords.column >= start.column)
+    && ifThen(onEndLine, esprimaCoords.column <= end.column);
+}
 
 
 class NodeDecoration {
