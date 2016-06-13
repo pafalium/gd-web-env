@@ -2,6 +2,7 @@
 import React from 'react';
 import {Color} from 'three';
 import _, {noop, partial} from 'lodash';
+
 import ProgramEditor, {NodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {ResultInstanceDecoration, ResultOcorrencesDecoration} from './ResultsView.jsx';
 
@@ -9,6 +10,14 @@ import Run from '../Runner/run.js';
 import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 
 class TraceabilityView extends React.Component {
+  /*
+    Props:
+      - program
+    State:
+      - traceabilityResults
+      - nodeDecorations
+      - resultInstanceDecorations
+  */
   constructor(props) {
     super(props);
     //Initialize bound methods.
@@ -37,7 +46,8 @@ class TraceabilityView extends React.Component {
       let nodeResults = getNodeResults(node, path, this.state.traceabilityResults);
       this.setState({
         nodeDecorations: [makeNodeDecoration(node, nodeColor)],
-        resultInstanceDecorations: nodeResults.map(partial(makeResultOcorrencesDecoration, _, nodeColor))
+        resultInstanceDecorations: nodeResults.map(
+          partial(makeResultOcorrencesDecoration, _, nodeColor))
       });
     } else {
       //Not hovering a node.
