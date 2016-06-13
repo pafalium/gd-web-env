@@ -14,19 +14,19 @@ import {Program} from '../Runner/Parsing/Program.js';
 
 /*
 ProgramEditor
-	A component responsible for the UI of editing a program.
-	It has to have a way of communicating/signaling that it produced a new version of the program.
-	It is just a top-level/abstract component as it doesn't impose any specific way of editing the program.
-	CompositeEditor
-		Edits a part of a program using other editors.
-	TextFragmentEditor
-		Edits a part of a program using the normal text editor.
-	LockedView
-		A part of the editor that is not being edited right now.
+  A component responsible for the UI of editing a program.
+  It has to have a way of communicating/signaling that it produced a new version of the program.
+  It is just a top-level/abstract component as it doesn't impose any specific way of editing the program.
+  CompositeEditor
+    Edits a part of a program using other editors.
+  TextFragmentEditor
+    Edits a part of a program using the normal text editor.
+  LockedView
+    A part of the editor that is not being edited right now.
 Cursors
-	Does it have cursors controlled by the keyboard?
-	Does it have mouse interaction?
-	If there are multiple types of editors, how do we manage cursors and mouse interaction?
+  Does it have cursors controlled by the keyboard?
+  Does it have mouse interaction?
+  If there are multiple types of editors, how do we manage cursors and mouse interaction?
 */
 // TODO Handle syntactically invalid text programs.
 // TODO Hide ace editor disorientation when the program is updated.
@@ -41,73 +41,73 @@ Cursors
 //sending a syntatically invalid program to the onValidProgram callback.
 
 class ProgramEditor extends React.Component {
-	/*
-		Props:
-			- program
-			- nodeDecorations {Array.<NodeDecoration>}
-			- onValidProgram
-			- onHoveredNode
-		State:
-			*not-specified*
-	*/
-	handleChange(newValue) {
-		if(Program.isSyntaticallyCorrect(newValue)) {
-			this.props.onValidProgram(Program.fromSourceCode(newValue));
-		}
-	}
-	handlePaste() {
-	}
-	render() {
-		return (
-			<div onMouseMove={this.handleMouseMove.bind(this)}>
-				<AceEditor
-					ref="aceEditor"
-					onChange={this.handleChange.bind(this)}
-					onPaste={this.handlePaste.bind(this)}
-					value={this.props.program.getSourceCode()}
-					mode="javascript"
-					theme="monokai"
-					width="100%"
-					height="100%"
-					editorProps={{$blockScrolling: Infinity}}/>
-			</div>
-		);
-	}
-	constructor(props) {
-		super(props);
-		this.initializeDecorations();
-	}
-	componentDidMount() {
-		this.aceEditor = this.refs["aceEditor"].editor;
-		this.updateDecorations(this.props.nodeDecorations);
-	}
-	componentDidUpdate() {
-		this.updateDecorations(this.props.nodeDecorations);
-	}
-	initializeDecorations() {
-		this.decorationsToMarkers = new Map();
-	}
-	updateDecorations(newDecorations) {
-		let currentDecorations = Array.from(this.decorationsToMarkers.keys());
-		let leavingDecorations = _.difference(currentDecorations, newDecorations);
-		let keepingDecorations = _.difference(currentDecorations, leavingDecorations);
-		let enteringDecorations = _.difference(newDecorations, keepingDecorations);
-		//Remove leaving.
-		leavingDecorations
-			.map(dec=>this.decorationsToMarkers.get(dec))
-			.forEach(marker=>{
-				this.aceEditor.getSession().removeMarker(marker);
-			});
-		leavingDecorations.forEach(dec=>{
-			this.decorationsToMarkers.delete(dec);
-		});
-		//Add entering.
-		enteringDecorations.forEach(dec=>{
-			let nodeRange = getNodeRange(dec.node);
-			let marker = addColoredMarker(this.aceEditor, nodeRange, dec.color);
-			this.decorationsToMarkers.set(dec, marker);
-		});
-	}
+  /*
+    Props:
+      - program
+      - nodeDecorations {Array.<NodeDecoration>}
+      - onValidProgram
+      - onHoveredNode
+    State:
+      *not-specified*
+  */
+  handleChange(newValue) {
+    if (Program.isSyntaticallyCorrect(newValue)) {
+      this.props.onValidProgram(Program.fromSourceCode(newValue));
+    }
+  }
+  handlePaste() {
+  }
+  render() {
+    return (
+      <div onMouseMove={this.handleMouseMove.bind(this)}>
+        <AceEditor
+          ref="aceEditor"
+          onChange={this.handleChange.bind(this)}
+          onPaste={this.handlePaste.bind(this)}
+          value={this.props.program.getSourceCode()}
+          mode="javascript"
+          theme="monokai"
+          width="100%"
+          height="100%"
+          editorProps={{$blockScrolling: Infinity}}/>
+      </div>
+    );
+  }
+  constructor(props) {
+    super(props);
+    this.initializeDecorations();
+  }
+  componentDidMount() {
+    this.aceEditor = this.refs["aceEditor"].editor;
+    this.updateDecorations(this.props.nodeDecorations);
+  }
+  componentDidUpdate() {
+    this.updateDecorations(this.props.nodeDecorations);
+  }
+  initializeDecorations() {
+    this.decorationsToMarkers = new Map();
+  }
+  updateDecorations(newDecorations) {
+    let currentDecorations = Array.from(this.decorationsToMarkers.keys());
+    let leavingDecorations = _.difference(currentDecorations, newDecorations);
+    let keepingDecorations = _.difference(currentDecorations, leavingDecorations);
+    let enteringDecorations = _.difference(newDecorations, keepingDecorations);
+    //Remove leaving.
+    leavingDecorations
+      .map(dec => this.decorationsToMarkers.get(dec))
+      .forEach(marker => {
+        this.aceEditor.getSession().removeMarker(marker);
+      });
+    leavingDecorations.forEach(dec => {
+      this.decorationsToMarkers.delete(dec);
+    });
+    //Add entering.
+    enteringDecorations.forEach(dec => {
+      let nodeRange = getNodeRange(dec.node);
+      let marker = addColoredMarker(this.aceEditor, nodeRange, dec.color);
+      this.decorationsToMarkers.set(dec, marker);
+    });
+  }
   handleMouseMove(mouseMoveEvent) {
     let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
     let {deepestNode, path} = nodesContainingCoords(programCoords, this.props.program);
@@ -128,8 +128,8 @@ class ProgramEditor extends React.Component {
 
 // dependencies: Program + ace
 function getNodeRange(astNode) {
-	const {start, end} = astNode.loc;
-	return new Range(start.line-1, start.column, end.line-1, end.column);
+  const {start, end} = astNode.loc;
+  return new Range(start.line-1, start.column, end.line-1, end.column);
 }
 function documentCoordsToEsprimaCoords(documentCoords) {
   return {
@@ -147,37 +147,37 @@ function esprimaCoordsToDocumentCoords(esprimaCoords) {
 
 // dependencies: ace + THREE.Color
 function addColoredMarker(aceEditor, range, color) {
-	let marker = aceEditor.getSession().addDynamicMarker({
-		range: range,
-		update: noop,
-		renderer: drawColoredMarker,
-		color: color.getStyle(),
-		editor: aceEditor
-	});
-	return marker.id;
+  let marker = aceEditor.getSession().addDynamicMarker({
+    range: range,
+    update: noop,
+    renderer: drawColoredMarker,
+    color: color.getStyle(),
+    editor: aceEditor
+  });
+  return marker.id;
 }
 function drawColoredMarker(htmlStringArray, range, left, top, config) {
   //Based on: ace/layer/marker - drawTextMarker().
-	//push html string into htmlstringarray that represents the marker as DOM objects.
-	function drawLine(range, clazz, extraLength, extraStyle) {
-		var height = lineHeight;
-	  var width = (range.end.column + (extraLength || 0) - range.start.column) * config.characterWidth;
+  //push html string into htmlstringarray that represents the marker as DOM objects.
+  function drawLine(range, clazz, extraLength, extraStyle) {
+    var height = lineHeight;
+    var width = (range.end.column + (extraLength || 0) - range.start.column) * config.characterWidth;
 
-	  var top = getTop(range.start.row, config);
-	  var left = padding + range.start.column * characterWidth;
+    var top = getTop(range.start.row, config);
+    var left = padding + range.start.column * characterWidth;
 
-	  htmlStringArray.push(
-	    "<div class='", clazz, "' style='",
-	    "height:", height, "px;",
-	    "width:", width, "px;",
-	    "top:", top, "px;",
-	    "left:", left, "px;", extraStyle || "", "'></div>"
- 	 	);
-	}
-	const {characterWidth, lineHeight} = config;
-	const padding = left - range.start.column * characterWidth;
-	const session = this.editor.getSession();
-	let start = range.start.row;
+    htmlStringArray.push(
+      "<div class='", clazz, "' style='",
+      "height:", height, "px;",
+      "width:", width, "px;",
+      "top:", top, "px;",
+      "left:", left, "px;", extraStyle || "", "'></div>"
+    );
+  }
+  const {characterWidth, lineHeight} = config;
+  const padding = left - range.start.column * characterWidth;
+  const session = this.editor.getSession();
+  let start = range.start.row;
   let end = range.end.row;
   let row = start;
   let prev = 0; 
@@ -194,7 +194,7 @@ function drawColoredMarker(htmlStringArray, range, left, top, config) {
     curr = next;
     next = row + 1 < end ? session.getScreenLastRowColumn(row + 1) : row == end ? 0 : range.end.column;
     drawLine(
-    	lineRange, 
+      lineRange, 
       (row == start  ? " ace_start" : "")
         + getBorderClass(row == start || row == start + 1 && range.start.column, prev < curr, curr > next, row == end),
       row == end ? 0 : 1, 
@@ -203,12 +203,12 @@ function drawColoredMarker(htmlStringArray, range, left, top, config) {
 }
 function getBorderClass(tl, tr, br, bl) {
   return (
-  	"ace_br" +
-  	((tl ? 1 : 0) | (tr ? 2 : 0) | (br ? 4 : 0) | (bl ? 8 : 0))
+    "ace_br" +
+    ((tl ? 1 : 0) | (tr ? 2 : 0) | (br ? 4 : 0) | (bl ? 8 : 0))
   );
 }
 function getTop(row, layerConfig) {
-	return (row - layerConfig.firstRowScreen) * layerConfig.lineHeight;
+  return (row - layerConfig.firstRowScreen) * layerConfig.lineHeight;
 }
 
 
@@ -244,10 +244,10 @@ function nodeContainsCoord(node, esprimaCoords) {
 
 
 class NodeDecoration {
-	constructor(node, color) {
-		this.node = node;
-		this.color = color;
-	}
+  constructor(node, color) {
+    this.node = node;
+    this.color = color;
+  }
 }
 
 export default ProgramEditor;
