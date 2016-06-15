@@ -249,6 +249,9 @@ class NodeDecoration {
     this.color = color;
   }
 }
+function makeNodeDecoration(node, color) {
+  return new NodeDecoration(node, color);
+}
 
 export default ProgramEditor;
-export {NodeDecoration};
+export {makeNodeDecoration};

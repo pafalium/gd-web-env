@@ -9,7 +9,7 @@ class ResultsView extends React.Component {
 	/*
 		Props:
 			- results: a list of the top level results of a program
-			- resultInstanceDecorations: a list of decorations to change appearence of some result instances
+			- resultDecorations: a list of decorations to change appearence of some result instances
 			- onHoveredResultInstance: a function to be called when the current hovered result instance changes
 		State:
 			- threeObjects {Array.<THREE.Object3D>}
@@ -22,7 +22,7 @@ class ResultsView extends React.Component {
 		//Initialize bound methods.
 		this.handleMouseMove = this.handleMouseMove.bind(this);
 		//Initialize state.
-		this.initializeResultInstanceDecorations();
+		this.initializeResultDecorations();
 		this.state = this.computeState({}, props);
 	}
 	componentWillReceiveProps(newProps) {
@@ -40,9 +40,9 @@ class ResultsView extends React.Component {
 				? toThree.convert.keepingCorrespondence(programResults)
 				: this.state;
 		// Apply resultInstance decorations.
-		let shouldUpdateDecorations = oldProps.resultInstanceDecorations !== newProps.resultInstanceDecorations
+		let shouldUpdateDecorations = oldProps.resultDecorations !== newProps.resultDecorations
 		if(shouldUpdateDecorations) {
-			this.updateResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, newProps.resultInstanceDecorations);
+			this.updateResultDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, newProps.resultDecorations);
 		}
 		// Return the new complete state.
 		let shouldHandleHovers = !!newProps.onHoveredResultInstance;
@@ -89,11 +89,11 @@ class ResultsView extends React.Component {
 		staticRoot.add(sunLight, belowLight, hemiLight, gridHelper, axisHelper);
 		return staticRoot;
 	}
-	initializeResultInstanceDecorations() {
+	initializeResultDecorations() {
 		this.decorationToObjects = new Map();
 		this.objectToOldMaterial = new Map();
 	}
-	updateResultInstanceDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, decorations) {
+	updateResultDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, decorations) {
 		function threeObjectsForDecoration(dec) {
 			function threeObjectsFromPath(path) {
 				function hasAssociatedResult(threeObject) {
@@ -241,6 +241,7 @@ function getMeshes(threeObject) {
 	return res;
 }
 
+
 class ResultDecoration {
 }
 
@@ -259,6 +260,12 @@ class ResultOcorrencesDecoration extends ResultDecoration {
 		this.color = color;
 	}
 }
+function makeResultInstanceDecoration(path, color) {
+  return new ResultInstanceDecoration(path, color);
+}
+function makeResultOcorrencesDecoration(result, color) {
+  return new ResultOcorrencesDecoration(result, color);
+}
 
-export {ResultInstanceDecoration, ResultOcorrencesDecoration};
+export {makeResultInstanceDecoration, makeResultOcorrencesDecoration};
 export default ResultsView;

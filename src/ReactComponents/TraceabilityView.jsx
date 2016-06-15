@@ -1,10 +1,10 @@
 
 import React from 'react';
-import {Color} from 'three';
 import _, {noop, partial} from 'lodash';
 
-import ProgramEditor, {NodeDecoration} from './ProgramEditor.jsx';
-import ResultsView, {ResultInstanceDecoration, ResultOcorrencesDecoration} from './ResultsView.jsx';
+import color from '../SceneGraph/color.js';
+import ProgramEditor, {makeNodeDecoration} from './ProgramEditor.jsx';
+import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoration} from './ResultsView.jsx';
 
 import Run from '../Runner/run.js';
 import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
@@ -27,14 +27,14 @@ class TraceabilityView extends React.Component {
     this.state = {
       traceabilityResults: Run.withTraceability(props.program),
       nodeDecorations: [],
-      resultInstanceDecorations: []
+      resultDecorations: []
     };
   }
   componentWillReceiveProps(newProps) {
     this.setState({
       traceabilityResults: Run.withTraceability(newProps.program),
       nodeDecorations: [],
-      resultInstanceDecorations: []
+      resultDecorations: []
     });
   }
   handleHoveredNode({node, path}) {//unambiguous reference to a program node of the current program
@@ -46,7 +46,7 @@ class TraceabilityView extends React.Component {
       let nodeResults = getNodeResults(node, path, this.state.traceabilityResults);
       this.setState({
         nodeDecorations: [makeNodeDecoration(node, nodeColor)],
-        resultInstanceDecorations: nodeResults.map(
+        resultDecorations: nodeResults.map(
           partial(makeResultOcorrencesDecoration, _, nodeColor))
       });
     } else {
@@ -63,15 +63,14 @@ class TraceabilityView extends React.Component {
       let decColor = color.hsl(50.0/360.0, 0.5, 0.5);
       this.setState({
         nodeDecorations: [makeNodeDecoration(creatorNode, decColor)],
-        resultInstanceDecorations: [makeResultInstanceDecoration(path, decColor)]
+        resultDecorations: [makeResultInstanceDecoration(path, decColor)]
       });
     } else {
       this.setState({
         nodeDecorations: [],
-        resultInstanceDecorations: []
+        resultDecorations: []
       });
     }
-    
   }
   render() {
     return (
@@ -88,7 +87,7 @@ class TraceabilityView extends React.Component {
           <ResultsView 
             results={this.state.traceabilityResults}
             //result instance decorations[{resultInstance, color}]
-            resultInstanceDecorations={this.state.resultInstanceDecorations}
+            resultDecorations={this.state.resultDecorations}
             onHoveredResultInstance={this.handleHoveredResultInstance}/>
         </div>
       </div>
@@ -109,32 +108,6 @@ const styles = {
     height: "100%"
   }
 };
-
-
-function makeNodeDecoration(node, color) {
-  return new NodeDecoration(node, color);
-}
-function makeResultInstanceDecoration(path, color) {
-  return new ResultInstanceDecoration(path, color);
-}
-function makeResultOcorrencesDecoration(result, color) {
-  return new ResultOcorrencesDecoration(result, color);
-}
-
-
-function randomColor() {
-  const c = new Color();
-  c.setHSL(Math.random(), 0.8, 0.5);
-  return c;
-}
-function colorByHSL(hue, saturation, lightness) {
- const c = new Color();
-  c.setHSL(hue, saturation, lightness);
-  return c; 
-}
-const color = {};
-color.random = randomColor;
-color.hsl = colorByHSL;
 
 
 export default TraceabilityView;
