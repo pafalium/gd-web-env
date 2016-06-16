@@ -143,6 +143,12 @@ const vector = {};
 vector.byXYZ = function(x, y, z) {
 	return (new THREE.Vector4(x, y, z, 0.0)).applyMatrix4(coordinates.current);
 };
+vector.byXY = function(x, y) {
+	return vector.byXYZ(x, y, 0);
+};
+vector.byYZ = function(y, z) {
+	return vector.byXYZ(0, y, z);
+};
 vector.byX = function(x) {
 	return vector.byXYZ(x, 0.0, 0.0);
 };
@@ -190,6 +196,12 @@ r.provide("vector", vector);
 const point = {};
 point.byXYZ = function(x, y, z) {
 	return (new THREE.Vector4(x, y, z, 1.0)).applyMatrix4(coordinates.current);
+};
+point.byXY = function(x, y) {
+	return point.byXYZ(x, y, 0);
+};
+point.byYZ = function(y, z) {
+	return point.byXYZ(0, y, z);
 };
 point.byX = function(x) {
 	return point.byXYZ(x, 0.0, 0.0);
@@ -314,6 +326,11 @@ box.byCentersWidthHeight = function([baseCenter, topCenter], [width, height]) {
 
 	let box = boxPrimitive(width, height, 1.0);
 	return transformObjectPrimitive(box, transformation);
+};
+box.byBottomWidthHeightZ = function(baseCenter, [width, height], z) {
+	const prim = boxPrimitive(width, height, z);
+	const transform = matrix.translation(baseCenter.x, baseCenter.y, baseCenter.z);
+	return transformObjectPrimitive(prim, transform);
 };
 r.provide("box", box);
 
@@ -548,6 +565,15 @@ sequence.dropRight = function(lst, n) {
 };
 r.provide("sequence", sequence);
 
+
+const random = {};
+random.integer = function(upper) {
+	return _.random(upper);
+};
+random.inRange = function(lower, upper) {
+	return _.random(lower, upper);
+};
+r.provide("random", random);
 
 
 
