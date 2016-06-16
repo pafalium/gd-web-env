@@ -43,7 +43,9 @@ function resultToThree(result, callback) {
 function arrayToThree(array, callback) {
 	var objs = array.map(r=>resultToThree(r, callback));
 	var parent = new THREE.Object3D();
-	parent.add.apply(parent, objs);
+	if (objs.length !== 0) {
+		parent.add.apply(parent, objs);
+	}
 	return parent;
 }
 
