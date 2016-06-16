@@ -91,7 +91,7 @@ class ResultsView extends React.Component {
 	}
 	initializeResultDecorations() {
 		this.decorationToObjects = new Map();
-		this.objectToOldMaterial = new Map();
+		this.objectToOldMaterial = new WeakMap();
 	}
 	updateResultDecorations(threeObjects, resultToTHREEObjects, threeObjectToResult, decorations) {
 		function threeObjectsForDecoration(dec) {
@@ -142,7 +142,6 @@ class ResultsView extends React.Component {
 			//Restore decoration's objects materials.
 			forEach(decorationToObjects.get(d), obj=>{
 				obj.material = objectToOldMaterial.get(obj);
-				objectToOldMaterial.delete(obj);
 			});
 			//Clear decorationToObjects entry.
 			decorationToObjects.delete(d);
