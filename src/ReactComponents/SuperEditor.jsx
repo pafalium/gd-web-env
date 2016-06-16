@@ -17,9 +17,10 @@ by the user.
 class SuperEditor extends React.Component {
   /*
     Props:
-      - initialProgram
+      - program
+      - onProgramChange
     State:
-      - currentProgram
+      - currentProgram: the current, possibly modified, version of program
       - results
       - runAutomatically
       - captureTrace
@@ -94,9 +95,16 @@ class SuperEditor extends React.Component {
   handleRun() {
     this.scheduleRun();
   }
+  componentWillReceiveProps(newProps) {
+    if (this.props.program !== newProps.program) {
+      this.setState({currentProgram: newProps.program});
+    }
+  }
   handleValidProgram(program) {
     // update the current program
     this.setState({currentProgram: program});
+    // propagate change to owner component
+    this.props.onProgramChange(program);
   }
   handleHoveredNode({node, path}) {
     // iff captureTrace -> highlight node (or parent) and its results
