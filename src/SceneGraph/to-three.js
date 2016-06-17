@@ -50,13 +50,16 @@ function arrayToThree(array, callback) {
 }
 
 var renderableFunctions = {
-	sphere: sphere,
-	cylinder: cylinder,
-	box: box,
-	transformObjectWith: transformObjectWith
+	sphere,
+	cylinder,
+	box,
+	rectangle,
+	transformObjectWith
 };
 
 var solidMat = new THREE.MeshPhongMaterial();
+var surfaceMat = new THREE.MeshPhongMaterial();
+surfaceMat.side = THREE.DoubleSide;
 // All geometries need to be rotated so that Z is their up axis.
 // They are defined with Y as their up axis so they need to be rotated -pi/2 around X.
 // This way Z becomes their up axis.
@@ -88,6 +91,15 @@ function box(result, callback) {
 		depth = result.args.depth;
 	var obj = new THREE.Mesh(boxGeom, solidMat);
 	obj.scale.set(width, height, depth);
+	return obj;
+}
+var rectangleGeom = new THREE.PlaneGeometry(1, 1);
+rectangleGeom.applyMatrix(yUpToZUpRotation);
+function rectangle(result, callback) {
+	var width = result.args.width,
+		height = result.args.height;
+	var obj = new THREE.Mesh(rectangleGeom, surfaceMat);
+	obj.scale.set(width, height, 1);
 	return obj;
 }
 function transformObjectWith(result, callback) {

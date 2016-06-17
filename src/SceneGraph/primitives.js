@@ -105,6 +105,14 @@ transform.translation.byVector = function(vector) {
 	return matrix.translation(vector.x, vector.y, vector.z);
 };
 transform.rotation = {};
+transform.rotation.aroundAxisByAngle = function(axis, radians) {
+	let axisOrig = axis.origin;
+	let axisToWorldOriginMatrix = matrix.translation(-axisOrig.x, -axisOrig.y, -axisOrig.z);
+	let rotationMatrix = matrix.rotation(axis.vector, radians);
+	let repositionAxisMatrix = matrix.translation(axisOrig.x, axisOrig.y, axisOrig.z);
+	return matrix.multiply(repositionAxisMatrix, 
+		matrix.multiply(rotationMatrix, axisToWorldOriginMatrix));
+};
 transform.rotation.aroundAxisVectorByAngle = function(axisVector, radians) {
 	let normalizedAxis = axisVector.clone().normalize();
 	return matrix.rotation(normalizedAxis, radians);
@@ -126,6 +134,16 @@ transform.compose = function(t1, t2) {
 	return matrix.multiply(t1, t2);
 };
 r.provide("transform", transform);
+
+
+const axis = {};
+axis.byPointVector = function(point, vector) {
+	return {
+		origin: point,
+		vector
+	};
+};
+r.provide("axis", axis);
 
 
 const coordinates = {};
@@ -267,6 +285,7 @@ vec.lengthSqr
 const boxPrimitive = r.defPrimitive("box", ["width", "height", "depth"]);
 const spherePrimitive = r.defPrimitive("sphere", ["radius"]);
 const cylinderPrimitive = r.defPrimitive("cylinder", ["radius", "height"]);
+const rectanglePrimitive = r.defPrimitive("rectangle", ["width", "height"]);
 const transformObjectPrimitive = r.defPrimitiveAndProvide("transformObjectWith", ["object", "transform"]);
 //r.defPrimitiveAndProvide("cone", ["radius", "height"]);
 //r.defPrimitiveAndProvide("coneFrustum", ["bottomRadius", "topRadius", "height"]);
@@ -332,6 +351,13 @@ box.byBottomWidthHeightZ = function(baseCenter, [width, height], z) {
 	const transform = matrix.translation(baseCenter.x, baseCenter.y, baseCenter.z);
 	return transformObjectPrimitive(prim, transform);
 };
+box.byCorners = function([pt1, pt2]) {
+	const dimsVec = point.sub(pt2, pt1);
+	const box = boxPrimitive(Math.abs(dimsVec.x), Math.abs(dimsVec.y), Math.abs(dimsVec.z));
+	const centerPt = point.add(pt1, vector.scale(dimsVec, 0.5));
+	const transformation = matrix.translation(centerPt.x, centerPt.y, centerPt.z);
+	return transformObjectPrimitive(box, transformation);
+};
 r.provide("box", box);
 
 
@@ -371,6 +397,17 @@ cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
 r.provide("cylinder", cylinder);
 
 
+const rectangle = {};
+rectangle.surface = {};
+rectangle.surface.byCornerWidthHeight = function(corner, [width, height]) {
+	const rect = rectanglePrimitive(width, height);
+	const transformation = matrix.translation(width*0.5+corner.x, height*0.5+corner.y, corner.z);
+	return transformObjectPrimitive(rect, transformation);
+};
+r.provide("rectangle", rectangle);
+
+
+// shape transformation functions
 function translateAux(object, vec) {
 	return transformObjectPrimitive(object, 
 				transform.translation.byVector(vec));
@@ -414,6 +451,10 @@ r.provide("translate", translate);
 
 const rotate = function(object) {
 	return {
+		aroundAxisByAngle: function(axis, radians) {
+			return transformObjectPrimitive(object,
+				transform.rotation.aroundAxisByAngle(axis, radians));
+		},
 		aroundAxisVectorByAngle: function(axis, radians) {
 			return transformObjectPrimitive(object,
 				transform.rotation.aroundAxisVectorByAngle(axis, radians));
