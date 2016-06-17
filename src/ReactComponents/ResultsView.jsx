@@ -129,6 +129,7 @@ class ResultsView extends React.Component {
 			mat.opacity = 0.9;
 			mat.depthTest = false;
 			mat.depthWrite = false;
+			mat.side = THREE.DoubleSide;
 			return mat;
 		}
 		const decorationToObjects = this.decorationToObjects;
