@@ -465,7 +465,7 @@ const rotate = function(object) {
 		},
 		aroundYByAngle: function(radians) {
 			return transformObjectPrimitive(object,
-				transform.rotation.aroundZYByAngle(radians));
+				transform.rotation.aroundYByAngle(radians));
 		},
 		aroundZByAngle: function(radians) {
 			return transformObjectPrimitive(object,
