@@ -1,5 +1,5 @@
 
-import {noop} from 'lodash';
+import {noop, times, constant} from 'lodash';
 import React from 'react';
 import brace from 'brace';
 import AceEditor from 'react-ace';
@@ -11,6 +11,8 @@ import 'brace/ext/language_tools';// this module is imported to get rid of "misp
 
 import {Program} from '../Runner/Parsing/Program.js';
 import {nodesContainingCoords, programNodes, programSignedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';
+import {recognizers as NodeP, constructors as Nodes} from '../Runner/Parsing/ast-utils.js';
+import * as dragmanager from './drag-manager.js';
 
 /*
 ProgramEditor
@@ -54,6 +56,7 @@ class ProgramEditor extends React.Component {
     return (
       <div 
         onMouseMove={this.handleMouseMove}
+        onMouseDown={this.handleMouseDown}>
         <AceEditor
           ref="aceEditor"
           onChange={this.handleChange}
@@ -74,6 +77,7 @@ class ProgramEditor extends React.Component {
     // Initialize bound methods.
     this.handleChange = this.handleChange.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
   }
   componentDidMount() {
     this.aceEditor = this.refs["aceEditor"].editor;
@@ -83,6 +87,10 @@ class ProgramEditor extends React.Component {
   componentDidUpdate() {
     this.updateSliderMarkers();
     this.updateDecorations(this.props.nodeDecorations);
+  }
+  handleMouseDown(mouseDownEvent) {
+    // Begin slider behavior when necessary.
+    this.tryStartConstantAdjustment(mouseDownEvent);
   }
   handleMouseMove(mouseMoveEvent) {
     let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
@@ -138,6 +146,36 @@ class ProgramEditor extends React.Component {
       this.sliderMarkers.push(marker);
     });
   }
+  tryStartConstantAdjustment(mouseDownEvent) {
+    let programCoords = this.mouseEventToEsprimaCoords(mouseDownEvent);
+    let {bottomUpNodes, pathToDeepest} = nodesContainingCoords(this.props.program, programCoords);
+    let shouldStart = NodeP.isNumericLiteral(bottomUpNodes[0]);
+    if (shouldStart) {
+      let pathToNode = NodeP.isSignedNumericLiteral(bottomUpNodes[1]) 
+        ? pathToDeepest.slice(0, -1)
+        : pathToDeepest;
+      let initialTargetNode = nodeAtPath(this.props.program, pathToNode);
+      let literalText = literalSourceCode(initialTargetNode);
+      let componentExtractor = /^(\+|\-)?([0-9]*)(?:\.([0-9]+))?$/; // Not handling 0x 0o 0b
+      let [,signStr="", intStr, fracStr=""] = componentExtractor.exec(literalText);
+      let fracDigitsNum = fracStr.length;
+      const startingInt = Number.parseInt(signStr+intStr+fracStr);
+      const startX = mouseDownEvent.clientX;
+      const onMove = mouseMoveEvent => {
+        let deltaX = mouseMoveEvent.clientX - startX;
+        let deltaInt = deltaX;
+        let newInt = startingInt + deltaInt;
+
+        let newLiteralText = literalTextFromInt(newInt, fracDigitsNum);
+        let targetNode = nodeAtPath(this.props.program, pathToNode);
+        let doc = this.aceEditor.getSession().getDocument();
+        doc.replace(
+          getNodeRange(targetNode), 
+          literalTextFromInt(newInt, fracDigitsNum));
+      };
+      dragmanager.start(mouseDownEvent, {onMove});
+    }
+  }
   mouseEventToEsprimaCoords(mouseEvent) {
     //this.aceEditor
     let {clientX, clientY} = mouseEvent;
@@ -147,6 +185,53 @@ class ProgramEditor extends React.Component {
     return programCoords;
   }
 }
+
+
+// Adjustable constants helper functions.
+function literalSourceCode(node) {
+  if (NodeP.isUnaryExpression(node)) {
+    return node.operator + node.argument.raw;
+  } else {
+    return node.raw;
+  }
+}
+function absoluteValueTextFromInt(int, fracDigitsNum) {
+  function getDigits(int) {
+    let intDigits = [];
+    let currentInt = Math.abs(int);
+    while (currentInt !== 0) {
+      let digit = currentInt % 10;
+      intDigits.unshift(digit);
+      currentInt = Math.floor(currentInt / 10);
+    }
+    return intDigits;
+  }
+  let intDigits = getDigits(int);
+  let neededDigits = fracDigitsNum + 1; // e.g. X.XXX (fracDigitsNum=3)
+  let allDigits = [
+    ...times(Math.max(neededDigits - intDigits.length), constant("0")),
+    ...intDigits
+  ];
+  let needsDecimalPoint = fracDigitsNum > 0;
+  let completeStr = needsDecimalPoint
+    ? [...allDigits.slice(0, -fracDigitsNum), ".", ...allDigits.slice(-fracDigitsNum)].join("")
+    : allDigits.join("");
+  return completeStr;
+}
+function numericLiteralFromInt(int, fracDigitsNum) {
+  let absStr = absoluteValueTextFromInt(int, fracDigitsNum);
+  let isNegative = int < 0;
+  return isNegative
+    ? Nodes.unaryExpr("-", 
+        Nodes.literal(Number.parseFloat(completeStr), completeStr))
+    : Nodes.literal(Number.parseFloat(completeStr), completeStr);
+}
+function literalTextFromInt(int, fracDigitsNum) {
+  let absStr = absoluteValueTextFromInt(int, fracDigitsNum);
+  let signStr = int < 0 ? "-" : "";
+  return signStr + absStr;
+}
+
 
 // dependencies: Program + ace
 function getNodeRange(astNode) {
