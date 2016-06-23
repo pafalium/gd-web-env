@@ -1,0 +1,8 @@
+
+/*ProgramEditor styles*/
+/*Class for hinting that numeric literals are adjustable in ace.*/
+.adjustable-hint {
+	position: absolute;
+	cursor: ew-resize !important;
+	pointer-events: auto;
+}

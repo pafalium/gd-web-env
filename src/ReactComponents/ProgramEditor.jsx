@@ -52,10 +52,11 @@ class ProgramEditor extends React.Component {
   */
   render() {
     return (
-      <div onMouseMove={this.handleMouseMove.bind(this)}>
+      <div 
+        onMouseMove={this.handleMouseMove}
         <AceEditor
           ref="aceEditor"
-          onChange={this.handleChange.bind(this)}
+          onChange={this.handleChange}
           value={this.props.program.getSourceCode()}
           mode="javascript"
           theme="monokai"
@@ -67,13 +68,20 @@ class ProgramEditor extends React.Component {
   }
   constructor(props) {
     super(props);
+    // Initialize state.
     this.initializeDecorations();
+    this.initializeSliderMarkers();
+    // Initialize bound methods.
+    this.handleChange = this.handleChange.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
   }
   componentDidMount() {
     this.aceEditor = this.refs["aceEditor"].editor;
+    this.updateSliderMarkers();
     this.updateDecorations(this.props.nodeDecorations);
   }
   componentDidUpdate() {
+    this.updateSliderMarkers();
     this.updateDecorations(this.props.nodeDecorations);
   }
   handleMouseMove(mouseMoveEvent) {
@@ -113,6 +121,21 @@ class ProgramEditor extends React.Component {
       this.decorationsToMarkers.set(dec, marker);
     });
   }
+  initializeSliderMarkers() {
+    this.sliderMarkers = [];
+  }
+  updateSliderMarkers() {
+    // Remove previous markers.
+    this.sliderMarkers.forEach(marker => {
+      this.aceEditor.getSession().removeMarker(marker);
+    });
+    this.sliderMarkers = [];
+    // Add current markers.
+    let numericLiterals = programSignedLiteralNodes(this.props.program);
+    numericLiterals.forEach(literal => {
+      let range = getNodeRange(literal);
+      let marker = this.aceEditor.getSession().addMarker(range, "adjustable-hint", "text", false);
+      this.sliderMarkers.push(marker);
     });
   }
   mouseEventToEsprimaCoords(mouseEvent) {
