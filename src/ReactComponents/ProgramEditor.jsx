@@ -9,7 +9,6 @@ import 'brace/mode/javascript';
 import 'brace/theme/monokai';
 import 'brace/ext/language_tools';// this module is imported to get rid of "mispelled options" warning from react-ace
 
-import {traverse} from 'estraverse';
 import {Program} from '../Runner/Parsing/Program.js';
 import {nodesContainingCoords, programNodes, programSignedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';
 
@@ -57,7 +56,6 @@ class ProgramEditor extends React.Component {
         <AceEditor
           ref="aceEditor"
           onChange={this.handleChange.bind(this)}
-          onPaste={this.handlePaste.bind(this)}
           value={this.props.program.getSourceCode()}
           mode="javascript"
           theme="monokai"
