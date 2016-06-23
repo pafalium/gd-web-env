@@ -50,13 +50,6 @@ class ProgramEditor extends React.Component {
     State:
       *not-specified*
   */
-  handleChange(newValue) {
-    if (Program.isSyntaticallyCorrect(newValue)) {
-      this.props.onValidProgram(Program.fromSourceCode(newValue));
-    }
-  }
-  handlePaste() {
-  }
   render() {
     return (
       <div onMouseMove={this.handleMouseMove.bind(this)}>
@@ -83,6 +76,11 @@ class ProgramEditor extends React.Component {
   }
   componentDidUpdate() {
     this.updateDecorations(this.props.nodeDecorations);
+  }
+  handleChange(newValue) {
+    if (Program.isSyntaticallyCorrect(newValue)) {
+      this.props.onValidProgram(Program.fromSourceCode(newValue));
+    }
   }
   initializeDecorations() {
     this.decorationsToMarkers = new Map();
