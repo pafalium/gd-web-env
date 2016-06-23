@@ -1,53 +1,98 @@
 "use strict";
 
+const isExpression = (function () {
+	var exprTypes = new Set([
+		"ThisExpression", 
+		"ArrayExpression",
+		"ObjectExpression",
+		"FunctionExpression",
+		"UnaryExpression",
+		"UpdateExpression",
+		"BinaryExpression",
+		"AssignmentExpression",
+		"LogicalExpression",
+		"MemberExpression",
+		"ConditionalExpression",
+		"CallExpression",
+		"NewExpression",
+		"SequenceExpression",
+		"Literal",
+		"Identifier"
+		]);
+	return function isExpression(node) {
+		return exprTypes.has(node.type);
+	};
+})();
+
+function isMemberExpression(node) {
+	return node.type === "MemberExpression";
+}
+
+function isVariableDeclarator(node) {
+	return node.type === "VariableDeclarator";
+}
+
+function isUpdateExpression(node) {
+	return node.type === "UpdateExpression";
+}
+
+function isExpressionStatement(node) {
+	return node.type === "ExpressionStatement";
+}
+
+function isCallExpression(node) {
+	return node.type === "CallExpression";
+}
+
+function isReturn(node) {
+	return node.type === "ReturnStatement";
+}
+
+function isFunction(node) {
+	return node.type === "FunctionExpression" || node.type === "FunctionDeclaration";
+}
+
+function isProgram(node) {
+	return node.type === "Program";
+}
+
+function isLiteral(node) {
+	return node.type === "Literal";
+}
+
+function isUnaryExpression(node) {
+	return node.type === "UnaryExpression";
+}
+
+function isSignUnaryExpression(node) {
+	return isUnaryExpression(node) 
+		&& (node.operator === "-" || node.operator === "+");
+}
+
+function isNumericLiteral(node) {
+	return isLiteral(node) && typeof node.value === "number";
+}
+
+function isSignedNumericLiteral(node) {
+	return isNumericLiteral(node) 
+		|| (isSignUnaryExpression(node) && isNumericLiteral(node.argument));
+}
+
 var u = {
-	isProgram: function(node) {
-		return node.type === "Program";
-	},
-	isFunction: function(node) {
-		return node.type === "FunctionExpression" || node.type === "FunctionDeclaration";
-	},
-	isReturn: function(node) {
-		return node.type === "ReturnStatement";
-	},
-	isCallExpression: function(node) {
-		return node.type === "CallExpression";
-	},
-	isExpressionStatement: function(node) {
-		return node.type === "ExpressionStatement";
-	},
-	isUpdateExpression: function(node) {
-		return node.type === "UpdateExpression";
-	},
-	isVariableDeclarator: function(node) {
-		return node.type === "VariableDeclarator";
-	},
-	isMemberExpression: function(node) {
-		return node.type === "MemberExpression";
-	},
-	isExpression: (function () {
-		var exprTypes = new Set([
-			"ThisExpression", 
-			"ArrayExpression",
-			"ObjectExpression",
-			"FunctionExpression",
-			"UnaryExpression",
-			"UpdateExpression",
-			"BinaryExpression",
-			"AssignmentExpression",
-			"LogicalExpression",
-			"MemberExpression",
-			"ConditionalExpression",
-			"CallExpression",
-			"NewExpression",
-			"SequenceExpression",
-			"Literal",
-			"Identifier"
-			]);
-		return function(node) {
-			return exprTypes.has(node.type);
-		};
-	})()
+	isExpression,
+	isMemberExpression,
+	isVariableDeclarator,
+	isUpdateExpression,
+	isExpressionStatement,
+	isCallExpression,
+	isReturn,
+	isFunction,
+	isProgram,
+	isUnaryExpression,
+	isSignUnaryExpression,
+	isLiteral,
+	isNumericLiteral,
+	isSignedNumericLiteral
 };
 
 var n = {
@@ -70,10 +115,11 @@ var n = {
 			name: name
 		};
 	},
-	literal: function(value) {
+	literal: function(value, raw) {
 		return {
 			type: "Literal",
-			value: value
+			value: value,
+			raw
 		};
 	},
 	block: function(stms) {
@@ -136,6 +182,14 @@ var n = {
 			object: obj,
 			property: prop,
 			computed: computed
+		};
+	},
+	unaryExpr: function(operator, argument, prefix=true) {
+		return {
+			type: "UnaryExpression",
+			operator,
+			argument,
+			prefix
 		};
 	}
 };
