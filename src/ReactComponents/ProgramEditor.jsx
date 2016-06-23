@@ -11,6 +11,7 @@ import 'brace/ext/language_tools';// this module is imported to get rid of "misp
 
 import {traverse} from 'estraverse';
 import {Program} from '../Runner/Parsing/Program.js';
+import {nodesContainingCoords, programNodes, programSignedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';
 
 /*
 ProgramEditor
@@ -77,6 +78,14 @@ class ProgramEditor extends React.Component {
   componentDidUpdate() {
     this.updateDecorations(this.props.nodeDecorations);
   }
+  handleMouseMove(mouseMoveEvent) {
+    let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
+    let {deepestNode, bottomUpNodes} = nodesContainingCoords(this.props.program, programCoords);
+    this.props.onHoveredNode({
+      node: deepestNode,
+      path: bottomUpNodes
+    });
+  }
   handleChange(newValue) {
     if (Program.isSyntaticallyCorrect(newValue)) {
       this.props.onValidProgram(Program.fromSourceCode(newValue));
@@ -106,12 +115,6 @@ class ProgramEditor extends React.Component {
       this.decorationsToMarkers.set(dec, marker);
     });
   }
-  handleMouseMove(mouseMoveEvent) {
-    let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
-    let {deepestNode, path} = nodesContainingCoords(programCoords, this.props.program);
-    this.props.onHoveredNode({
-      node: deepestNode,
-      path
     });
   }
   mouseEventToEsprimaCoords(mouseEvent) {
@@ -207,37 +210,6 @@ function getBorderClass(tl, tr, br, bl) {
 }
 function getTop(row, layerConfig) {
   return (row - layerConfig.firstRowScreen) * layerConfig.lineHeight;
-}
-
-
-// dependencies: Program + lodash
-function nodesContainingCoords(esprimaCoords, program) {
-  const ast = program.getAST();
-  let path = [];
-  traverse(ast, {
-    enter(node, parent) {
-      if(nodeContainsCoord(node, esprimaCoords)) {
-        path.push(node);
-      }
-    }
-  });
-  path.reverse();
-  return {
-    path: path, 
-    deepestNode: path[0]
-  };
-}
-function nodeContainsCoord(node, esprimaCoords) {
-  function ifThen(premise, consequence) {
-    return !premise || consequence;
-  }
-  const {start, end} = node.loc;
-  let betweenLines = esprimaCoords.line >= start.line && esprimaCoords.line <= end.line;
-  let onStartLine = esprimaCoords.line === start.line;
-  let onEndLine = esprimaCoords.line === end.line;
-  return betweenLines 
-    && ifThen(onStartLine, esprimaCoords.column >= start.column)
-    && ifThen(onEndLine, esprimaCoords.column <= end.column);
 }
 
 
