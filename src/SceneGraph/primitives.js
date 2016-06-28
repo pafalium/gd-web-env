@@ -286,6 +286,8 @@ const boxPrimitive = r.defPrimitive("box", ["width", "height", "depth"]);
 const spherePrimitive = r.defPrimitive("sphere", ["radius"]);
 const cylinderPrimitive = r.defPrimitive("cylinder", ["radius", "height"]);
 const rectanglePrimitive = r.defPrimitive("rectangle", ["width", "height"]);
+const polygonSurfacePrimitive = r.defPrimitive("polygonSurface", ["vertices"]);
+const extrusionPrimitive = r.defPrimitive("extrusion", ["extrudable", "displacement"]);
 const transformObjectPrimitive = r.defPrimitiveAndProvide("transformObjectWith", ["object", "transform"]);
 //r.defPrimitiveAndProvide("cone", ["radius", "height"]);
 //r.defPrimitiveAndProvide("coneFrustum", ["bottomRadius", "topRadius", "height"]);
@@ -405,6 +407,21 @@ rectangle.surface.byCornerWidthHeight = function(corner, [width, height]) {
 	return transformObjectPrimitive(rect, transformation);
 };
 r.provide("rectangle", rectangle);
+
+
+const polygon = {};
+polygon.surface = {};
+polygon.surface.byVertices = function(vertices) {
+	return polygonSurfacePrimitive(vertices);
+};
+r.provide("polygon", polygon);
+
+
+const extrusion = {};
+extrusion.bySurfaceVector = function(surface, displacementVector) {
+	return extrusionPrimitive(surface, displacementVector);
+};
+r.provide("extrusion", extrusion);
 
 
 // shape transformation functions

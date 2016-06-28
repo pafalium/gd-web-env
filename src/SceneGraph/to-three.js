@@ -2,6 +2,9 @@
 import THREE from 'three';
 import {PrimitiveProp} from './primitives.js';
 import makeMatrixTransformedObject3D from './makeMatrixTransformedObject3D.js';
+import {surfaceMat, solidMat} from './default-materials.js';
+import {polygonSurface} from './polygon-surface.js';
+import {extrusion} from './extrusion.js';
 
 /*
 	THREE representation generation code.
@@ -54,12 +57,11 @@ var renderableFunctions = {
 	cylinder,
 	box,
 	rectangle,
-	transformObjectWith
+	transformObjectWith,
+	polygonSurface,
+	extrusion
 };
 
-var solidMat = new THREE.MeshPhongMaterial();
-var surfaceMat = new THREE.MeshPhongMaterial();
-surfaceMat.side = THREE.DoubleSide;
 // All geometries need to be rotated so that Z is their up axis.
 // They are defined with Y as their up axis so they need to be rotated -pi/2 around X.
 // This way Z becomes their up axis.
