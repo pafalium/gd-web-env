@@ -218,6 +218,9 @@ point.byXYZ = function(x, y, z) {
 point.byXY = function(x, y) {
 	return point.byXYZ(x, y, 0);
 };
+point.byXZ = function(x, z) {
+	return point.byXYZ(x, 0, z);
+};
 point.byYZ = function(y, z) {
 	return point.byXYZ(0, y, z);
 };
@@ -240,11 +243,29 @@ point.bySpherical = function(radius, azimuthAngle, polarAngle) {
 		radius*Math.sin(azimuthAngle)*sinPolar,
 		radius*Math.cos(polarAngle));
 };
+point.x = function(pt) {
+	return pt.x;
+};
+point.y = function(pt) {
+	return pt.y;
+};
+point.z = function(pt) {
+	return pt.z;
+};
 point.origin = function() {
 	return point.byXYZ(0, 0, 0);
 }
 point.add = function(point, vec) {
 	return point.clone().add(vec);
+};
+point.addX = function(pt, x) {
+	return point.add(pt, vector.byXYZ(x, 0, 0));
+};
+point.addXZ = function(pt, x, z) {
+	return point.add(pt, vector.byXYZ(x, 0, z));
+};
+point.addZ = function(pt, z) {
+	return point.add(pt, vector.byXYZ(0, 0, z));
 };
 point.sub = function(p1, p2) {
 	return p1.clone().sub(p2);
@@ -571,12 +592,12 @@ sequence.count = function(n) {
 	}
 	return arr;
 };
-sequence.zip = function(l1, l2) {
-	const smallerLength = Math.min(l1.length, l2.length);
+sequence.zip = function(...lists) {
+	const smallerLength = Math.min(...lists.map(lst => lst.length));
 	var arr = [];
 	var i = 0;
 	while(i<smallerLength) {
-		arr.push([l1[i], l2[i]]);
+		arr.push(lists.map(lst => lst[i]));
 		i++;
 	}
 	return arr;
@@ -625,11 +646,20 @@ r.provide("sequence", sequence);
 
 
 const random = {};
-random.integer = function(upper) {
-	return _.random(upper);
-};
 random.inRange = function(lower, upper) {
 	return _.random(lower, upper);
+};
+random.integer = function(upper) {
+	return _.random(Math.trunc(upper));
+};
+random.integer.inRange = function(lower, upper) {
+	return _.random(Math.trunc(lower), Math.trunc(upper));
+};
+random.real = function(upper) {
+	return _.random(upper, true);
+};
+random.real.inRange = function(lower, upper) {
+	return _.random(lower, upper, true);
 };
 r.provide("random", random);
 
