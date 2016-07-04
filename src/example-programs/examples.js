@@ -9,7 +9,8 @@ const exampleData = [
 	["initialProgram.js", fs.readFileSync(__dirname + "/" + "initialProgram.js", "utf8")],
 	["ines-wall.js", fs.readFileSync(__dirname + "/" + "ines-wall.js", "utf8")],
 	["nolan-facade.js", fs.readFileSync(__dirname + "/" + "nolan-facade.js", "utf8")],
-	["sheung-wan-hotel-v3.js", fs.readFileSync(__dirname + "/" + "sheung-wan-hotel-v3.js", "utf8")]
+	["sheung-wan-hotel-v3.js", fs.readFileSync(__dirname + "/" + "sheung-wan-hotel-v3.js", "utf8")],
+	["dom-ino-frame.js", fs.readFileSync(__dirname + "/" + "dom-ino-frame.js", "utf8")]
 ];
 
 const examples = exampleData.map(
