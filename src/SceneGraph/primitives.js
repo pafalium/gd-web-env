@@ -270,6 +270,9 @@ point.addZ = function(pt, z) {
 point.sub = function(p1, p2) {
 	return p1.clone().sub(p2);
 };
+point.subZ = function(pt, z) {
+	return point.sub(pt, vector.byXYZ(0, 0, z));
+};
 point.pointPlusVector = point.add;
 point.pointMinusPoint = point.sub;
 r.provide("point", point);
@@ -371,7 +374,10 @@ box.byCentersWidthHeight = function([baseCenter, topCenter], [width, height]) {
 };
 box.byBottomWidthHeightZ = function(baseCenter, [width, height], z) {
 	const prim = boxPrimitive(width, height, z);
-	const transform = matrix.translation(baseCenter.x, baseCenter.y, baseCenter.z);
+	const transform = matrix.translation(
+		baseCenter.x, 
+		baseCenter.y, 
+		baseCenter.z + z / 2.0);
 	return transformObjectPrimitive(prim, transform);
 };
 box.byCorners = function([pt1, pt2]) {
@@ -380,6 +386,10 @@ box.byCorners = function([pt1, pt2]) {
 	const centerPt = point.add(pt1, vector.scale(dimsVec, 0.5));
 	const transformation = matrix.translation(centerPt.x, centerPt.y, centerPt.z);
 	return transformObjectPrimitive(box, transformation);
+};
+box.byCornerXYZ = function(pt, [x, y, z]) {
+	let p2 = point.add(pt, vector.byXYZ(x, y, z));
+	return box.byCorners([pt, p2]);
 };
 r.provide("box", box);
 
@@ -565,24 +575,59 @@ sequence.division = function(start, end, divisions) {
 	//    Return return the sequence of numbers that define those segments.
 	// Return a sequence of equally spaced numbers between start and end.
 	// [x_1=start, ..., x_divisions, x_divisions+1=end]
+	// start = 0, end = 10, 
+	//   divisions = 0
+	// [NaN]
+	//   divisions = 1
+	// [0, 10]
+	//   divisions = 2
+	// [0, 5, 10]
 	var arr = [];
 	var stepSize = (end-start) / divisions;
 	var i = 0;
 	while(i<divisions+1) {
-		arr.push(stepSize*i);
+		arr.push(start+stepSize*i);
 		i++;
 	}
 	return arr;
 };
+/*
+	@returns {Array} An array containing [a, evenlySpacedVals(n), b].
+*/
+sequence.cutInterval = function(a, b, n) {
+	function cuts(times) {
+		let spacing = (b-a)/(n+1);
+		return sequence.count(times).map(i => a + (i+1)*spacing);
+	}
+
+	return [a, ...cuts(n), b];
+};
 sequence.intervalDivision = function(a, b, n) {
 	//[x_1=start, ..., x_n=end]
+	// a = 0, b = 10
+	//  n = 0
+	// []
+	//  n = 1
+	// [NaN]
+	//  n = 2
+	// [0, 10]
+	//  n = 3
+	// [0, 5, 10]
   var spacing = (b-a)/(n-1);
   var res = [];
   for(var i=0; i<n; i++) {
     res.push(a+i*spacing);
   }
   return res;
-}; 
+};
+// Same as intervalDivision except with n=1 -> [(a+b)*0.5]
+sequence.evenValsBetween = function(a, b, n) {
+	if (n == 1) {
+		return [a + (b-a)*0.5];
+	} 
+
+	return sequence.count(n).map(i => a + i*(b-a)/(n-1));
+};
 sequence.count = function(n) {
 	var arr = [];
 	var i = 0;
@@ -663,6 +708,14 @@ random.real.inRange = function(lower, upper) {
 };
 r.provide("random", random);
 
+
+const functional = {};
+functional.compose = function(...fns) {
+  return function(...args) {
+    return fns.reduceRight((prev, fn) => fn.apply(null, [prev]), args);
+  };
+};
+r.provide("functional", functional);
 
 
 export default r.primitives;
