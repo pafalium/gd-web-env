@@ -2,7 +2,13 @@
 import React from 'react';
 
 import RealTimeRunEditor from './RealTimeRunEditor.jsx';
+import TraceabilityView from './TraceabilityView.jsx';
+import SuperEditor from './SuperEditor.jsx';
 import {examples} from '../example-programs/examples.js';
+const traceabilityMode = "traceability";
+const realtimeRunMode = "realtimeRun";
+const superMode = "superEditor";
+const modes = [superMode, traceabilityMode, realtimeRunMode];
 
 class App extends React.Component {
 	constructor(props) {
@@ -10,6 +16,7 @@ class App extends React.Component {
 		this.state = {
 			programs: examples,
 			activeProgram: examples[0]
+			modeIdx: 0,
 		};
 		this.onSelectedProgram = this.onSelectedProgram.bind(this);
 		this.onProgramChange = this.onProgramChange.bind(this);
@@ -23,14 +30,30 @@ class App extends React.Component {
 		// do nothing, for now...
 	}
 	render() {
+		const currMode = modes[this.state.modeIdx];
 		return (
-			<div>
-				<ProgramSelector 
-					programs={this.state.programs} 
-					onSelectedProgram={this.onSelectedProgram}/>
-				<RealTimeRunEditor
-					program={this.state.activeProgram.program}
-					onProgramChange={this.onProgramChange}/>
+			<div style={{display: "flex"}}>
+				<div style={{width: "100px", overflowX: "scroll"}}>
+					<button onClick={this.onCycleMode.bind(this)}>Cycle Mode</button>
+					<ProgramSelector 
+						programs={this.state.programs} 
+						onSelectedProgram={this.onSelectedProgram}/>
+				</div>
+				<div style={{width: "calc(100% - 100px)"}}>
+					{
+						currMode === traceabilityMode
+						? <TraceabilityView
+								program={this.state.activeProgram.program}
+								onProgramChange={this.onProgramChange}/>
+						: currMode === realtimeRunMode 
+							?	<RealTimeRunEditor
+									program={this.state.activeProgram.program}
+									onProgramChange={this.onProgramChange}/>
+							: <SuperEditor
+									program={this.state.activeProgram.program}
+									onProgramChange={this.onProgramChange}/>
+					}
+				</div>
 			</div>
 		);
 	}
