@@ -1,40 +1,89 @@
 
 import React from 'react';
+import Select from 'react-select';
 
 import RealTimeRunEditor from './RealTimeRunEditor.jsx';
 import TraceabilityView from './TraceabilityView.jsx';
 import SuperEditor from './SuperEditor.jsx';
 import {examples} from '../example-programs/examples.js';
+import {runInCad, clearCad, selectCads} from '../Runner/run-in-cad.js';
+
 const traceabilityMode = "traceability";
 const realtimeRunMode = "realtimeRun";
 const superMode = "superEditor";
 const modes = [superMode, traceabilityMode, realtimeRunMode];
+const availableCads = [
+	{value: "autocad", label: "AutoCAD"},
+	{value: "sketchup", label: "SketchUp"}
+];
+
 
 class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			programs: examples,
-			activeProgram: examples[0]
+			activeProgram: examples[0],
+			activeProgramCurrentVersion: examples[0].program,
 			modeIdx: 0,
+			selectedCads: ["autocad"]
 		};
 		this.onSelectedProgram = this.onSelectedProgram.bind(this);
 		this.onProgramChange = this.onProgramChange.bind(this);
 	}
 	onSelectedProgram(program) {
 		this.setState({
-			activeProgram: program
+			activeProgram: program,
+			activeProgramCurrentVersion: program.program
 		});
 	}
 	onProgramChange(newProgram) {
-		// do nothing, for now...
+		this.setState({
+			activeProgramCurrentVersion: newProgram
+		});
+	}
+	onRunInCad() {
+		// Call run in cad procedure
+		selectCads(this.state.selectedCads);
+		runInCad(this.state.activeProgramCurrentVersion);
+	}
+	onClearCad() {
+		// Call clear cad procedure
+		selectCads(this.state.selectedCads);
+		clearCad();
+	}
+	onSelectedCadsChange(selectedCads) {
+		let newSelectedCads = selectedCads !== null
+			? selectedCads.map(({value})=>value)
+			: null;
+		this.setState({
+			selectedCads: newSelectedCads
+		});
 	}
 	render() {
 		const currMode = modes[this.state.modeIdx];
+		const noCadSelected = this.state.selectedCads === null;
 		return (
 			<div style={{display: "flex"}}>
 				<div style={{width: "100px", overflowX: "scroll"}}>
 					<button onClick={this.onCycleMode.bind(this)}>Cycle Mode</button>
+					<button 
+						onClick={this.onRunInCad.bind(this)}
+						disabled={noCadSelected}>
+						Run in CAD
+					</button>
+					<button 
+						onClick={this.onClearCad.bind(this)}
+						disabled={noCadSelected}>
+						Clear CAD
+					</button>
+					<Select 
+						multi={true}
+						options={availableCads}
+						value={this.state.selectedCads}
+						onChange={this.onSelectedCadsChange.bind(this)}
+						placeholder="destination CADs"
+					/>
 					<ProgramSelector 
 						programs={this.state.programs} 
 						onSelectedProgram={this.onSelectedProgram}/>
