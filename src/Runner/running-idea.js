@@ -11,7 +11,6 @@ import {idGenerator} from '../id-generator.js';
 import primitives from '../SceneGraph/primitives.js';
 
 
-const primitiveImportCode = generatePrimitiveImportCode(primitives);
 function generatePrimitiveImportCode(primitives) {
 	return (
 		"var " 
@@ -26,7 +25,7 @@ function generatePrimitiveImportCode(primitives) {
 // Main function!!
 // ***************
 //
-function runProgramPrime2(program, transforms) {
+function runProgramPrime2(program, transforms, predefinedBindings=primitives) {
 	//
 	// TODO: Map nodeIds to AstNodes.
 	//       - Option 1: Convert nodeIds to AstNodes after running.
@@ -63,6 +62,7 @@ function runProgramPrime2(program, transforms) {
 	});
 
 	// generate program code
+	var primitiveImportCode = generatePrimitiveImportCode(predefinedBindings);
 	var instrumentedProgram = escodegen.generate(programAst);
 	
 	var body = primitiveImportCode+instrumentedProgram;
@@ -71,12 +71,9 @@ function runProgramPrime2(program, transforms) {
 	var contexts = transforms.map(t=>t.makeContext());
 	var args = Array.from(contextIds.values()).concat("primitives");
 	var programFunction = new Function(args, body);
-	programFunction.apply(null, contexts.concat([primitives]));
+	programFunction.apply(null, contexts.concat([predefinedBindings]));
 	return contexts;
 }
 
 
-
-module.exports = {
-	runProgramPrime2: runProgramPrime2
-};
+export {runProgramPrime2};
