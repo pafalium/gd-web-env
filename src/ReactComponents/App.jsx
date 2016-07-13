@@ -42,6 +42,11 @@ class App extends React.Component {
 			activeProgramCurrentVersion: newProgram
 		});
 	}
+	onCycleMode() {
+		this.setState({
+			modeIdx: (this.state.modeIdx+1)%modes.length
+		});
+	}
 	onRunInCad() {
 		// Call run in cad procedure
 		selectCads(this.state.selectedCads);
