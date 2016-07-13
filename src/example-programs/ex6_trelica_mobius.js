@@ -71,6 +71,7 @@ function polygonNormal(pts) {
 function midCoord(c1, c2) {
   // This is an hack since c1 and c2 should be points.
   // The result of vector.add will be (x,y,z,2) which is invalid.
+  // On top of computing the middle coordinates, vector.scale also corrects the invalid value.
   return vector.scale(vector.add(c1, c2), 0.5);
 }
 function quadCenter(c1, c2, c3, c4) {
