@@ -3,3 +3,4 @@ npm-debug.log
 dist/bundle.js
 dist/libs.js
 scraps/*
+server/**/*.bak
