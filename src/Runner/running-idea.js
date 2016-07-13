@@ -8,17 +8,17 @@ import escodegen from 'escodegen';
 import {constructors as Nodes, recognizers as NodeP} from './Parsing/ast-utils.js';
 import {idGenerator} from '../id-generator.js';
 
-import primitives, {PrimitiveProp} from '../SceneGraph/primitives.js';
+import primitives from '../SceneGraph/primitives.js';
 
 
 const primitiveImportCode = generatePrimitiveImportCode(primitives);
 function generatePrimitiveImportCode(primitives) {
 	return (
-		"var " + 
-		primitives.map(function(primitive, i){
-			return ""+primitive[PrimitiveProp]+"="+"primitives["+i+"].value";
-		}).join(",") +
-		";");
+		"var " 
+		+ primitives.map(function(primitive, i){
+				return ""+primitive.name+"="+"primitives["+i+"].value";
+			}).join(",") 
+		+	";\n");
 }
 
 //

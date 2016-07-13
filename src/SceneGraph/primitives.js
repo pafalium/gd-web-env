@@ -10,8 +10,8 @@ const r = {
 	primitives: [],
 	provide: function(name, value) {
 		this.primitives.push({
-			[PrimitiveProp]: name,
-			value: value
+			name,
+			value
 		});
 	},
 	defPrimitive: function(name, args) {
