@@ -125,7 +125,7 @@ class ProgramSelector extends React.Component {
 	render() {
 		return (
 			<div>
-				<p style={styles.selectors.header}>Programs</p>
+				<h2 style={styles.selectors.header}>Programs</h2>
 				<ul>
 					{this.props.programs.map(this.renderProgramSelector, this)}
 				</ul>
