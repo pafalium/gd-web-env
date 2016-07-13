@@ -96,7 +96,7 @@ function box(result, callback) {
 	return obj;
 }
 var rectangleGeom = new THREE.PlaneGeometry(1, 1);
-rectangleGeom.applyMatrix(yUpToZUpRotation);
+//rectangleGeom.applyMatrix(yUpToZUpRotation);
 function rectangle(result, callback) {
 	var width = result.args.width,
 		height = result.args.height;
