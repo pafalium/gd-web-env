@@ -71,7 +71,7 @@ function nolanPattern(p, n, nFaixas, l, angMax) {
         : [
 			rotate(nolanPainel(p, n, l, angMax))
 				.aroundAxisByAngle(
-					axis.byPointVector(p, vector.byZ(1)), 
+					axis.byPointVector(p, vector.byX(1)), 
 					aSinusoide),
 			nolanPattern(point.add(p, vector.byX(width + d)), n, nFaixas - 1, l, angMax)
         ];

@@ -4,9 +4,9 @@ const cRevit = 1.93333;
 const hRevit = 0.64444;
 const eRevit = 0.322;
 
-
 function rightCuboid(bottom, width, height, z) {
-	return box.byBottomWidthHeightZ(bottom, [width, height], z);
+	let p = brickMovement(bottom);
+	return box.byCornerXYZ(point.add(p, vector.byXY(width / -2, height / -2)), [width, height, z]);
 }
 
 
@@ -23,9 +23,9 @@ function brick4(p, lado, alt, e) {
 	const lado2 = (lado - j) / 2.0;
 	const alt2 = (alt - j) / 2.0;
 	const pp = point.add(p, vector.byXY(e / 2.0, lado2 / 2.0 + j));
-	const p1 = point.add(p, vector.byY(lado2));
-	const p2 = point.add(p, vector.byZ(alt2));
-	const p3 = point.add(p, vector.byYZ(lado2, alt2));
+	const p1 = point.add(pp, vector.byY(lado2));
+	const p2 = point.add(pp, vector.byZ(alt2));
+	const p3 = point.add(pp, vector.byYZ(lado2, alt2));
 	return [
 		rightCuboid(pp, e, lado2, alt2),
 		rightCuboid(p1, e, lado2, alt2),
@@ -39,9 +39,9 @@ function brick3(p, lado, alt, e) {
 	const lado2 = (lado - j) / 2.0;
 	const alt2 = (alt - j) / 2.0;
 	const pp = point.add(p, vector.byXY(e / 2.0, lado2/2.0 + j));
-	const p1 = point.add(p, vector.byY(lado2));
-	//const p2 = point.add(p, vector.byZ(alt2));
-	const p3 = point.add(p, vector.byYZ(lado2, alt2));
+	const p1 = point.add(pp, vector.byY(lado2));
+	//const p2 = point.add(pp, vector.byZ(alt2));
+	const p3 = point.add(pp, vector.byYZ(lado2, alt2));
 	return [
 		rightCuboid(pp, e, lado2, alt2),
 		rightCuboid(p1, e, lado2, alt2),
