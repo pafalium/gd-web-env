@@ -111,6 +111,8 @@ function cornersBoxPrimitive(p1, p2) {
 }
 
 import sequence from '../SceneGraph/Predefs/sequence.js';
+import {point, vector} from '../SceneGraph/Predefs/point-vector-matrix.js';
+import random from '../SceneGraph/Predefs/random.js';
 
 const cylinder = {};
 cylinder.byCentersRadius = function([c1, c2], radius) {
@@ -120,7 +122,6 @@ const sphere = {};
 sphere.byCenterRadius = function(center, radius) {
 	return centerSpherePrimitive(center, radius);
 };
-import {point, vector} from '../SceneGraph/Predefs/point-vector-matrix.js';
 const box = {};
 box.byCorners = function([c1, c2]) {
 	return cornersBoxPrimitive(c1, c2);
@@ -132,7 +133,8 @@ let predefinedBindings = [
 	{name: "cylinder", value: cylinder},
 	{name: "sphere", value: sphere},
 	{name: "point", value: point},
-	{name: "vector", value: vector}
+	{name: "vector", value: vector},
+	{name: "random", value: random}
 ];
 
 //
