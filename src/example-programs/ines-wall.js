@@ -6,7 +6,9 @@ const eRevit = 0.322;
 
 function rightCuboid(bottom, width, height, z) {
 	let p = brickMovement(bottom);
-	return box.byCornerXYZ(point.add(p, vector.byXY(width / -2, height / -2)), [width, height, z]);
+	let c1 = point.add(p, vector.byXY(-width / 2, -height / 2));
+	let c2 = point.add(p, vector.byXYZ(width / 2, height / 2, z));
+	return box.byCorners([c1, c2]);
 }
 
 
