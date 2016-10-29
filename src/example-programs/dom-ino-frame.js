@@ -18,7 +18,7 @@ const floorSlab = [
   ]),
   box.byCorners([ // stair landing extension
     point.byXYZ(floorWidth, 0, 0),
-    point.byXYZ(floorWidth+stairWidth, stairWidth, slabHeight)
+    point.byXYZ(floorWidth + stairWidth, stairWidth, slabHeight)
   ]),
   box.byCornerXYZ( // stair landing
       point.byXYZ(floorWidth, stairWidth, 0), 
@@ -26,7 +26,7 @@ const floorSlab = [
 ];
 
 const floorSlabs = map(
-  i => translate(floorSlab).byZ(i * (slabHeight+floorToCeiling)),
+  i => translate(floorSlab).byZ(i*(slabHeight + floorToCeiling)),
   count(floors + 1));
 floorSlabs;
 
@@ -40,7 +40,7 @@ const foundationSide = 1.0;
 const foundationHeight = 0.5;
 
 const backColumnPositions = map(
-  ([x,y])=>point.byXY(x,y), 
+  ([x, y])=>point.byXY(x,y), 
   cartesianProduct(
     division(columnToSide, floorWidth - columnToSide, spacesBetweenColumns), 
     [backColumnDistanceToEdge]));
@@ -51,7 +51,7 @@ const frontColumnPositions = map(
     [floorDepth - frontColumnDistanceToEdge]));
 
 function column(pos) {
-  const height = slabHeight + (slabHeight + floorToCeiling) * floors;
+  const height = slabHeight + (slabHeight + floorToCeiling)*floors;
   return [
     box.byBottomWidthHeightZ(pos, [columnSide, columnSide], height),
     box.byCentersWidthHeight(
@@ -68,8 +68,8 @@ columns;
 
 //stairway
 function straightStairs(width, runLength, riseHeight, steps) {
-  const stepLength = runLength / steps;
-  const stepHeight = riseHeight / steps;
+  const stepLength = runLength/steps;
+  const stepHeight = riseHeight/steps;
   const translateVector = vector.byYZ(stepLength, stepHeight);
   const bottomLeftCorner = point.byXYZ(0, 0, 0);
   const topRightCorner = point.byXYZ(width, stepLength, stepHeight);
@@ -80,8 +80,8 @@ function straightStairs(width, runLength, riseHeight, steps) {
     ]),
     count(steps));
   const underneathAngle = Math.atan2(stepHeight, stepLength);
-  const underneathHeight = stepLength * Math.sin(underneathAngle);
-  const underneathLength = (steps-1)*stepLength / Math.cos(underneathAngle);
+  const underneathHeight = stepLength*Math.sin(underneathAngle);
+  const underneathLength = (steps - 1)*stepLength/Math.cos(underneathAngle);
   const underneath = compose(
     translate.byXYZ(0, stepLength, 0),
     rotate.aroundXByAngle(underneathAngle)
@@ -93,23 +93,23 @@ function straightStairs(width, runLength, riseHeight, steps) {
 }
 
 function uShapedStairs(flightWidth, steps, turnStepLength, straightLength, riseHeight) {
-  const stepHeight = riseHeight / steps;
+  const stepHeight = riseHeight/steps;
   const straightStepsNum = steps - 1;
-  const bottomStepsNum = Math.floor(straightStepsNum / 2);
-  const topStepsNum = Math.ceil(straightStepsNum / 2);
-  const bottomRiseHeight = stepHeight * bottomStepsNum;
-  const topRiseHeight = stepHeight * topStepsNum;
+  const bottomStepsNum = Math.floor(straightStepsNum/2);
+  const topStepsNum = Math.ceil(straightStepsNum/2);
+  const bottomRiseHeight = stepHeight*bottomStepsNum;
+  const topRiseHeight = stepHeight*topStepsNum;
   
   const bottomFlight = straightStairs(flightWidth, straightLength, bottomRiseHeight, bottomStepsNum);
   const turnStep = box.byCorners([
     point.byXYZ(0, straightLength, bottomRiseHeight),
     point.byXYZ(
-      2 * flightWidth, 
+      2*flightWidth, 
       straightLength + turnStepLength, 
       bottomRiseHeight + stepHeight)
   ]);
   const topFlight = compose(
-    translate.byXYZ(2 * flightWidth, straightLength, bottomRiseHeight+stepHeight),
+    translate.byXYZ(2*flightWidth, straightLength, bottomRiseHeight + stepHeight),
     rotate.aroundZByAngle(Math.PI)
   )(straightStairs(flightWidth, straightLength, topRiseHeight, topStepsNum));
 
@@ -127,8 +127,8 @@ const stairs = map(
       stairStepNum, 
       stairWidth, 
       stairStepNum*0.15, 
-      floorToCeiling+slabHeight))
-    .byXYZ(floorWidth, 2*stairWidth, slabHeight+i*(slabHeight+floorToCeiling)),
+      floorToCeiling + slabHeight))
+    .byXYZ(floorWidth, 2*stairWidth, slabHeight + i*(slabHeight + floorToCeiling)),
   count(floors));
 stairs;
 
