@@ -65,7 +65,8 @@ class ProgramEditor extends React.Component {
           theme="monokai"
           width="100%"
           height="100%"
-          editorProps={{$blockScrolling: Infinity}}/>
+          editorProps={{$blockScrolling: Infinity}}
+          setOptions={{dragEnabled: false}}/>
       </div>
     );
   }
