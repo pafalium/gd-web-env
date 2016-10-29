@@ -13,6 +13,7 @@ class OrbitThreeView extends React.Component {
 			latitudeDegrees: 45,
 			longitudeDegrees: 45,
 			distanceToCenter: 50,
+			center: new THREE.Vector3(0,0,0),
 			canvasSize: {
 				width: 512,
 				height: 512
@@ -33,10 +34,11 @@ class OrbitThreeView extends React.Component {
 		};
 		const m4 = new THREE.Matrix4();
 		//translateDistance -> rotateLatitude -> rotateLongitude
-		let transDist = m4.clone().makeTranslation(0,0,this.state.distanceToCenter),
+		let transCenter = m4.clone().makeTranslation(this.state.center.x, this.state.center.y, this.state.center.z),
+			transDist = m4.clone().makeTranslation(0,0,this.state.distanceToCenter),
 			rotLat = m4.clone().makeRotationAxis(xyz(1,0,0), -(this.state.latitudeDegrees/180.0)*Math.PI),
 			rotLong = m4.clone().makeRotationAxis(xyz(0,1,0), -(this.state.longitudeDegrees/180.0)*Math.PI);
-		let cameraWorldMatrix = m4.multiply(rotLong).multiply(rotLat).multiply(transDist);
+		let cameraWorldMatrix = m4.multiply(transCenter).multiply(rotLong).multiply(rotLat).multiply(transDist);
 		//let viewMatrix = cameraWorldMatrix.clone().getInverse();
 		let aspect = this.state.canvasSize.width / this.state.canvasSize.height;
 		let camera = new THREE.PerspectiveCamera(70.0/*deg*/, aspect, 0.1, 1000.0);
@@ -47,12 +49,14 @@ class OrbitThreeView extends React.Component {
 	getInitialDragState() {
 			return {
 				dragging: false,
+				mode: null,
 				lastPos: null
 			};
 	}
 	_onMouseDown(e) {
 		//begin drag
 		this._dragState.dragging = true;
+		this._dragState.mode = e.button === 1 ? "pan" : "rotate";
 		this._dragState.lastPos = [e.screenX, e.screenY];
 		//add mousemove and mouseup to document
 		document.addEventListener("mousemove", this._onMouseMove);
@@ -64,14 +68,21 @@ class OrbitThreeView extends React.Component {
 		let lastPos = this._dragState.lastPos,
 			curPos = [e.screenX, e.screenY];
 		let deltaPos = curPos.map((_,i)=>curPos[i]-lastPos[i]);
-		//convert delta to latlong
-		let latLongDelta = deltaPos.map(d=>d*0.5);
-		//update state
+		if (this._dragState.mode === "rotate"){
+			//convert delta to latlong
+			let latLongDelta = deltaPos.map(d=>d*0.5);
+			//update state
+			this.setState({
+				latitudeDegrees: this.state.latitudeDegrees + latLongDelta[1],
+				longitudeDegrees: this.state.longitudeDegrees + latLongDelta[0]
+			});
+		} else {
+			const {canvasSize, center} = this.state;
+			let scaledDeltaPos = [deltaPos[0]/canvasSize.width, deltaPos[1]/canvasSize.height];
+			let newCenter = center.clone().add(new THREE.Vector3(-scaledDeltaPos[0], 0, scaledDeltaPos[1]));
+			this.setState({center: newCenter});
+		}
 		this._dragState.lastPos = curPos;
-		this.setState({
-			latitudeDegrees: this.state.latitudeDegrees + latLongDelta[1],
-			longitudeDegrees: this.state.longitudeDegrees + latLongDelta[0]
-		});
 	}
 	_onMouseUp(e) {
 		//finish drag
