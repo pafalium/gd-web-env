@@ -1,12 +1,33 @@
 
-import THREE from 'three';
 import _ from 'lodash';
 
 //This file defines the set of primitives that programs written in the IDE can use.
 
+//ASCII art font is Colossal
+//Generated using http://patorjk.com/software/taag/
+
+//- Provide mechanism
+//- Declaration of placeholders for objects that are spawned later in to-three and to-cad
+//- User program API specification
+//   - points, vectors, translation, rotation
+//   - APIs for creating objects
+
+
+//8888888b.                           d8b      888          
+//888   Y88b                          Y8P      888          
+//888    888                                   888          
+//888   d88P 888d888 .d88b.  888  888 888  .d88888  .d88b.  
+//8888888P"  888P"  d88""88b 888  888 888 d88" 888 d8P  Y8b 
+//888        888    888  888 Y88  88P 888 888  888 88888888 
+//888        888    Y88..88P  Y8bd8P  888 Y88b 888 Y8b.     
+//888        888     "Y88P"    Y88P   888  "Y88888  "Y8888  
+//
+//
+//
+
 const PrimitiveProp = Symbol("PrimitiveName");
 
-const r = {
+const registry = {
 	primitives: [],
 	provide: function(name, value) {
 		this.primitives.push({
@@ -34,48 +55,68 @@ const r = {
 	}
 };
 
+export default registry.primitives;
+export {PrimitiveProp};
+
 //No points when creating things
 //Functional behavior
 
-import {matrix} from './Predefs/point-vector-matrix.js';
 
-//TODO Add transform to rotate from one axis to other axis.
-//TODO Make transforms functions that can be applied to objects.
-const transform = {};
-transform.translation = {};
-transform.translation.byVector = function(vector) {
-	return matrix.translation(vector.x, vector.y, vector.z);
-};
-transform.rotation = {};
-transform.rotation.aroundAxisByAngle = function(axis, radians) {
-	let axisOrig = axis.origin;
-	let axisToWorldOriginMatrix = matrix.translation(-axisOrig.x, -axisOrig.y, -axisOrig.z);
-	let rotationMatrix = matrix.rotation(axis.vector, radians);
-	let repositionAxisMatrix = matrix.translation(axisOrig.x, axisOrig.y, axisOrig.z);
-	return matrix.multiply(repositionAxisMatrix, 
-		matrix.multiply(rotationMatrix, axisToWorldOriginMatrix));
-};
-transform.rotation.aroundAxisVectorByAngle = function(axisVector, radians) {
-	let normalizedAxis = axisVector.clone().normalize();
-	return matrix.rotation(normalizedAxis, radians);
-};
-transform.rotation.aroundXByAngle = function(radians) {
-	return matrix.rotation(vector.byX(1.0), radians);
-};
-transform.rotation.aroundYByAngle = function(radians) {
-	return matrix.rotation(vector.byY(1.0), radians);
-};
-transform.rotation.aroundZByAngle = function(radians) {
-	return matrix.rotation(vector.byZ(1.0), radians);
-};
-transform.scaling = {};
-transform.scaling.byFactor = function(scaleFactor) {
-	return matrix.scaling(scaleFactor, scaleFactor, scaleFactor);
-};
-transform.compose = function(t1, t2) {
-	return matrix.multiply(t1, t2);
-};
-r.provide("transform", transform);
+
+//888     888 d8b                              .d88888b.  888       d8b          
+//888     888 Y8P                             d88P" "Y88b 888       Y8P          
+//888     888                                 888     888 888                    
+//Y88b   d88P 888  .d88b.  888  888  888      888     888 88888b.  8888 .d8888b  
+// Y88b d88P  888 d8P  Y8b 888  888  888      888     888 888 "88b "888 88K      
+//  Y88o88P   888 88888888 888  888  888      888     888 888  888  888 "Y8888b. 
+//   Y888P    888 Y8b.     Y88b 888 d88P      Y88b. .d88P 888 d88P  888      X88 
+//    Y8P     888  "Y8888   "Y8888888P"        "Y88888P"  88888P"   888  88888P' 
+//                                                                  888          
+//                                                                 d88P          
+//                                                               888P"           
+
+
+//TODO Define more primitives.
+//primitives
+const boxPrimitive = registry.defPrimitive("box", ["width", "height", "depth"]);
+const spherePrimitive = registry.defPrimitive("sphere", ["radius"]);
+const cylinderPrimitive = registry.defPrimitive("cylinder", ["radius", "height"]);
+const rectanglePrimitive = registry.defPrimitive("rectangle", ["width", "height"]);
+const polygonSurfacePrimitive = registry.defPrimitive("polygonSurface", ["vertices"]);
+const extrusionPrimitive = registry.defPrimitive("extrusion", ["extrudable", "displacement"]);
+const transformObjectPrimitive = registry.defPrimitiveAndProvide("transformObjectWith", ["object", "transform"]);
+//registry.defPrimitiveAndProvide("cone", ["radius", "height"]);
+//registry.defPrimitiveAndProvide("coneFrustum", ["bottomRadius", "topRadius", "height"]);
+//registry.defPrimitiveAndProvide("regularPyramid", ["sides", "height"]);
+
+//registry.defPrimitiveAndProvide("line", ["origin", "direction"]);
+//registry.defPrimitiveAndProvide("polyline", ["coordinates", "closed"]);
+//registry.defPrimitiveAndProvide("spline", ["coordinates", "closed"]);
+//registry.defPrimitiveAndProvide("arc", ["radius", "angle"]);
+
+//registry.defPrimitiveAndProvide("circle", ["radius"]);
+//registry.defPrimitiveAndProvide("plane", ["origin", "normal"]);
+//registry.defPrimitiveAndProvide("polygon", ["coordinates"]);
+//registry.defPrimitiveAndProvide("regularPolygon", ["radius", "sides"]);
+
+
+//8888888b.          d8b          888                         d8888          d8b          
+//888   Y88b         Y8P          888                        d88888          Y8P          
+//888    888                      888                       d88P888                       
+//888   d88P .d88b.  888 88888b.  888888 .d8888b           d88P 888 888  888 888 .d8888b  
+//8888888P" d88""88b 888 888 "88b 888    88K              d88P  888 `Y8bd8P' 888 88K      
+//888       888  888 888 888  888 888    "Y8888b.        d88P   888   X88K   888 "Y8888b. 
+//888       Y88..88P 888 888  888 Y88b.       X88       d8888888888 .d8""8b. 888      X88 
+//888        "Y88P"  888 888  888  "Y888  88888P'      d88P     888 888  888 888  88888P' 
+//                                                                                        
+//                                                                                        
+//                                                                                        
+
+import {point, vector, matrix} from './Predefs/point-vector-matrix.js';
+registry.provide("vector", vector);
+registry.provide("point", point);
+//TODO Check if all vector operations are implemented and available.
+
 
 
 const axis = {};
@@ -85,64 +126,21 @@ axis.byPointVector = function(point, vector) {
 		vector
 	};
 };
-r.provide("axis", axis);
+registry.provide("axis", axis);
 
 
-import {point, vector} from './Predefs/point-vector-matrix.js';
-r.provide("vector", vector);
-r.provide("point", point);
-//TODO Check if all vector operations are implemented and available.
-// vectors
-//
-//r.defPrimitive("point_distance", ["p1", "p2"], function(p1, p2){
-//	return p2.clone().sub( p1 ).length();
-//});
-//r.defPrimitive("direction_from_to", ["p0", "p1"], function(p0, p1){
-//	return p1.clone().sub( p0 ).normalize();
-//});
-//r.defPrimitive("linear_interpolation", ["p0", "p1", "t"], function(p0, p1, t) {
-//	return p0.clone().lerp( p1, t );
-//});
-//r.defPrimitive("mult", ["v1", "v2"], function(v1, v2) {
-//	return v1.clone().multiply(v2);
-//});
-/*
-vec = {}; 
-{_threeVec: new THREE.Vector3(0,0,0),
- cartesianCoords: [x,y,z],
- dir: [alpha, beta],
- magntitude: num
- }
-vec.byPolar
-vec.mul
-vec.lengthSqr 
-*/
-
-
-//TODO Define more primitives.
-//primitives
-const boxPrimitive = r.defPrimitive("box", ["width", "height", "depth"]);
-const spherePrimitive = r.defPrimitive("sphere", ["radius"]);
-const cylinderPrimitive = r.defPrimitive("cylinder", ["radius", "height"]);
-const rectanglePrimitive = r.defPrimitive("rectangle", ["width", "height"]);
-const polygonSurfacePrimitive = r.defPrimitive("polygonSurface", ["vertices"]);
-const extrusionPrimitive = r.defPrimitive("extrusion", ["extrudable", "displacement"]);
-const transformObjectPrimitive = r.defPrimitiveAndProvide("transformObjectWith", ["object", "transform"]);
-//r.defPrimitiveAndProvide("cone", ["radius", "height"]);
-//r.defPrimitiveAndProvide("coneFrustum", ["bottomRadius", "topRadius", "height"]);
-//r.defPrimitiveAndProvide("regularPyramid", ["sides", "height"]);
-
-//r.defPrimitiveAndProvide("line", ["origin", "direction"]);
-//r.defPrimitiveAndProvide("polyline", ["coordinates", "closed"]);
-//r.defPrimitiveAndProvide("spline", ["coordinates", "closed"]);
-//r.defPrimitiveAndProvide("arc", ["radius", "angle"]);
-
-//r.defPrimitiveAndProvide("circle", ["radius"]);
-//r.defPrimitiveAndProvide("plane", ["origin", "normal"]);
-//r.defPrimitiveAndProvide("polygon", ["coordinates"]);
-//r.defPrimitiveAndProvide("regularPolygon", ["radius", "sides"]);
-
-// shapes
+// shapes                                 
+// .d8888b.  888                                          
+//d88P  Y88b 888                                          
+//Y88b.      888                                          
+// "Y888b.   88888b.   8888b.  88888b.   .d88b.  .d8888b  
+//    "Y88b. 888 "88b     "88b 888 "88b d8P  Y8b 88K      
+//      "888 888  888 .d888888 888  888 88888888 "Y8888b. 
+//Y88b  d88P 888  888 888  888 888 d88P Y8b.          X88 
+// "Y8888P"  888  888 "Y888888 88888P"   "Y8888   88888P' 
+//                             888                        
+//                             888                        
+//                             888                        
 const box = {};
 box.byWidthHeightDepth = function(width, height, depth) {
 	return boxPrimitive(width, height, depth);
@@ -206,7 +204,7 @@ box.byCornerXYZ = function(pt, [x, y, z]) {
 	let p2 = point.add(pt, vector.byXYZ(x, y, z));
 	return box.byCorners([pt, p2]);
 };
-r.provide("box", box);
+registry.provide("box", box);
 
 
 const sphere = {};
@@ -214,10 +212,10 @@ sphere.byRadius = function(radius) {
 	return spherePrimitive(radius);
 };
 sphere.byCenterRadius = function(vec, radius) {
-	let translation = transform.translation.byVector(vec);
+	let translation = matrix.translation(vec.x, vec.y, vec.z);
 	return transformObjectPrimitive(spherePrimitive(radius), translation);
 };
-r.provide("sphere", sphere);
+registry.provide("sphere", sphere);
 
 
 const cylinder = {};
@@ -236,13 +234,16 @@ cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
 			point.pointMinusPoint(topCenter, baseCenter),
 			0.5));
 	let translationVector = point.pointMinusPoint(midPoint, worldOrigin);
-	let translationTransform = transform.translation.byVector(translationVector);
+	let translationTransform = matrix.translation(
+		translationVector.x,
+		translationVector.y,
+		translationVector.z);
 
-	let transformation = transform.compose(translationTransform, orientAxisTransform);
+	let transformation = matrix.multiply(translationTransform, orientAxisTransform)
 	let cylinder = cylinderPrimitive(radius, vector.length(cylinderAxis));
 	return transformObjectPrimitive(cylinder, transformation);
 };
-r.provide("cylinder", cylinder);
+registry.provide("cylinder", cylinder);
 
 
 const rectangle = {};
@@ -252,7 +253,7 @@ rectangle.surface.byCornerWidthHeight = function(corner, [width, height]) {
 	const transformation = matrix.translation(width*0.5+corner.x, height*0.5+corner.y, corner.z);
 	return transformObjectPrimitive(rect, transformation);
 };
-r.provide("rectangle", rectangle);
+registry.provide("rectangle", rectangle);
 
 
 const polygon = {};
@@ -260,17 +261,76 @@ polygon.surface = {};
 polygon.surface.byVertices = function(vertices) {
 	return polygonSurfacePrimitive(vertices);
 };
-r.provide("polygon", polygon);
+registry.provide("polygon", polygon);
 
 
 const extrusion = {};
 extrusion.bySurfaceVector = function(surface, displacementVector) {
 	return extrusionPrimitive(surface, displacementVector);
 };
-r.provide("extrusion", extrusion);
+registry.provide("extrusion", extrusion);
 
 
-// shape transformation functions
+//88888888888                                 .d888                                        
+//    888                                    d88P"                                         
+//    888                                    888                                           
+//    888  888d888 8888b.  88888b.  .d8888b  888888 .d88b.  888d888 88888b.d88b.  .d8888b  
+//    888  888P"      "88b 888 "88b 88K      888   d88""88b 888P"   888 "888 "88b 88K      
+//    888  888    .d888888 888  888 "Y8888b. 888   888  888 888     888  888  888 "Y8888b. 
+//    888  888    888  888 888  888      X88 888   Y88..88P 888     888  888  888      X88 
+//    888  888    "Y888888 888  888  88888P' 888    "Y88P"  888     888  888  888  88888P' 
+//
+//
+//
+
+//TODO Make shapes objects that can have methods.
+//TODO Consider whether to extend shape objects with methods to transform them.
+/*
+shape.scale.uniform(scale)
+shape.mirror.byPlane
+*/
+
+
+//TODO Add transform to rotate from one axis to other axis.
+//TODO Make transforms functions that can be applied to objects.
+const transform = {};
+transform.translation = {};
+transform.translation.byVector = function(vector) {
+	return matrix.translation(vector.x, vector.y, vector.z);
+};
+transform.rotation = {};
+transform.rotation.aroundAxisByAngle = function(axis, radians) {
+	let axisOrig = axis.origin;
+	let axisToWorldOriginMatrix = matrix.translation(-axisOrig.x, -axisOrig.y, -axisOrig.z);
+	let rotationMatrix = matrix.rotation(axis.vector, radians);
+	let repositionAxisMatrix = matrix.translation(axisOrig.x, axisOrig.y, axisOrig.z);
+	return matrix.multiply(repositionAxisMatrix, 
+		matrix.multiply(rotationMatrix, axisToWorldOriginMatrix));
+};
+transform.rotation.aroundAxisVectorByAngle = function(axisVector, radians) {
+	let normalizedAxis = axisVector.clone().normalize();
+	return matrix.rotation(normalizedAxis, radians);
+};
+transform.rotation.aroundXByAngle = function(radians) {
+	return matrix.rotation(vector.byX(1.0), radians);
+};
+transform.rotation.aroundYByAngle = function(radians) {
+	return matrix.rotation(vector.byY(1.0), radians);
+};
+transform.rotation.aroundZByAngle = function(radians) {
+	return matrix.rotation(vector.byZ(1.0), radians);
+};
+transform.scaling = {};
+transform.scaling.byFactor = function(scaleFactor) {
+	return matrix.scaling(scaleFactor, scaleFactor, scaleFactor);
+};
+transform.compose = function(t1, t2) {
+	return matrix.multiply(t1, t2);
+};
+registry.provide("transform", transform);
+
+
+
 function translateAux(object, vec) {
 	return transformObjectPrimitive(object, 
 				transform.translation.byVector(vec));
@@ -309,7 +369,7 @@ translate.byY = function(y){
 translate.byZ = function(z){
 	return _.partial(translateAux, _, vector.byZ(z));
 };
-r.provide("translate", translate);
+registry.provide("translate", translate);
 
 
 const rotate = function(object) {
@@ -360,33 +420,30 @@ rotate.aroundZByAngle = function(radians) {
 				transform.rotation.aroundZByAngle(radians));
 	};
 };
-r.provide("rotate", rotate);
+registry.provide("rotate", rotate);
 
 
-//////////////////////////////////
-//////////////////////////////////
-//////////////////////////////////
-//TODO Make shapes objects that can have methods.
-//TODO Consider whether to extend shape objects with methods to transform them.
-/*
-shape.translate.byXYZ(x,y,z)
-shape.translate.byZ(z)
-shape.translate.byVector(vector)
-shape.rotate.byAxisAngle(axis,angle)
-shape.scale.uniform(scale)
-shape.mirror.byPlane
-*/
+//888b     d888 d8b                   
+//8888b   d8888 Y8P                   
+//88888b.d88888                       
+//888Y88888P888 888 .d8888b   .d8888b 
+//888 Y888P 888 888 88K      d88P"    
+//888  Y8P  888 888 "Y8888b. 888      
+//888   "   888 888      X88 Y88b.    
+//888       888 888  88888P'  "Y8888P 
+//
+//
+//
 
 
 import sequence from './Predefs/sequence.js';
-r.provide("sequence", sequence);
+registry.provide("sequence", sequence);
 
 import random from './Predefs/random.js';
-r.provide("random", random);
+registry.provide("random", random);
 
 import functional from './Predefs/functional.js';
-r.provide("functional", functional);
+registry.provide("functional", functional);
 
 
-export default r.primitives;
-export {PrimitiveProp};
+
