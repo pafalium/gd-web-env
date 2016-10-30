@@ -86,7 +86,7 @@ const polygonSurfacePrimitive = registry.defPrimitive("polygonSurface", ["vertic
 const extrusionPrimitive = registry.defPrimitive("extrusion", ["extrudable", "displacement"]);
 const transformObjectPrimitive = registry.defPrimitiveAndProvide("transformObjectWith", ["object", "transform"]);
 //registry.defPrimitiveAndProvide("cone", ["radius", "height"]);
-//registry.defPrimitiveAndProvide("coneFrustum", ["bottomRadius", "topRadius", "height"]);
+const coneFrustumPrimitive = registry.defPrimitive("coneFrustum", ["bottomRadius", "topRadius", "height"]);
 //registry.defPrimitiveAndProvide("regularPyramid", ["sides", "height"]);
 
 //registry.defPrimitiveAndProvide("line", ["origin", "direction"]);
@@ -270,6 +270,43 @@ extrusion.bySurfaceVector = function(surface, displacementVector) {
 };
 registry.provide("extrusion", extrusion);
 
+
+const coneFrustum = {};
+coneFrustum.byBottomRadiusTopRadius = function(bottom, botRadius, top, topRadius) {
+	let bottomToTop = vector.sub(top, bottom);
+	let worldZAxis = vector.byXYZ(0.0,0.0,1.0);
+	let orientAxisTransform = matrix.alignFromAxisToAxis(worldZAxis, vector.normalized(bottomToTop));
+
+	let worldOrigin = point.byXYZ(0.0,0.0,0.0);
+	let midPoint = point.pointPlusVector(
+		bottom, 
+		vector.scale(bottomToTop, 0.5));
+	let translationVector = point.pointMinusPoint(midPoint, worldOrigin);
+	let translationTransform = matrix.translation(
+		translationVector.x,
+		translationVector.y,
+		translationVector.z);
+
+	let transformation = matrix.multiply(translationTransform, orientAxisTransform);
+
+	let height = vector.length(bottomToTop);
+	let frustum = coneFrustumPrimitive(botRadius, topRadius, height);
+
+	return transformObjectPrimitive(frustum, transformation);
+};
+coneFrustum.byRadiusesHeight = function(botRadius, topRadius, height) {
+	return coneFrustumPrimitive(botRadius, topRadius, height);
+};
+coneFrustum.byBottomTopRadiusesHeight = function(bottom, botRadius, topRadius, height) {
+	let transformation = matrix.translation(
+		bottom.x,
+		bottom.y,
+		bottom.z + height*0.5);
+	return transformObjectPrimitive(
+		coneFrustumPrimitive(botRadius, topRadius, height),
+		transformation);
+};
+registry.provide("coneFrustum", coneFrustum);
 
 //88888888888                                 .d888                                        
 //    888                                    d88P"                                         

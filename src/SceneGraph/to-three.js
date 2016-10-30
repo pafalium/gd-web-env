@@ -59,7 +59,8 @@ var renderableFunctions = {
 	rectangle,
 	transformObjectWith,
 	polygonSurface,
-	extrusion
+	extrusion,
+	coneFrustum
 };
 
 // All geometries need to be rotated so that Z is their up axis.
@@ -109,6 +110,13 @@ function transformObjectWith(result, callback) {
 	var matrix = result.args.transform;
 	var obj = makeMatrixTransformedObject3D(matrix);
 	obj.add(objToTransform);
+	return obj;
+}
+function coneFrustum(result, callback) {
+	var {bottomRadius, topRadius, height} = result.args;
+	var geom = new THREE.CylinderGeometry(bottomRadius, topRadius, height, 32);
+	var obj = new THREE.Mesh(geom, solidMat);
+	geom.applyMatrix(yUpToZUpRotation);
 	return obj;
 }
 
