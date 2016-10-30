@@ -15,6 +15,9 @@
     "brfs": "^1.4.3",
     "browserify": "^13.0.0",
     "gulp": "^3.9.1",
+    "gulp-buster": "^1.1.0",
+    "gulp-html-replace": "^1.6.1",
+    "gulp-streamify": "^1.0.2",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
   },

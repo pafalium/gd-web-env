@@ -1,6 +1,6 @@
 node_modules/*
 npm-debug.log
-dist/bundle.js
-dist/libs.js
+dist/*
 scraps/*
 server/**/*.bak
+busters.json

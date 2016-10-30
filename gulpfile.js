@@ -7,6 +7,12 @@ var gulp         = require('gulp');
 var browserify   = require('browserify');
 var source       = require('vinyl-source-stream');
 
+var bust         = require('gulp-buster');
+var streamify    = require('gulp-streamify');
+
+var htmlreplace  = require('gulp-html-replace');
+var fs           = require('fs');
+
 var packageJson = require('./package.json');
 var dependencies = Object.keys(packageJson && packageJson.dependencies || {});
 
@@ -23,7 +29,9 @@ gulp.task('libs', function () {
     .bundle()
     .on('error', handleErrors)
     .pipe(source('libs.js'))
-    .pipe(gulp.dest('./dist/'));
+    .pipe(gulp.dest('./dist/'))
+    .pipe(streamify(bust()))
+    .pipe(gulp.dest('.'));
 });
 
 gulp.task('scripts', function () {
@@ -33,12 +41,37 @@ gulp.task('scripts', function () {
     .on('error', handleErrors)
     .on('end', ()=>{console.log("ended")})
     .pipe(source('bundle.js'))
+    .pipe(gulp.dest('./dist/'))
+    .pipe(streamify(bust()))
+    .pipe(gulp.dest('.'));
+});
+
+gulp.task('css', function () {
+  return gulp.src('./styles/styles.css')
+    .pipe(gulp.dest('./dist/'))
+    .pipe(streamify(bust()))
+    .pipe(gulp.dest('.'));
+})
+
+gulp.task('html', function () {
+  var busters = JSON.parse(fs.readFileSync('busters.json'));
+
+  return gulp.src('index.html')
+    .pipe(htmlreplace({
+      'css': 'styles.css?v=' + busters['dist/styles.css'],
+      'js': [
+        'libs.js?v=' + busters['dist/libs.js'],
+        'bundle.js?v=' + busters['dist/bundle.js']
+      ]
+    }))
     .pipe(gulp.dest('./dist/'));
 });
 
 gulp.task('watch', function(){
   gulp.watch('package.json', ['libs']);
   gulp.watch('src/**', ['scripts']);
+  gulp.watch('styles/styles.css', ['css']);
+  gulp.watch('busters.json', ['html']);
 });
 
-gulp.task('default', ['libs', 'scripts', 'watch']);
+gulp.task('default', ['libs', 'scripts', 'css', 'watch']);
