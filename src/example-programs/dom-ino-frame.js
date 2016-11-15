@@ -10,26 +10,6 @@ const slabHeight = 0.3;
 const stairWidth = 1.0;
 const stairStepNum = 18;
 
-//slabs
-const floorSlab = [
-  box.byCorners([ // living area portion
-    point.byXYZ(0, 0, 0),
-    point.byXYZ(floorWidth, floorDepth, slabHeight)
-  ]),
-  box.byCorners([ // stair landing extension
-    point.byXYZ(floorWidth, 0, 0),
-    point.byXYZ(floorWidth + stairWidth, stairWidth, slabHeight)
-  ]),
-  box.byCornerXYZ( // stair landing
-      point.byXYZ(floorWidth, stairWidth, 0), 
-      [2*stairWidth, stairWidth, slabHeight])
-];
-
-const floorSlabs = map(
-  i => translate(floorSlab).byZ(i*(slabHeight + floorToCeiling)),
-  count(floors + 1));
-floorSlabs;
-
 //columns + foundations
 const spacesBetweenColumns = 3;
 const backColumnDistanceToEdge = 0.20;
@@ -39,16 +19,53 @@ const columnSide = 0.20;
 const foundationSide = 1.0;
 const foundationHeight = 0.5;
 
-const backColumnPositions = map(
-  ([x, y])=>point.byXY(x,y), 
-  cartesianProduct(
-    division(columnToSide, floorWidth - columnToSide, spacesBetweenColumns), 
-    [backColumnDistanceToEdge]));
-const frontColumnPositions = map(
-  ([x, y])=>point.byXY(x,y),
-  cartesianProduct(
-    division(columnToSide, floorWidth - columnToSide, spacesBetweenColumns),
-    [floorDepth - frontColumnDistanceToEdge]));
+domIno();
+
+function domIno() {
+  return [
+    slabs(),
+    columns(),
+    stairs()
+  ];
+}
+
+
+function slabs() {
+  let floorSlab = [
+    box.byCorners([ // living area portion
+      point.byXYZ(0, 0, 0),
+      point.byXYZ(floorWidth, floorDepth, slabHeight)
+    ]),
+    box.byCorners([ // stair landing extension
+      point.byXYZ(floorWidth, 0, 0),
+      point.byXYZ(floorWidth + stairWidth, stairWidth, slabHeight)
+    ]),
+    box.byCornerXYZ( // stair landing
+        point.byXYZ(floorWidth, stairWidth, 0),
+        [2*stairWidth, stairWidth, slabHeight])
+  ];
+  return map(
+    i => translate(floorSlab).byZ(i*(slabHeight + floorToCeiling)),
+    count(floors + 1));
+}
+
+
+function columns() {
+  let backColumnPositions = map(
+    ([x, y]) => point.byXY(x,y),
+    cartesianProduct(
+      division(columnToSide, floorWidth - columnToSide, spacesBetweenColumns),
+      [backColumnDistanceToEdge]));
+  let frontColumnPositions = map(
+    ([x, y]) => point.byXY(x,y),
+    cartesianProduct(
+      division(columnToSide, floorWidth - columnToSide, spacesBetweenColumns),
+      [floorDepth - frontColumnDistanceToEdge]));
+  return [
+    map(column, backColumnPositions),
+    map(column, frontColumnPositions)
+  ];
+}
 
 function column(pos) {
   const height = slabHeight + (slabHeight + floorToCeiling)*floors;
@@ -60,20 +77,27 @@ function column(pos) {
   ];
 }
 
-const columns = [
-  map(column, backColumnPositions),
-  map(column, frontColumnPositions)
-];
-columns;
 
-//stairway
+function stairs() {
+  return map(
+    i => translate(
+      uShapedStairs(
+        stairWidth,
+        stairStepNum,
+        stairWidth,
+        stairStepNum*0.15,
+        floorToCeiling + slabHeight))
+      .byXYZ(floorWidth, 2*stairWidth, slabHeight + i*(slabHeight + floorToCeiling)),
+    count(floors))
+}
+
 function straightStairs(width, runLength, riseHeight, steps) {
   const stepLength = runLength/steps;
   const stepHeight = riseHeight/steps;
   const translateVector = vector.byYZ(stepLength, stepHeight);
   const bottomLeftCorner = point.byXYZ(0, 0, 0);
   const topRightCorner = point.byXYZ(width, stepLength, stepHeight);
-  const stepsGeom = map(i => 
+  const stepsGeom = map(i =>
     box.byCorners([
       point.add(bottomLeftCorner, vector.scale(translateVector, i)),
       point.add(topRightCorner, vector.scale(translateVector, i))
@@ -99,13 +123,13 @@ function uShapedStairs(flightWidth, steps, turnStepLength, straightLength, riseH
   const topStepsNum = Math.ceil(straightStepsNum/2);
   const bottomRiseHeight = stepHeight*bottomStepsNum;
   const topRiseHeight = stepHeight*topStepsNum;
-  
+
   const bottomFlight = straightStairs(flightWidth, straightLength, bottomRiseHeight, bottomStepsNum);
   const turnStep = box.byCorners([
     point.byXYZ(0, straightLength, bottomRiseHeight),
     point.byXYZ(
-      2*flightWidth, 
-      straightLength + turnStepLength, 
+      2*flightWidth,
+      straightLength + turnStepLength,
       bottomRiseHeight + stepHeight)
   ]);
   const topFlight = compose(
@@ -119,16 +143,3 @@ function uShapedStairs(flightWidth, steps, turnStepLength, straightLength, riseH
     topFlight
   ];
 }
-
-const stairs = map(
-  i => translate(
-    uShapedStairs(
-      stairWidth, 
-      stairStepNum, 
-      stairWidth, 
-      stairStepNum*0.15, 
-      floorToCeiling + slabHeight))
-    .byXYZ(floorWidth, 2*stairWidth, slabHeight + i*(slabHeight + floorToCeiling)),
-  count(floors));
-stairs;
-

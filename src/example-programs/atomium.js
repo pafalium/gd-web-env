@@ -1,50 +1,49 @@
 
-//atomium
-//a cube with spheres in vertices and geometric center, with cylinders in diagonals and edges
 
+const {map, zip, concat, repeatTimes, rotateLeft} = sequence;
 const xyz = point.byXYZ;
 
-function atomium() {
-	var c0 = xyz(0,0,0),
-		c1 = xyz(-1,-1,1),
-		c2 = xyz(1,-1,1),
-		c3 = xyz(1,1,1),
-		c4 = xyz(-1,1,1),
-		c5 = xyz(-1,-1,-1),
-		c6 = xyz(1,-1,-1),
-		c7 = xyz(1,1,-1),
-		c8 = xyz(-1,1,-1);
+function atomiumSpheres(cs, r) {
+	return map(c => sphere.byCenterRadius(c, r), cs);
+}
+
+function atomiumTubes(c0, upCs, downCs, r) {
 	return [
-		atomiumSpheres([c0,c1,c2,c3,c4,c5,c6,c7,c8]),
-		atomiumFrame(c0, [c1,c2,c3,c4], [c5,c6,c7,c8])
+		map(([p1,p2]) => atomiumTube(p1, p2, r),
+			zip(upCs, rotateLeft(upCs, 1))),
+		map(([p1,p2]) => atomiumTube(p1, p2, r),
+			zip(downCs, rotateLeft(downCs, 1))),
+		map(([p1,p2]) => atomiumTube(p1, p2, r),
+			zip(upCs, downCs)),
+		map(([p1,p2]) => atomiumTube(p1, p2, r),
+			zip(repeatTimes(c0, 8), concat(upCs, downCs)))
 	];
 }
 
-function atomiumSpheres(cs) {
-	return sequence.map(c=>sphere.byCenterRadius(c, 0.3), cs);
+function atomiumTube(p1, p2, r) {
+	return cylinder.byCentersRadius([p1, p2], r);
 }
 
-function atomiumFrame(c0, upCs, downCs) {
+function atomiumFrame(sphereR, frameW, tubeR) {
+	let c0 = xyz(0,0,0),
+		c1 = xyz(-frameW, -frameW, +frameW),
+		c2 = xyz(+frameW, -frameW, +frameW),
+		c3 = xyz(+frameW, +frameW, +frameW),
+		c4 = xyz(-frameW, +frameW, +frameW),
+		c5 = xyz(-frameW, -frameW, -frameW),
+		c6 = xyz(+frameW, -frameW, -frameW),
+		c7 = xyz(+frameW, +frameW, -frameW),
+		c8 = xyz(-frameW, +frameW, -frameW);
 	return [
-		sequence.map(
-			([p1,p2])=>atomiumTube(p1,p2),
-			sequence.zip(upCs, sequence.rotate(upCs, 1))),
-		sequence.map(
-			([p1,p2])=>atomiumTube(p1,p2),
-			sequence.zip(downCs, sequence.rotate(downCs, 1))),
-		sequence.map(
-			([p1,p2])=>atomiumTube(p1,p2),
-			sequence.zip(upCs, downCs)),
-		sequence.map(
-			([p1,p2])=>atomiumTube(p1,p2),
-			sequence.zip(
-				sequence.repeatTimes(c0, 8), sequence.concat(upCs, downCs)))
+		atomiumSpheres([c0,c1,c2,c3,c4,c5,c6,c7,c8], sphereR),
+		atomiumTubes(c0, [c1,c2,c3,c4], [c5,c6,c7,c8], tubeR)
 	];
 }
 
-function atomiumTube(p1, p2) {
-	return cylinder.byCentersRadius([p1, p2], 0.1);
+function atomium(sphereR, frameW, tubeR) {
+	return rotate(atomiumFrame(sphereR, frameW, tubeR))
+		.aligningAxes(axis.z, axis.xyz);
 }
 
-atomium();
+atomium(9, 32, 1.5);
 
