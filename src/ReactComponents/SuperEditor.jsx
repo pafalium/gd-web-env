@@ -9,6 +9,8 @@ import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoratio
 import Run from '../Runner/run.js';
 import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 
+import time from '../utils/time.js';
+
 /*
   Running automatically and capturing trace were joined in this component. 
   Whether to run automatically and/or capture trace can be controlled 
@@ -157,13 +159,13 @@ class SuperEditor extends React.Component {
   }
   performRun() {
     if (this.state.captureTrace) {
-      let {results, traceabilityInfo} = Run.withTraceability(this.state.currentProgram);
+      let {results, traceabilityInfo} = time("Traceability", ()=>Run.withTraceability(this.state.currentProgram));
       this.setState({
         results: {results},
         traceabilityInfo: traceabilityInfo
       });
     } else {
-      let {results} = Run.normally(this.state.currentProgram);
+      let {results} = time("Bare run", ()=>Run.normally(this.state.currentProgram));
       this.setState({
         results: {results},
         traceabilityInfo: null

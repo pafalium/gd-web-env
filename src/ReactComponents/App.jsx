@@ -8,6 +8,8 @@ import SuperEditor from './SuperEditor.jsx';
 import {examples} from '../example-programs/examples.js';
 import {runInCad, clearCad, selectCads} from '../Runner/run-in-cad.js';
 
+import time from '../utils/time.js';
+
 const traceabilityMode = "traceability";
 const realtimeRunMode = "realtimeRun";
 const superMode = "superEditor";
@@ -50,7 +52,7 @@ class App extends React.Component {
 	onRunInCad() {
 		// Call run in cad procedure
 		selectCads(this.state.selectedCads);
-		runInCad(this.state.activeProgramCurrentVersion);
+		time("CAD export", ()=>runInCad(this.state.activeProgramCurrentVersion));
 	}
 	onClearCad() {
 		// Call clear cad procedure

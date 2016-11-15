@@ -5,6 +5,8 @@ import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
 import {noop, isEqual, difference, flatten, map, forEach} from 'lodash';
 
+import time from '../utils/time.js';
+
 class ResultsView extends React.Component {
 	/*
 		Props:
@@ -37,7 +39,7 @@ class ResultsView extends React.Component {
 		 threeObjects, 
 			resultToTHREEObjects, 
 			threeObjectToResult } = shouldComputeObjects
-				? toThree.convert.keepingCorrespondence(programResults)
+				? time("three convertion", ()=>toThree.convert.keepingCorrespondence(programResults))
 				: this.state;
 		// Apply resultInstance decorations.
 		let shouldUpdateDecorations = oldProps.resultDecorations !== newProps.resultDecorations
