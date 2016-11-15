@@ -154,3 +154,107 @@ function moebiusTruss(r, u1, u2, m, v1, v2, n) {
 }
 
 moebiusTruss(10, 0, Math.PI*4, 160, 0, 0.3, 10);
+
+
+
+
+
+const add = vector.add;
+const xyz = vector.byXYZ;
+const spherical = vector.bySpherical;
+const polar = vector.byPolar;
+
+function arcCs(p, r, phi, psi0, psi1, n) {
+  return map(psi => add(p, spherical(r, phi, psi)),
+    intervalDivision(psi0, psi1, n));
+}
+
+function arcTrussCs(p, apexR, baseR, phi, psi0, psi1, e, n) {
+  let dpsi = (psi1 - psi0)/n;
+  return [
+    arcCs(add(p, polar(e/2, phi + Math.PI/2)), apexR, phi, psi0, psi1, n),//base arc
+    arcCs(p, baseR, phi, psi0 + dpsi/2, psi1 - dpsi/2, n-1),//apex arc
+    arcCs(add(p, polar(e/2, phi - Math.PI/2)), apexR, phi, psi0, psi1, n)//base arc
+  ];
+}
+
+function arcTruss(p, apexR, baseR, phi, psi0, psi1, e, n) {
+  return spatialTruss(
+    arcTrussCs(p, apexR, baseR, phi, psi0, psi1, e, n), 
+    0.3, 0.1);
+}
+
+
+arcTruss(xyz(0,0,0), 10, 8, 0.0*Math.PI, -1.0*Math.PI/2, 1.0*Math.PI/2, 1.5, 10);
+
+
+
+
+
+function waveTrussCs(p, apexR, baseR, l, phi, psi0, psi1, dpsi, alpha0, alpha1, dAlpha, rAmpl) {
+  let n = Math.floor((psi1-psi0) / dpsi);
+  //caso final - ultimo arcCs
+  if(alpha0 >= alpha1) {
+    return [
+      arcCs(
+        add(p, polar(l/2.0, phi - Math.PI/2)), 
+        apexR + rAmpl * Math.sin(alpha0),
+        phi, psi0, psi1, n
+      )
+    ];
+  } else {
+    return concat(
+      [
+        arcCs(
+          add(p, polar(l/2.0, phi - Math.PI/2)),
+          apexR + rAmpl * Math.sin(alpha0),
+          phi, psi0, psi1, n
+        ),
+        arcCs(
+          p, baseR + rAmpl * Math.sin(alpha0),
+          phi, psi0 + dpsi/2.0, psi1 - dpsi/2.0, n
+        )
+      ],
+      waveTrussCs(
+        add(p, polar(l, phi + Math.PI/2)),
+        apexR, baseR, l, phi, psi0, psi1, dpsi,
+        alpha0 + dAlpha, alpha1, dAlpha, rAmpl
+      )
+    );
+  }
+}
+
+
+spatialTruss(
+  waveTrussCs(
+    xyz(0, 0, 0), 10, 8, 1.5, 0.0*Math.PI, 
+    -1.0*Math.PI/2, 1.0*Math.PI/2, 0.1*Math.PI, 
+    0.0*Math.PI, 2.0*Math.PI, 0.1*Math.PI, 4.0
+  ),
+  0.2, 0.1
+);
+
+
+
+
+const {count} = sequence;
+
+function wavyCs(p, baseR, l, phi, psi0, psi1, psiN, alpha0, alpha1, alphaN, rAmpl) {
+  return map(
+    ([i, alpha]) => arcCs(
+      add(p, polar(i*l, phi + Math.PI/2)), 
+      baseR + rAmpl*Math.sin(alpha), phi, psi0, psi1, psiN
+    ),
+    zip(count(alphaN), intervalDivision(alpha0, alpha1, alphaN))
+  );
+}
+
+function wavyTruss(p, baseR, l, phi, psi0, psi1, psiN, alpha0, alpha1, alphaN, rAmpl) {
+  return spatialTrussInsertApex(wavyCs(p, baseR, l, phi, psi0, psi1, psiN, alpha0, alpha1, alphaN, rAmpl));
+}
+
+wavyTruss(xyz(0, 0, 0),
+  10, 1.5, 0.0*Math.PI,
+  -1.0*Math.PI/2, 1.0*Math.PI/2, 15,
+  0.0*Math.PI, 2.0*Math.PI, 30,
+  4.0);
