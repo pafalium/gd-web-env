@@ -79,6 +79,9 @@ vector.byY = function(y) {
 vector.byZ = function(z) {
 	return vector.byXYZ(0.0, 0.0, z);
 };
+vector.byPolar = function(radius, theta) {
+	return vector.byXYZ(radius*Math.cos(theta), radius*Math.sin(theta), 0);
+};
 vector.byCylindrical = function(radius, theta, height) {
 	return vector.byXYZ(radius*Math.cos(theta), radius*Math.sin(theta), height);
 };

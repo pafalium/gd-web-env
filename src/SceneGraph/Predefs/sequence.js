@@ -6,28 +6,21 @@ sequence.map = function(fn, seq) {
 sequence.reduce = function(fn, seq, initialValue) {
 	return seq.reduce(fn, initialValue);
 };
-sequence.division = function(start, end, divisions) {
-	// Divide directed interval defined by 'start' and 'end' into 'divisions' segments.
-	//    Return return the sequence of numbers that define those segments.
-	// Return a sequence of equally spaced numbers between start and end.
-	// [x_1=start, ..., x_divisions, x_divisions+1=end]
-	// start = 0, end = 10, 
-	//   divisions = 0
-	// [NaN]
-	//   divisions = 1
-	// [0, 10]
-	//   divisions = 2
-	// [0, 5, 10]
-	var arr = [];
-	var stepSize = (end-start) / divisions;
-	var i = 0;
-	while(i<divisions+1) {
-		arr.push(start+stepSize*i);
-		i++;
-	}
-	return arr;
+/**
+	Split the [start, end] interval into _divisions_ intervals.
+	Take the starting values of each interval.
+	If _last_ then take end value of last interval.
+	@returns {Array} An array containing numbers spliting the interval
+		[start,end] into _divisions_ equally sized parts, including _end_ if 
+		_last_ is true.
+*/
+sequence.division = function(start, end, divisions, last=true) {
+	let space = (end - start)/divisions;
+	return sequence.count(last ? divisions+1 : divisions)
+		.map(i => start + space*i);
 };
-/*
+/**
+	Same as division(a, b, n+1, true).
 	@returns {Array} An array containing [a, evenlySpacedVals(n), b].
 */
 sequence.cutInterval = function(a, b, n) {
@@ -38,6 +31,11 @@ sequence.cutInterval = function(a, b, n) {
 
 	return [a, ...cuts(n), b];
 };
+/**
+	Same as cutInterval but n includes _a_ and _b_, that is, cutInterval(a, b, n-2).
+	Length of return is _n_.
+	Same as division(a, b, n-1, true).
+*/
 sequence.intervalDivision = function(a, b, n) {
 	//[x_1=start, ..., x_n=end]
 	// a = 0, b = 10
@@ -49,20 +47,32 @@ sequence.intervalDivision = function(a, b, n) {
 	// [0, 10]
 	//  n = 3
 	// [0, 5, 10]
-  var spacing = (b-a)/(n-1);
-  var res = [];
-  for(var i=0; i<n; i++) {
-    res.push(a+i*spacing);
-  }
-  return res;
+	var spacing = (b-a)/(n-1);
+	var res = [];
+	for(var i=0; i<n; i++) {
+		res.push(a+i*spacing);
+	}
+	return res;
 };
-// Same as intervalDivision except with n=1 -> [(a+b)*0.5]
+/**
+	Same as intervalDivision except with n=1 -> [(a+b)*0.5].
+*/
 sequence.evenValsBetween = function(a, b, n) {
 	if (n == 1) {
 		return [a + (b-a)*0.5];
 	} 
 
 	return sequence.count(n).map(i => a + i*(b-a)/(n-1));
+};
+/**
+	@returns {Array} An array containing the middle of all segments 
+		from cutting [a, b] into _segs_ segments.
+*/
+sequence.intervalMiddles = function(a, b, segs) {
+	let totalSpace = (b - a);
+	let segmentSpace = totalSpace/segs;
+	let cutPosition = segmentSpace/2;
+	return sequence.count(segs).map(i => a + cutPosition + i*segmentSpace);
 };
 sequence.count = function(n) {
 	var arr = [];
@@ -83,7 +93,26 @@ sequence.zip = function(...lists) {
 	}
 	return arr;
 };
-sequence.cartesianProduct = function(l1, l2) {
+/**
+	@returns {Array} An array containing all the tuples from applying
+		the cartesian product to _lists_.
+*/
+sequence.cartesianProduct = function(...lsts) {	
+	function cartAux(...lists) {
+		if (lists.length > 1) {
+			let [lst, ...rest] = lists;
+			let smallerCartProd = cartAux(...rest);
+			return smallerCartProd
+				.map(tuple => lst.map(el => [el, ...tuple]))
+				.reduce((prev, cur) => [...cur, ...prev], []);
+		} else {
+			return lists[0].map(el => [el]);
+		}
+	}
+
+	return cartAux(...lsts);
+	/*
+	// This code should be equivalent to the above when lsts.length === 2.
 	var arr = [];
 	for(let i=0; i<l1.length; i++) {
 		for(let j=0; j<l2.length; j++) {
@@ -91,6 +120,7 @@ sequence.cartesianProduct = function(l1, l2) {
 		}
 	}
 	return arr;
+	*/
 };
 sequence.rotate = function(lst, offset) {
 	function posModulo(dividend, divisor) {
@@ -102,6 +132,7 @@ sequence.rotate = function(lst, offset) {
 	}
 	return arr;
 };
+sequence.rotateLeft = sequence.rotate;
 sequence.repeatTimes = function(elem, n) {
 	let i=0;
 	let arr = [];
@@ -111,8 +142,26 @@ sequence.repeatTimes = function(elem, n) {
 	}
 	return arr;
 };
-sequence.concat = function(lst1, lst2) {
-	return lst1.concat(lst2);
+/**
+	@returns {Array} An Array containing the elements of all _lists_
+		following the order l1[0], ..., ln[0], ..., l1[m], ..., lk[m],
+		where lk is the list before first list that lacks the mth element.
+*/
+sequence.interleave = function interleave(...lists) {
+	let res = [];
+	let smallestLength = Math.min.apply(null, lists.map(lst => lst.length));
+	for (let j = 0; j < smallestLength; j++) {
+		for (let i = 0; i<lists.length; i++) {
+			res.push(lists[i][j]);
+		}
+	}
+	for (let i = 0; lists[i].length !== smallestLength; i++) {
+		res.push(lists[i][smallestLength]);
+	}
+	return res;
+};
+sequence.concat = function(...lists) {
+	return [].concat(...lists);
 };
 sequence.length = function(lst) {
 	return lst.length;

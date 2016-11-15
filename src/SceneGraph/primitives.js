@@ -120,12 +120,20 @@ registry.provide("point", point);
 
 
 const axis = {};
-axis.byPointVector = function(point, vector) {
+axis.byPointVector = function(point, vec) {
 	return {
 		origin: point,
-		vector
+		vector: vec,
+		direction: vector.normalized(vec)
 	};
 };
+axis.x = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(1, 0, 0));
+axis.y = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(0, 1, 0));
+axis.z = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(0, 0, 1));
+axis.xy = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(1, 1, 0));
+axis.xz = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(1, 0, 1));
+axis.yz = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(0, 1, 1));
+axis.xyz = axis.byPointVector(point.byXYZ(0, 0, 0), vector.byXYZ(1, 1, 1));
 registry.provide("axis", axis);
 
 
@@ -173,7 +181,7 @@ box.byCentersWidthHeight = function([baseCenter, topCenter], [width, height]) {
 	let boxAxis = point.pointMinusPoint(topCenter, baseCenter);
 	let worldXAxis = vector.byCylindrical(1, sphPhi(boxAxis) + Math.PI/2, 0);
 	let worldYAxis = vector.normalized(vector.cross(boxAxis, worldXAxis));
-	let worldZAxis = vector.normalized(boxAxis);
+	//let worldZAxis = vector.normalized(boxAxis);
 	let midPoint = point.pointPlusVector(
 		baseCenter, 
 		vector.scale(
@@ -430,6 +438,10 @@ const rotate = function(object) {
 		aroundZByAngle: function(radians) {
 			return transformObjectPrimitive(object,
 				transform.rotation.aroundZByAngle(radians));
+		},
+		aligningAxes: function(fromAxis, toAxis) {
+			return transformObjectPrimitive(object,
+				matrix.alignFromAxisToAxis(fromAxis.direction, toAxis.direction));
 		}
 	};
 };
@@ -457,6 +469,12 @@ rotate.aroundZByAngle = function(radians) {
 				transform.rotation.aroundZByAngle(radians));
 	};
 };
+rotate.aligningAxes = function(fromAxis, toAxis) {
+	return function(object) {
+		return transformObjectPrimitive(object,
+			matrix.alignFromAxisToAxis(fromAxis.direction, toAxis.direction));
+	}
+};
 registry.provide("rotate", rotate);
 
 
@@ -482,5 +500,6 @@ registry.provide("random", random);
 import functional from './Predefs/functional.js';
 registry.provide("functional", functional);
 
-
+import math from './Predefs/math.js';
+registry.provide("math", math);
 
