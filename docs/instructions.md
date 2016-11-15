@@ -1,6 +1,6 @@
 
 # The environment
-![The environment.](web-page.png)
+![The environment.](web-page.PNG)
 
 
 ## Displayed results
