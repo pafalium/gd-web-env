@@ -90,7 +90,9 @@ There three ways of declaring variables in Javascript:
 Variables declared with `var` are visible in the whole body of the function they are inside of.
 ```javascript
 function func() {
-  var aVar = "hello";
+  var a = "hello";
+  let b = "there";
+  const c = 42;
 }
 ```
 The variable `aVar` is only visible inside `func`.
@@ -100,10 +102,12 @@ The variable `aVar` is only visible inside `func`.
 
 ```javascript
 function func() {
-  const cAnswer = 42;
-  let a = 10;
-  cAnswer = 1000; // Error
-
+  const cAnswer = 1100;
+  cAnswer = 1000; // Error: cannot modify "cAnswer"
+  if (cAnswer === 1100) {
+  	let deeperLet = "I'm inside!";
+  }
+  return deeperLet; // Error: "deeperLet" does not exist
 }
 ```
 
@@ -134,6 +138,16 @@ point.bySpherical(r, th, phi)
 point.add(p1, p2) vector.add(v1, v2)
 (-c)
 point.sub(p1, p2) vector.sub(v1, v2)
+(selectors)
+point.x = function(pt)
+point.y = function(pt)
+point.z = function(pt)
+(vector operations)
+vector.dot = function(v1, v2)
+vector.cross = function(v1, v2)
+vector.scale = function(vec, scalar)
+vector.length = function(vec)
+vector.normalized = function(vec)
 
 (box)
 box.byWidthHeightDepth = function(width, height, depth)
