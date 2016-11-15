@@ -1,11 +1,58 @@
 
+# The environment
+![The environment.](web-page.png)
+
+
+## Displayed results
+When the web page runs a program, it displays all the results of the expressions that are in the program's top-level.
+Put simply, it displays results of expressions that are "outside of everything".
+
+```javascript
+function foo() {
+  return sphere.byCenterRadius(xyz(0, 0, 0), 5);
+}
+
+foo();
+```
+
+After running the previous program, the environment shows the result of the last line, `foo();`.
+
+
+## Running
+The editor runs the program automatically after every change. This can be disabled by unchecking the _"Run automatically"_ checkbox. In this case, you can run the program by pressing the _"Run now"_ button.
+
+
+## Literal adjustment
+You can click and drag on any number in the source code to adjust its value. The editor does not change the amount of decimal digits of the number.
+
+Dragging right increases; dragging left decreases.
+
+![Image showing off literal adjustment.](literal-adjustment.gif)
+
+
+## Traceability
+If enabled, the editor highlights the results of functions under the mouse pointer. If the mouse is above an object in the 3D view, the editor highlights the function where it was created.
+
+### From code to results
+![Traceability from code to results.](traceability-code-results.gif)
+
+### From results to code
+![Traceability from results to code.](traceability-results-code.gif)
+
+
+
 # From Racket to Javascript
 ## Identifiers
 Javascript is similar to Processing and Python when it comes to identifiers.
-Javascript identifiers can only contain alphanumeric characters (and also "$" and "\_") and may not start with a digit.
+Javascript identifiers can only contain alphanumeric characters (and also `$` and `\_`) and may not start with a digit.
 
 Like so, valid identifiers in Racket may not be valid in Javascript.
 For example, `polygon-surface` is not a valid Javascript identifier.
+
+
+## Operators
+Javascript supports a variety of operators like mathematical operators, `+ - * / %`, and logical operators, `! < <= > >= && ||`.
+They are written in infix notation like in mathematical expressions, e.g. `1 + 1`.
 
 
 ## Functions
@@ -37,18 +84,6 @@ square(2)
 ```
 
 
-## Control-flow
-```javascript
-if (/*condition*/) {/*then-body*/} else {/*else-body*/}
-while (/*condition*/) {/*body*/}
-do {/*body*/} while (/*condition*/);
-
-for (/*variables*/; /*condition*/; /*variable update*/) {/*body*/}
-for-in (/*variable*/ in /*javascript-object*/) {/*body*/}
-for-of (/*variable*/ of /*javascript-iterable*/) {/*body*/}
-```
-
-
 ## Variables
 There three ways of declaring variables in Javascript:
 `var`,`let` and `const`.
@@ -70,6 +105,18 @@ function func() {
   cAnswer = 1000; // Error
 
 }
+```
+
+
+## Control-flow
+```javascript
+if (/*condition*/) {/*then-body*/} else {/*else-body*/}
+while (/*condition*/) {/*body*/}
+do {/*body*/} while (/*condition*/);
+
+for (/*variables*/; /*condition*/; /*variable update*/) {/*body*/}
+for-in (/*variable*/ in /*javascript-object*/) {/*body*/}
+for-of (/*variable*/ of /*javascript-iterable*/) {/*body*/}
 ```
 
 
@@ -131,11 +178,8 @@ translate.byVector(vec)
 
 ## Lists (or Arrays)
 ```
-(map fn list) -> sequence.map(fn, list)
-(reduce) -> sequence.reduce(fn, list, init)
-(list elems...) -> [elems...]
 '() -> []
-(cons)
+(list elems...) -> [elems...]
 (append lst1 lst2) -> sequence.concat(lst1, lst2)
                    -> [...lst1, ...lst2]
 ```
@@ -205,45 +249,6 @@ functional.cond = function(condPairs)
 ## Primitives in source files
 You may want to look at function signtures, which are found in `src/SceneGraph/primitives.js`.
 Anything passed to `registry.provide()` calls will be available to programs run by the environment.
-
-
-
-# Special behavior
-## Displayed results
-When the web page runs a program, it displays all the results of the expressions that exist in the program's top-level.
-Put simply, it displays results of expressions that are "outside of everything".
-
-```javascript
-function foo() {
-  return sphere.byCenterRadius(xyz(0, 0, 0), 5);
-}
-
-foo();
-```
-
-After running the previous program, the environment shows the result of the last line, `foo();`.
-
-
-## Running
-The editor runs the program automatically after every change. This can be disabled by unchecking the "Run automatically" checkbox. In this case, you can run the program by pressing the "Run now" button.
-
-
-## Literal adjustment
-You can click and drag on any number in the source code to adjust its value. The editor does not change the amount of decimal digits of the number.
-
-Dragging right increases; dragging left decreases.
-
-![Image showing off literal adjustment.](literal-adjustment.gif)
-
-
-## Traceability
-If enabled, the editor highlights the results of functions under the mouse pointer. If the mouse is above an object in the 3D view, the editor highlights the function where it was created.
-
-### From code to results
-![Traceability from code to results.](traceability-code-results.gif)
-
-### From results to code
-![Traceability from results to code.](traceability-results-code.gif)
 
 
 

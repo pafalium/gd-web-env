@@ -10,13 +10,15 @@ If already have the environment working, you may want to check the [instructions
 
 
 ## Building
-* You'll need to have [node.js](https://nodejs.org/en/) and [gulp](http://gulpjs.com/) installed.
-* Then open up a console in the repository's root directory and run `npm install`. This will install all dependencies required for the web page itself and for the rest of the build process.
-* Run `gulp` to build the web page.
+You need to have [node.js](https://nodejs.org/en/) and [gulp](http://gulpjs.com/) installed.
+
+Then open up a console in the repository's root directory and run `npm install`. This will install all dependencies required for the web page itself and for the rest of the build process.
+
+Run `gulp` to build the web page.
 
 
 ## Running
-After the web page as been built, what remains to be done is start the server.
+After the web page as been built, what remains is starting the server and opening up the environment.
 
 You'll need to install [Racket](https://racket-lang.org/).
 
@@ -24,7 +26,7 @@ Afterwards, you need to install [Rosetta](https://github.com/aptmcl/rosetta) usi
 
 Finally, run `server/server.rkt` using Racket. It should open the index page in a web browser when it loads.
 
-Note: If you don't need to export to CAD, you can just use a static http server like http-serve.
+__Note:__ If you don't need to export to CAD, you can just use a static http server like `http-serve`.
 
 
 ## License
