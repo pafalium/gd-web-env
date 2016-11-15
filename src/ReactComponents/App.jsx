@@ -73,7 +73,6 @@ class App extends React.Component {
 		return (
 			<div style={{display: "flex"}}>
 				<div style={{width: "100px", overflowX: "scroll"}}>
-					<button onClick={this.onCycleMode.bind(this)}>Cycle Mode</button>
 					<button 
 						onClick={this.onRunInCad.bind(this)}
 						disabled={noCadSelected}>
