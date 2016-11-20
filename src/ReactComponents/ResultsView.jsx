@@ -3,7 +3,8 @@ import React from 'react';
 import OrbitThreeView from './OrbitThreeView.jsx';
 import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
-import {noop, isEqual, difference, flatten, map, forEach} from 'lodash';
+import {noop, isEqual, difference, flatten, map, forEach,
+				throttle} from 'lodash';
 
 import time from '../utils/time.js';
 
@@ -23,6 +24,8 @@ class ResultsView extends React.Component {
 		super(props);
 		//Initialize bound methods.
 		this.handleMouseMove = this.handleMouseMove.bind(this);
+		this.performPicking = this.performPicking.bind(this);
+		this.schedulePicking = throttle(this.performPicking, 100/*msec*/);
 		//Initialize state.
 		this.initializeResultDecorations();
 		this.state = this.computeState({}, props);
@@ -181,8 +184,19 @@ class ResultsView extends React.Component {
 	handleMouseMove(mouseMoveEvent) {
 		//discover what result instance is below the mouse
 		//call the onHoveredResultInstance callback in it
-		let coords = this.mouseEventNormalizedDeviceCoords(mouseMoveEvent);
+		/*let coords = this.mouseEventNormalizedDeviceCoords(mouseMoveEvent);
 		let objectBelowMouse = this.pickClosest(coords);
+		let path = this.buildResultInstancePath(objectBelowMouse);
+		this.props.onHoveredResultInstance({
+			resultInstance: path[0],
+			path
+		});*/
+
+		let coords = this.mouseEventNormalizedDeviceCoords(mouseMoveEvent);
+		this.schedulePicking(coords);
+	}
+	performPicking(normDevCoords) {
+		let objectBelowMouse = this.pickClosest(normDevCoords);
 		let path = this.buildResultInstancePath(objectBelowMouse);
 		this.props.onHoveredResultInstance({
 			resultInstance: path[0],

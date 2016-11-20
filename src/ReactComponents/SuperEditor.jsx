@@ -75,14 +75,14 @@ class SuperEditor extends React.Component {
             <ProgramEditor
               program={this.state.currentProgram}
               onValidProgram={this.handleValidProgram}
-              nodeDecorations={this.state.nodeDecorations}
+              nodeDecorations={this.state.captureTrace ? this.state.nodeDecorations : []}
               onHoveredNode={this.handleHoveredNode} />
           </div>
           <div style={styles.splitRight}>
             <ResultsView
               results={this.state.results}
-              resultDecorations={this.state.resultDecorations}
-              onHoveredResultInstance={this.handleHoveredResultInstance} />
+              resultDecorations={this.state.captureTrace ? this.state.resultDecorations : []}
+              onHoveredResultInstance={this.state.captureTrace ? this.handleHoveredResultInstance : null} />
           </div>
         </div>
       </div>
@@ -127,24 +127,21 @@ class SuperEditor extends React.Component {
     }
   }
   handleHoveredResultInstance({resultInstance, path}) {
-    // iff captureTrace -> highlight resultInstance and its creator node
-    if (this.state.captureTrace) {
-      // Copied from: TraceabilityView.jsx
-      let isHoveringSomething = path.length !== 0;
-      if(isHoveringSomething) {
-        let creatorNode = getResultCreatorNode(resultInstance, path, 
-          {traceabilityInfo: this.state.traceabilityInfo}, this.state.currentProgram);
-        let decColor = color.hsl(50.0/360.0, 0.5, 0.5);
-        this.setState({
-          nodeDecorations: [makeNodeDecoration(creatorNode, decColor)],
-          resultDecorations: [makeResultInstanceDecoration(path, decColor)]
-        });
-      } else {
-        this.setState({
-          nodeDecorations: [],
-          resultDecorations: []
-        });
-      }
+    // Copied from: TraceabilityView.jsx
+    let isHoveringSomething = path.length !== 0;
+    if(isHoveringSomething) {
+      let creatorNode = getResultCreatorNode(resultInstance, path, 
+        {traceabilityInfo: this.state.traceabilityInfo}, this.state.currentProgram);
+      let decColor = color.hsl(50.0/360.0, 0.5, 0.5);
+      this.setState({
+        nodeDecorations: [makeNodeDecoration(creatorNode, decColor)],
+        resultDecorations: [makeResultInstanceDecoration(path, decColor)]
+      });
+    } else {
+      this.setState({
+        nodeDecorations: [],
+        resultDecorations: []
+      });
     }
   }
   componentWillUpdate(newProps, newState) {
