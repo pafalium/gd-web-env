@@ -2,7 +2,48 @@
 /*ProgramEditor styles*/
 /*Class for hinting that numeric literals are adjustable in ace.*/
 .adjustable-hint {
-	position: absolute;
-	cursor: ew-resize !important;
-	pointer-events: auto;
+  position: absolute;
+  cursor: ew-resize !important;
+  pointer-events: auto;
+}
+
+
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: gray;
+  background-color: rgb(39, 40, 34);
+}
+
+
+
+.vertical-icon-bar {
+  width: 80px;
+  height: 100%;
+  float: left;
+  background-color: rgb(47, 49, 41);
+  text-align: center;
+}
+
+.icon-button {
+  box-sizing: border-box;
+  width: 70px;
+  height: 70px;
+}
+
+.drawer-container {
+  float: left;
+}
+
+.drawer {
+  width: 300px;
+  height: 100%;
+  float: left;
+  background-color: rgb(47, 49, 41);
+  padding-top: 2em;
+  padding-left: 2em;
+  padding-right: 1em;
+  box-sizing: border-box;
+  position: absolute;
 }

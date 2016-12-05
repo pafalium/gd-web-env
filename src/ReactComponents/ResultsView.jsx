@@ -100,7 +100,7 @@ class ResultsView extends React.Component {
 		sunLight.position.set(0.1, 1, 0.3);
 		const belowLight = new THREE.DirectionalLight(0xffffca, 0.1);
 		belowLight.position.set(-0.1, -1, -0.4)
-		const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.3);
+		const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.4);
 		// create global coordinates helpers
 		const gridHelper = new THREE.GridHelper(100, 1);
 		gridHelper.setColors(0x888888, 0x444444);

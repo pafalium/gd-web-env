@@ -10,7 +10,9 @@ import THREE from 'three';
 class ThreeRenderer extends React.Component {
   componentDidMount() {
     const canvas = ReactDOM.findDOMNode(this.refs["canvas"]);
-    const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas, antialias: true, alpha: true
+    });
     this._renderer = renderer;
     this._draw();
   }
