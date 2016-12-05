@@ -147,7 +147,6 @@ function runInCad(program) {
 	let [saveTopLevelContext] = runProgramPrime2(program, [saveTopLevelTransform], predefinedBindings);
 	let results = saveTopLevelContext.topLevelExprResults.values();
 	// execute the top-level results with the CAD API (to-three)
-	clearCad();
 	let {cadRefs} = resultsToCAD(results);
 }
 

@@ -3,7 +3,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Select from 'react-select';
 
-import {selectProgram, setExportCads, exportToCads, clearCads} from './actions-reducers.js';
+import {selectProgram, setExportCads, doExportToCads, doClearCads} from './actions-reducers.js';
 
 //8888888                                         888                 888 
 //  888                                           888                 888 
@@ -84,7 +84,7 @@ const ActiveCadsSelector = ({availableCads, activeCads, onActiveCadsChange}) => 
       multi={true}
       options={availableCads.map(cadName => ({label: cadName, value: cadName}))}
       value={activeCads}
-      onChange={onActiveCadsChange}
+      onChange={(vals) => onActiveCadsChange(vals ? vals.map((({value}) => value)) : [])}
       placeholder="destination CADs"
     />
 );
@@ -113,8 +113,8 @@ const RunInCadContainer = connect(
   }),
   dispatch => ({
     onActiveCadsChange: (activeCads) => dispatch(setExportCads(activeCads)),
-    onRunInCadClicked: () => dispatch(exportToCads()),
-    onClearCadClicked: () => dispatch(clearCads())
+    onRunInCadClicked: () => dispatch(doExportToCads()),
+    onClearCadClicked: () => dispatch(doClearCads())
   })
 )(RunInCadPanel);
 

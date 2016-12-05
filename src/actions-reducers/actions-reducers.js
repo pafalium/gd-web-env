@@ -1,11 +1,28 @@
 
 import {combineReducers} from 'redux';
 
+import {Program} from '../Runner/Parsing/Program.js';
+const nullProgram = {name: 'untitled', program: Program.fromSourceCode('')};
+
 import {examples as examplePrograms} from '../example-programs/examples.js';
 
-import {Program} from '../Runner/Parsing/Program.js';
+import {runInCad, clearCad, selectCads} from '../Runner/run-in-cad.js';
 
-const nullProgram = {name: 'untitled', program: Program.fromSourceCode('')};
+// .d8888b.           888                   888                             
+//d88P  Y88b          888                   888                             
+//Y88b.               888                   888                             
+// "Y888b.    .d88b.  888  .d88b.   .d8888b 888888 .d88b.  888d888 .d8888b  
+//    "Y88b. d8P  Y8b 888 d8P  Y8b d88P"    888   d88""88b 888P"   88K      
+//      "888 88888888 888 88888888 888      888   888  888 888     "Y8888b. 
+//Y88b  d88P Y8b.     888 Y8b.     Y88b.    Y88b. Y88..88P 888          X88 
+// "Y8888P"   "Y8888  888  "Y8888   "Y8888P  "Y888 "Y88P"  888      88888P' 
+//                                                                          
+//                                                                          
+//                                                                          
+function activeCads(state) {
+  return state.exportCads;
+}
+
 
 //8888888888                                    888    
 //888                                           888    
@@ -39,17 +56,58 @@ export function setExportCads(exportCads) {
   };
 }
 
-export function exportToCads() {
+function exportToCads() {
   return {
     type: EXPORT_TO_CADS
   };
 }
 
-export function clearCads() {
+function clearCads() {
   return {
     type: CLEAR_EXPORT_CADS
   };
 }
+
+export function doExportToCads() {
+  return (dispatch, getState) => {
+    dispatch(exportToCads());
+    setTimeout(() => {
+      try {
+        selectCads(getState().exportCads);
+        runInCad(getState().activeProgram.program);
+        dispatch({
+          type: EXPORT_DONE
+        });
+      } catch (e) {
+        dispatch({
+          type: EXPORT_FAILED,
+          error: e
+        });
+      }
+    }, 0);
+  };
+}
+
+export function doClearCads() {
+  return (dispatch, getState) => {
+    dispatch(clearCads());
+    setTimeout(() => {
+      try {
+        selectCads(getState().exportCads);
+        clearCad();
+        dispatch({
+          type: EXPORT_DONE
+        });
+      } catch (e) {
+        dispatch({
+          type: EXPORT_FAILED,
+          error: e
+        });
+      }
+    }, 0);
+  }
+}
+
 
 /**
  Reducers 
@@ -82,7 +140,6 @@ function exportingToCAD(state = false, action = {}) {
       return state;
   }
 }
-
 
 
 

@@ -1,13 +1,23 @@
 
 import React from 'react';
 import {render} from 'react-dom';
-import {createStore} from 'redux';
+import {createStore, applyMiddleware} from 'redux';
 import {Provider} from 'react-redux';
+import thunkMiddleware from 'redux-thunk';
+import createLogger from 'redux-logger';
 
 import editorState from './actions-reducers.js';
 import EditorPage from './EditorPage.jsx';
 
-let store = createStore(editorState);
+const loggerMiddleware = createLogger();
+
+const store = createStore(
+  editorState, 
+  applyMiddleware(
+    thunkMiddleware,
+    loggerMiddleware
+  )
+);
 
 
 render(

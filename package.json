@@ -35,6 +35,8 @@
     "react-redux": "^4.4.6",
     "react-select": "^1.0.0-beta13",
     "redux": "^3.6.0",
+    "redux-logger": "^2.7.4",
+    "redux-thunk": "^2.1.0",
     "three": "^0.74.0",
     "three-orbit-controls": "^72.0.0"
   },
