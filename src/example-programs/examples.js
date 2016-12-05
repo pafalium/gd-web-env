@@ -13,7 +13,8 @@ const exampleData = [
 	["dom-ino-frame.js", fs.readFileSync(__dirname + "/" + "dom-ino-frame.js", "utf8")],
 	["cruzeta.js", fs.readFileSync(__dirname + "/" + "cruzeta.js", "utf8")],
 	["column.js", fs.readFileSync(__dirname + "/" + "column.js", "utf8")],
-	["coneSphere.js", fs.readFileSync(__dirname + "/" + "coneSphere.js", "utf8")]
+	["coneSphere.js", fs.readFileSync(__dirname + "/" + "coneSphere.js", "utf8")],
+	["cities.js", fs.readFileSync(__dirname + "/" + "cities.js", "utf8")]
 ];
 
 const examples = exampleData.map(
