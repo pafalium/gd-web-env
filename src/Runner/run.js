@@ -1,7 +1,7 @@
 
-var running = require("./running-idea");
-var traceCall = require('./Instrumentation/trace-call-transform').transform;
-var saveTopLevel = require('./Instrumentation/save-top-level-transform').transform;
+import runProgram from './running-idea.js';
+import {transform as traceCall} from './Instrumentation/trace-call-transform.js';
+import {transform as saveTopLevel} from './Instrumentation/save-top-level-transform.js';
 
 //
 // TODO Increase cohesion of running programs. 
@@ -9,9 +9,9 @@ var saveTopLevel = require('./Instrumentation/save-top-level-transform').transfo
 //
 
 function runWithTraceability(program) {
-	var [results, traceabilityInfo] = running.runProgramPrime2(
+	var [results, traceabilityInfo] = runProgram(
 		program, [saveTopLevel, traceCall]);
-	return {results, traceabilityInfo};
+	return new ProgramResults(results, traceabilityInfo);
 }
 
 //
@@ -19,14 +19,18 @@ function runWithTraceability(program) {
 // The results of a program are the values of its top-level expressions.
 //
 function run(program) {
-	var [results] = running.runProgramPrime2(program, [saveTopLevel]);
-	return {results};
+	var [results] = runProgram(program, [saveTopLevel]);
+	return new ProgramResults(results);
 }
 
-module.exports = {
-	normally: run,
-	withTraceability: runWithTraceability,
-	Results: {
-		emptyResults: new Map()
-	}
-};
+/**
+	@constructor
+ */
+function ProgramResults(results, traceabilityInfo) {
+	this.results = results;
+	this.traceabilityInfo = traceabilityInfo;
+}
+
+export {run as runNormally};
+export {runWithTraceability};
+export {ProgramResults};

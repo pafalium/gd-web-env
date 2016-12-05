@@ -3,7 +3,7 @@ import {constructors as Nodes, recognizers as NodeP} from '../Parsing/ast-utils.
 import {idGenerator} from '../../id-generator.js';
 import {nodeId} from '../Parsing/node-id.js';
 
-var traceCallTransform = {
+const traceCallTransform = {
 	/*
 		foo.bar(a, b, c) -> 
 		(function($1, $2, $3){

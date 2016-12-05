@@ -6,7 +6,7 @@ import color from '../SceneGraph/color.js';
 import ProgramEditor, {makeNodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoration} from './ResultsView.jsx';
 
-import Run from '../Runner/run.js';
+import {runWithTraceability, runNormally} from '../Runner/run.js';
 import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 
 import time from '../utils/time.js';
@@ -43,17 +43,17 @@ class SuperEditor extends React.Component {
     this.scheduleRun = debounce(this.performRun, 100/*msec*/);
     // Initialize state.
     // TODO Move to initialize and update methods.
-    let {results, traceabilityInfo} = Run.withTraceability(props.program);
+    let programResults = runWithTraceability(props.program);
     this.state = {
       currentProgram: props.program,
       runAutomatically: true,
       captureTrace: true,
-      traceabilityInfo: traceabilityInfo,
       nodeDecorations: [],
       resultDecorations: [],
-      results: {results}
+      programResults
     };
   }
+
   render() {
     return (
       <div>
@@ -80,7 +80,7 @@ class SuperEditor extends React.Component {
           </div>
           <div style={styles.splitRight}>
             <ResultsView
-              results={this.state.results}
+              results={this.state.programResults}
               resultDecorations={this.state.captureTrace ? this.state.resultDecorations : []}
               onHoveredResultInstance={this.state.captureTrace ? this.handleHoveredResultInstance : null} />
           </div>
@@ -88,26 +88,32 @@ class SuperEditor extends React.Component {
       </div>
     );
   }
+
   toggleRunAutomatically() {
     this.setState({runAutomatically: !this.state.runAutomatically});
   }
+
   toggleCaptureTrace() {
     this.setState({captureTrace: !this.state.captureTrace});
   }
+
   handleRun() {
     this.scheduleRun();
   }
+
   componentWillReceiveProps(newProps) {
     if (this.props.program !== newProps.program) {
       this.setState({currentProgram: newProps.program});
     }
   }
+
   handleValidProgram(program) {
     // update the current program
     this.setState({currentProgram: program});
     // propagate change to owner component
     this.props.onProgramChange(program);
   }
+
   handleHoveredNode({node, path}) {
     // iff captureTrace -> highlight node (or parent) and its results
     if (this.state.captureTrace) {
@@ -115,7 +121,7 @@ class SuperEditor extends React.Component {
       let isHoveringSomething = path.length !== 0;
       if(isHoveringSomething) {
         let nodeColor = color.hsl(100.0/360.0, 0.5, 0.5);
-        let nodeResults = getNodeResults(node, path, {traceabilityInfo: this.state.traceabilityInfo});
+        let nodeResults = getNodeResults(node, path, this.state.programResults);
         this.setState({
           nodeDecorations: [makeNodeDecoration(node, nodeColor)],
           resultDecorations: nodeResults.map(
@@ -126,12 +132,13 @@ class SuperEditor extends React.Component {
       }
     }
   }
+
   handleHoveredResultInstance({resultInstance, path}) {
     // Copied from: TraceabilityView.jsx
     let isHoveringSomething = path.length !== 0;
     if(isHoveringSomething) {
       let creatorNode = getResultCreatorNode(resultInstance, path, 
-        {traceabilityInfo: this.state.traceabilityInfo}, this.state.currentProgram);
+        this.state.programResults, this.state.currentProgram);
       let decColor = color.hsl(50.0/360.0, 0.5, 0.5);
       this.setState({
         nodeDecorations: [makeNodeDecoration(creatorNode, decColor)],
@@ -144,6 +151,7 @@ class SuperEditor extends React.Component {
       });
     }
   }
+
   componentWillUpdate(newProps, newState) {
     const programChanged = this.state.currentProgram !== newState.currentProgram;
     const captureTraceChanged = this.state.captureTrace !== newState.captureTrace;
@@ -154,18 +162,17 @@ class SuperEditor extends React.Component {
       this.scheduleRun();
     }
   }
+  
   performRun() {
     if (this.state.captureTrace) {
-      let {results, traceabilityInfo} = time("Traceability", ()=>Run.withTraceability(this.state.currentProgram));
+      let programResults = time("Traceability", ()=>runWithTraceability(this.state.currentProgram));
       this.setState({
-        results: {results},
-        traceabilityInfo: traceabilityInfo
+        programResults
       });
     } else {
-      let {results} = time("Bare run", ()=>Run.normally(this.state.currentProgram));
+      let programResults = time("Bare run", ()=>runNormally(this.state.currentProgram));
       this.setState({
-        results: {results},
-        traceabilityInfo: null
+        programResults
       });
     }
     this.setState({

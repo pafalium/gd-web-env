@@ -75,5 +75,5 @@ function runProgramPrime2(program, transforms, predefinedBindings=primitives) {
 	return contexts;
 }
 
-
+export default runProgramPrime2;
 export {runProgramPrime2};
