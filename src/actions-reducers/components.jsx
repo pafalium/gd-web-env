@@ -122,6 +122,7 @@ const RunInCadPanel = ({
   onClearCadClicked
 }) => (
   <div>
+    <h3>Export to CAD</h3>
     <ActiveCadsSelector 
       activeCads={activeCads} 
       availableCads={availableCads}

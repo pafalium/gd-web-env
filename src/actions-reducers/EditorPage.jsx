@@ -17,7 +17,7 @@ const SuperEditorContainer = connect(
   })
 )(SuperEditor);
 
-const EditorPage = ({program, onProgramChange}) => (
+const EditorPage = () => (
   <div>
     <div style={{
       position: 'absolute',
