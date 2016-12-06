@@ -79,27 +79,30 @@ const VisitKeys = {
 };
 
 export function traverse(ast, {enter=noop, leave=noop}) {
-	function visit(thing, path) {
-		if (Array.isArray(thing)) {
-			visitArray(thing, path);
-		} else {
-			visitNode(thing, path);
-		}
-	}
-	function visitNode(node, path) {
-		let keys = VisitKeys[node.type];
-		enter(node, path);
-		forEach(keys, key => {
+  function visit(thing, path) {
+    if (Array.isArray(thing)) {
+      visitArray(thing, path);
+    } else {
+      visitNode(thing, path);
+    }
+  }
+
+  function visitNode(node, path) {
+    let keys = VisitKeys[node.type];
+    enter(node, path);
+    forEach(keys, key => {
             if (node[key]) { // Some node attributes can be null on a valid ast.
-			 visit(node[key], [...path, key]);   
+       visit(node[key], [...path, key]);   
             }
-		});
-		leave(node, path);
-	}
-	function visitArray(array, path) {
-		forEach(array, (el, i) => {
-			visit(el, [...path, i]);
-		});
-	}
-	visit(ast, []);
-};
+    });
+    leave(node, path);
+  }
+
+  function visitArray(array, path) {
+    forEach(array, (el, i) => {
+      visit(el, [...path, i]);
+    });
+  }
+  
+  visit(ast, []);
+}
