@@ -1,6 +1,7 @@
 
 import {nodeId} from './Parsing/node-id.js';
 import {getNodeById} from './Parsing/getNodeById.js';
+import {sourceToAst} from './Parsing/program.js';
 
 // dependencies: run.withTraceability + Program
 
@@ -54,7 +55,7 @@ function getResultCreatorNode(resultInstance, path, traceabilityResults, program
     currentResultIdx++;
   }
   //Otherwise, default to the node that represent the whole program.
-  return program.getAST();
+  return sourceToAst(program);
 }
 
 function getNodeResults(node, path, traceabilityResults) {

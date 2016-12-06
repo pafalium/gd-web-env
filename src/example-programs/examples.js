@@ -1,6 +1,5 @@
 
 const fs = require('fs');
-const Program = require('../Runner/Parsing/Program.js').Program;
 
 const exampleData = [
 	["atomium.js", fs.readFileSync(__dirname + "/" + "atomium.js", "utf8")],
@@ -18,9 +17,9 @@ const exampleData = [
 ];
 
 const examples = exampleData.map(
-	([name,sourceCode])=>({
-		program: Program.fromSourceCode(sourceCode),
-		name: name
+	([name, sourceCode])=>({
+		name: name,
+		program: sourceCode
 	}));
 
 module.exports.examples = examples;

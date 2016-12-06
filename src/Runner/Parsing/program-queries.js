@@ -1,13 +1,12 @@
 
-import {traverse, VisitorOption} from 'estraverse';
-import {property, } from 'lodash';
+import {traverse as estraverse, VisitorOption} from 'estraverse';
+import {property} from 'lodash';
 
 import {traverse as myTraverse} from './traversal.js';
 import {recognizers as NodeP} from './ast-utils.js';
-import {Program} from './Program.js';
+import {sourceToAst} from './program.js';
 
-export function nodesContainingCoords(program, esprimaCoords) {
-  const ast = program.getAST();
+export function nodesContainingCoords(ast, esprimaCoords) {
   let coordsInside = nodeContainsCoord(ast, esprimaCoords);
   if (coordsInside) {
     let bottomUpNodes = [];
@@ -24,7 +23,7 @@ export function nodesContainingCoords(program, esprimaCoords) {
     return {
       bottomUpNodes,
       pathToDeepest,
-      deepestNode: nodeAtPath(program, pathToDeepest)
+      deepestNode: nodeAtPath(ast, pathToDeepest)
     };
   } else {
     return {
@@ -33,12 +32,11 @@ export function nodesContainingCoords(program, esprimaCoords) {
       deepestNode: ast
     };
   }
-};
+}
 
-function _estraverse_nodesContainingCoords(program, esprimaCoords) {
-  const ast = program.getAST();
+function _estraverse_nodesContainingCoords(ast, esprimaCoords) {
   let path = [];
-  traverse(ast, {
+  estraverse(ast, {
     enter(node, parent) {
       if(nodeContainsCoord(node, esprimaCoords)) {
         path.push(node);
@@ -50,7 +48,7 @@ function _estraverse_nodesContainingCoords(program, esprimaCoords) {
     path: path, 
     deepestNode: path[0]
   };
-};
+}
 
 export function nodeContainsCoord(node, esprimaCoords) {
   function ifThen(premise, consequence) {
@@ -63,23 +61,21 @@ export function nodeContainsCoord(node, esprimaCoords) {
   return betweenLines 
     && ifThen(onStartLine, esprimaCoords.column >= start.column)
     && ifThen(onEndLine, esprimaCoords.column <= end.column);
-};
+}
 
-export function programNodes(program) {
-  const ast = program.getAST();
+export function programNodes(ast) {
   const nodes = [];
-  traverse(ast, {
+  estraverse(ast, {
     enter(node, parent) {
       nodes.push(node);
     }
   });
   return nodes;
-};
+}
 
-export function programSignedLiteralNodes(program) {
-  const ast = program.getAST();
+export function signedLiteralNodes(ast) {
   const nodes = [];
-  traverse(ast, {
+  estraverse(ast, {
     enter(node, parent) {
       if (NodeP.isSignedNumericLiteral(node)) {
         nodes.push(node);
@@ -88,13 +84,12 @@ export function programSignedLiteralNodes(program) {
     }
   });
   return nodes;
-};
+}
 
-export function nodeAtPath(program, path) {
-  const ast = program.getAST();
+export function nodeAtPath(ast, path) {
   if (path.length !== 0) {
     return property(path)(ast);
   } else {
     return ast;
   }
-};
+}

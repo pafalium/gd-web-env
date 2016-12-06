@@ -5,7 +5,9 @@ import esprima from 'esprima';
 import estraverse from 'estraverse';
 import escodegen from 'escodegen';
 
+
 import {constructors as Nodes, recognizers as NodeP} from './Parsing/ast-utils.js';
+import {sourceToAst} from './Parsing/program.js';
 import {idGenerator} from '../id-generator.js';
 
 import primitives from '../SceneGraph/primitives.js';
@@ -33,7 +35,7 @@ function runProgramPrime2(program, transforms, predefinedBindings=primitives) {
 	//       - Option 3: Provide a function and an array with AstNodes in preorder.
 	// TODO: Handle runtime exceptions.
 	//
-	var programAst = _.cloneDeep(program.getAST());
+	var programAst = _.cloneDeep(sourceToAst(program));
 
 	//gather nodes affected by each transform
 	var nodesToInstrument = new Map(transforms.map(t=>[t,new Set()]));

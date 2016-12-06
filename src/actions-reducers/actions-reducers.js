@@ -1,8 +1,7 @@
 
 import {combineReducers} from 'redux';
 
-import {Program} from '../Runner/Parsing/Program.js';
-const nullProgram = {name: 'untitled', program: Program.fromSourceCode('')};
+const nullProgram = {name: 'untitled', program: ''};
 
 import {examples as examplePrograms} from '../example-programs/examples.js';
 
@@ -202,7 +201,7 @@ function programs(state = examplePrograms, action = {}) {
       // Do program storage stuff.
     case CREATE_PROGRAM:
       return [
-        {name: action.name, program: Program.fromSourceCode(action.source)},
+        {name: action.name, program: action.source},
         ...examplePrograms
       ];
     case SAVE_PROGRAM:

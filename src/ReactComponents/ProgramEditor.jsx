@@ -1,6 +1,6 @@
 
-import {noop, times, constant} from 'lodash';
-import React from 'react';
+import {noop, times, constant, difference} from 'lodash';
+import React, {PropTypes} from 'react';
 import brace from 'brace';
 import AceEditor from 'react-ace';
 const Range = brace.acequire('ace/range').Range;
@@ -9,8 +9,8 @@ import 'brace/mode/javascript';
 import 'brace/theme/monokai';
 import 'brace/ext/language_tools';// this module is imported to get rid of "mispelled options" warning from react-ace
 
-import {Program} from '../Runner/Parsing/Program.js';
-import {nodesContainingCoords, programNodes, programSignedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';
+import {validSource, sourceToAst} from '../Runner/Parsing/program.js';
+import {nodesContainingCoords, signedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';
 import {recognizers as NodeP, constructors as Nodes} from '../Runner/Parsing/ast-utils.js';
 import * as dragmanager from './drag-manager.js';
 
@@ -50,17 +50,18 @@ class ProgramEditor extends React.Component {
       - onValidProgram
       - onHoveredNode
     State:
-      *not-specified*
+      - ast
   */
   render() {
+    const {ast} = this.state;
     return (
       <div 
-        onMouseMove={this.handleMouseMove}
-        onMouseDown={this.handleMouseDown}>
+        onMouseMove={ast !== null ? this.handleMouseMove : noop}
+        onMouseDown={ast !== null ? this.handleMouseDown : noop}>
         <AceEditor
           ref="aceEditor"
           onChange={this.handleChange}
-          value={this.props.program.getSourceCode()}
+          value={this.props.program}
           mode="javascript"
           theme="monokai"
           width="100%"
@@ -70,8 +71,14 @@ class ProgramEditor extends React.Component {
       </div>
     );
   }
+
   constructor(props) {
     super(props);
+    this.state = {
+      ast: validSource(props.program) 
+        ? sourceToAst(props.program)
+        : null
+    };
     // Initialize state.
     this.initializeDecorations();
     this.initializeSliderMarkers();
@@ -80,40 +87,57 @@ class ProgramEditor extends React.Component {
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
   }
+
   componentDidMount() {
     this.aceEditor = this.refs["aceEditor"].editor;
     this.updateSliderMarkers();
     this.updateDecorations(this.props.nodeDecorations);
   }
+
+  componentWillReceiveProps(newProps) {
+    const {program} = newProps;
+    this.setState({
+      ast: validSource(program)
+        ? sourceToAst(program)
+        : null
+    });
+  }
+
   componentDidUpdate() {
     this.updateSliderMarkers();
     this.updateDecorations(this.props.nodeDecorations);
   }
+
   handleMouseDown(mouseDownEvent) {
     // Begin slider behavior when necessary.
     this.tryStartConstantAdjustment(mouseDownEvent);
   }
+
   handleMouseMove(mouseMoveEvent) {
     let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
-    let {deepestNode, bottomUpNodes} = nodesContainingCoords(this.props.program, programCoords);
+    let {deepestNode, bottomUpNodes} = nodesContainingCoords(this.state.ast, programCoords);
     this.props.onHoveredNode({
       node: deepestNode,
       path: bottomUpNodes
     });
   }
-  handleChange(newValue) {
-    if (Program.isSyntaticallyCorrect(newValue)) {
-      this.props.onValidProgram(Program.fromSourceCode(newValue));
+
+  handleChange(newSource) {
+    this.props.onProgramChange(newSource);
+    if (validSource(newSource)) {
+      this.props.onValidProgram(newSource);
     }
   }
+
   initializeDecorations() {
     this.decorationsToMarkers = new Map();
   }
+
   updateDecorations(newDecorations) {
     let currentDecorations = Array.from(this.decorationsToMarkers.keys());
-    let leavingDecorations = _.difference(currentDecorations, newDecorations);
-    let keepingDecorations = _.difference(currentDecorations, leavingDecorations);
-    let enteringDecorations = _.difference(newDecorations, keepingDecorations);
+    let leavingDecorations = difference(currentDecorations, newDecorations);
+    let keepingDecorations = difference(currentDecorations, leavingDecorations);
+    let enteringDecorations = difference(newDecorations, keepingDecorations);
     //Remove leaving.
     leavingDecorations
       .map(dec => this.decorationsToMarkers.get(dec))
@@ -130,9 +154,11 @@ class ProgramEditor extends React.Component {
       this.decorationsToMarkers.set(dec, marker);
     });
   }
+
   initializeSliderMarkers() {
     this.sliderMarkers = [];
   }
+
   updateSliderMarkers() {
     // Remove previous markers.
     this.sliderMarkers.forEach(marker => {
@@ -140,22 +166,25 @@ class ProgramEditor extends React.Component {
     });
     this.sliderMarkers = [];
     // Add current markers.
-    let numericLiterals = programSignedLiteralNodes(this.props.program);
+    let numericLiterals = this.state.ast !== null 
+      ? signedLiteralNodes(this.state.ast)
+      : [];
     numericLiterals.forEach(literal => {
       let range = getNodeRange(literal);
       let marker = this.aceEditor.getSession().addMarker(range, "adjustable-hint", "text", false);
       this.sliderMarkers.push(marker);
     });
   }
+
   tryStartConstantAdjustment(mouseDownEvent) {
     let programCoords = this.mouseEventToEsprimaCoords(mouseDownEvent);
-    let {bottomUpNodes, pathToDeepest} = nodesContainingCoords(this.props.program, programCoords);
+    let {bottomUpNodes, pathToDeepest} = nodesContainingCoords(this.state.ast, programCoords);
     let shouldStart = NodeP.isNumericLiteral(bottomUpNodes[0]);
     if (shouldStart) {
       let pathToNode = NodeP.isSignedNumericLiteral(bottomUpNodes[1]) 
         ? pathToDeepest.slice(0, -1)
         : pathToDeepest;
-      let initialTargetNode = nodeAtPath(this.props.program, pathToNode);
+      let initialTargetNode = nodeAtPath(this.state.ast, pathToNode);
       let literalText = literalSourceCode(initialTargetNode);
       let componentExtractor = /^(\+|\-)?([0-9]*)(?:\.([0-9]+))?$/; // Not handling 0x 0o 0b
       let [,signStr="", intStr, fracStr=""] = componentExtractor.exec(literalText);
@@ -167,8 +196,7 @@ class ProgramEditor extends React.Component {
         let deltaInt = deltaX;
         let newInt = startingInt + deltaInt;
 
-        let newLiteralText = literalTextFromInt(newInt, fracDigitsNum);
-        let targetNode = nodeAtPath(this.props.program, pathToNode);
+        let targetNode = nodeAtPath(this.state.ast, pathToNode);
         let doc = this.aceEditor.getSession().getDocument();
         doc.replace(
           getNodeRange(targetNode), 
@@ -177,6 +205,7 @@ class ProgramEditor extends React.Component {
       dragmanager.start(mouseDownEvent, {onMove});
     }
   }
+
   mouseEventToEsprimaCoords(mouseEvent) {
     //this.aceEditor
     let {clientX, clientY} = mouseEvent;
@@ -187,6 +216,32 @@ class ProgramEditor extends React.Component {
   }
 }
 
+class NodeDecoration {
+  constructor(node, color) {
+    this.node = node;
+    this.color = color;
+  }
+}
+
+function makeNodeDecoration(node, color) {
+  return new NodeDecoration(node, color);
+}
+
+export default ProgramEditor;
+export {makeNodeDecoration};
+
+
+
+ProgramEditor.propTypes = {
+  program: PropTypes.string.isRequired,
+  nodeDecorations: PropTypes.arrayOf(PropTypes.instanceOf(NodeDecoration)).isRequired,
+  onProgramChange: PropTypes.func,
+  onValidProgram: PropTypes.func,
+  onHoveredNode: PropTypes.func
+};
+
+
+
 
 // Adjustable constants helper functions.
 function literalSourceCode(node) {
@@ -196,6 +251,7 @@ function literalSourceCode(node) {
     return node.raw;
   }
 }
+
 function absoluteValueTextFromInt(int, fracDigitsNum) {
   function getDigits(int) {
     let intDigits = [];
@@ -219,14 +275,16 @@ function absoluteValueTextFromInt(int, fracDigitsNum) {
     : allDigits.join("");
   return completeStr;
 }
+
 function numericLiteralFromInt(int, fracDigitsNum) {
   let absStr = absoluteValueTextFromInt(int, fracDigitsNum);
   let isNegative = int < 0;
   return isNegative
     ? Nodes.unaryExpr("-", 
-        Nodes.literal(Number.parseFloat(completeStr), completeStr))
-    : Nodes.literal(Number.parseFloat(completeStr), completeStr);
+        Nodes.literal(Number.parseFloat(absStr), absStr))
+    : Nodes.literal(Number.parseFloat(absStr), absStr);
 }
+
 function literalTextFromInt(int, fracDigitsNum) {
   let absStr = absoluteValueTextFromInt(int, fracDigitsNum);
   let signStr = int < 0 ? "-" : "";
@@ -239,12 +297,14 @@ function getNodeRange(astNode) {
   const {start, end} = astNode.loc;
   return new Range(start.line-1, start.column, end.line-1, end.column);
 }
+
 function documentCoordsToEsprimaCoords(documentCoords) {
   return {
     line: documentCoords.row + 1,
     column: documentCoords.column
   };
 }
+
 function esprimaCoordsToDocumentCoords(esprimaCoords) {
   return {
     row: esprimaCoords.line - 1,
@@ -264,6 +324,7 @@ function addColoredMarker(aceEditor, range, color) {
   });
   return marker.id;
 }
+
 function drawColoredMarker(htmlStringArray, range, left, top, config) {
   //Based on: ace/layer/marker - drawTextMarker().
   //push html string into htmlstringarray that represents the marker as DOM objects.
@@ -309,26 +370,16 @@ function drawColoredMarker(htmlStringArray, range, left, top, config) {
       "background-color:"+this.color+";"+"position: absolute;"+"opacity: 0.4;");
   }
 }
+
 function getBorderClass(tl, tr, br, bl) {
   return (
     "ace_br" +
     ((tl ? 1 : 0) | (tr ? 2 : 0) | (br ? 4 : 0) | (bl ? 8 : 0))
   );
 }
+
 function getTop(row, layerConfig) {
   return (row - layerConfig.firstRowScreen) * layerConfig.lineHeight;
 }
 
 
-class NodeDecoration {
-  constructor(node, color) {
-    this.node = node;
-    this.color = color;
-  }
-}
-function makeNodeDecoration(node, color) {
-  return new NodeDecoration(node, color);
-}
-
-export default ProgramEditor;
-export {makeNodeDecoration};
