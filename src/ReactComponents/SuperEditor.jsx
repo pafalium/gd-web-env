@@ -1,17 +1,105 @@
 
-import React from 'react';
+import React, {Children, PropTypes} from 'react';
 import _, {partial, debounce, noop} from 'lodash';
 
 import color from '../SceneGraph/color.js';
 import ProgramEditor, {makeNodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoration} from './ResultsView.jsx';
 
-import {runWithTraceability, runNormally} from '../Runner/run.js';
+import {runWithTraceability, runNormally, emptyResults} from '../Runner/run.js';
 import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 
 import {validSource} from '../Runner/Parsing/program.js';
 
 import time from '../utils/time.js';
+
+
+//8888888                                         888                 888 
+//  888                                           888                 888 
+//  888                                           888                 888 
+//  888   88888b.d88b.  88888b.   .d88b.  888d888 888888 .d88b.   .d88888 
+//  888   888 "888 "88b 888 "88b d88""88b 888P"   888   d8P  Y8b d88" 888 
+//  888   888  888  888 888  888 888  888 888     888   88888888 888  888 
+//  888   888  888  888 888 d88P Y88..88P 888     Y88b. Y8b.     Y88b 888 
+//8888888 888  888  888 88888P"   "Y88P"  888      "Y888 "Y8888   "Y88888 
+//                      888                                               
+//                      888                                               
+//                      888                                               
+
+const ColumnSplit = ({children, height = '100%'}) => (
+  <div className='column-split' style={{height}}>
+    {Children.map(children, c => 
+      <div style={{width: 100/Children.count(children) + '%', height: '100%'}}>
+        {c}
+      </div>
+    )}
+  </div>
+);
+
+const RowSplit = ({children}) => (
+  <div className='row-split'>
+    {children}
+  </div>
+);
+
+const HorizontalBar = ({children}) => (
+  <div className='horizontal-bar'>
+    <div>{children}</div>
+  </div>
+);
+
+const Checkbox = ({label, checked, onClick}) => (
+  <label className='checkbox' onChange={onClick}>
+    <input type='checkbox' checked={checked}/>
+    <span>{label}</span>
+  </label>
+);
+
+
+//       d8888          888                      888 
+//      d88888          888                      888 
+//     d88P888          888                      888 
+//    d88P 888  .d8888b 888888 888  888  8888b.  888 
+//   d88P  888 d88P"    888    888  888     "88b 888 
+//  d88P   888 888      888    888  888 .d888888 888 
+// d8888888888 Y88b.    Y88b.  Y88b 888 888  888 888 
+//d88P     888  "Y8888P  "Y888  "Y88888 "Y888888 888 
+//                                                   
+//                                                   
+//                                                   
+
+const RunningControlsBar = ({
+  autorun, 
+  traceability, 
+  onAutorunClick, 
+  onTraceabilityClick,
+  onRunClick
+}) => (
+  <HorizontalBar>
+    <Checkbox label='Run Automatically' checked={autorun} onClick={onAutorunClick}/>
+    <Checkbox label='Capture Trace' checked={traceability} onClick={onTraceabilityClick}/>
+    <button onClick={onRunClick}>Run Now</button>
+  </HorizontalBar>
+);
+
+const StatusBar = ({status}) => (
+  <HorizontalBar>
+    <span>{status}</span>
+  </HorizontalBar>
+);
+
+
+// .d8888b.                                     8888888888     888 d8b 888                    
+//d88P  Y88b                                    888            888 Y8P 888                    
+//Y88b.                                         888            888     888                    
+// "Y888b.   888  888 88888b.   .d88b.  888d888 8888888    .d88888 888 888888 .d88b.  888d888 
+//    "Y88b. 888  888 888 "88b d8P  Y8b 888P"   888       d88" 888 888 888   d88""88b 888P"   
+//      "888 888  888 888  888 88888888 888     888       888  888 888 888   888  888 888     
+//Y88b  d88P Y88b 888 888 d88P Y8b.     888     888       Y88b 888 888 Y88b. Y88..88P 888     
+// "Y8888P"   "Y88888 88888P"   "Y8888  888     8888888888 "Y88888 888  "Y888 "Y88P"  888     
+//                    888                                                                     
+//                    888                                                                     
+//                    888                                                                     
 
 /*
   Running automatically and capturing trace were joined in this component. 
@@ -44,51 +132,42 @@ class SuperEditor extends React.Component {
     this.performRun = this.performRun.bind(this);
     this.scheduleRun = debounce(this.performRun, 100/*msec*/);
     // Initialize state.
-    // TODO Move to initialize and update methods.
-    let programResults = runWithTraceability(props.program);
     this.state = {
       currentProgram: props.program,
       runAutomatically: true,
       captureTrace: true,
       nodeDecorations: [],
       resultDecorations: [],
-      programResults
+      programResults: emptyResults,
+      status: 'idle'
     };
+
+    this.scheduleRun();
   }
 
   render() {
     return (
-      <div>
-        <div style={styles.controls}>
-          <div onClick={this.toggleRunAutomatically} style={styles.controlsItem}>
-            <input type="checkbox" checked={this.state.runAutomatically} />
-            <span>Run automatically</span>
-          </div>
-          <div onClick={this.toggleCaptureTrace} style={styles.controlsItem}>
-            <input type="checkbox" checked={this.state.captureTrace} />
-            <span>Capture trace</span>
-          </div>
-          <div style={styles.controlsItem}>
-            <button onClick={this.handleRun}>Run now</button>
-          </div>
-        </div>
-        <div style={styles.splitParent}>
-          <div style={styles.splitLeft}>
-            <ProgramEditor
-              program={this.state.currentProgram}
-              onProgramChange={this.handleProgramChange}
-              onValidProgram={noop}
-              nodeDecorations={this.state.captureTrace ? this.state.nodeDecorations : []}
-              onHoveredNode={this.handleHoveredNode} />
-          </div>
-          <div style={styles.splitRight}>
-            <ResultsView
-              results={this.state.programResults}
-              resultDecorations={this.state.captureTrace ? this.state.resultDecorations : []}
-              onHoveredResultInstance={this.state.captureTrace ? this.handleHoveredResultInstance : null} />
-          </div>
-        </div>
-      </div>
+      <RowSplit>
+        <RunningControlsBar
+          autorun={this.state.runAutomatically}
+          traceability={this.state.captureTrace}
+          onAutorunClick={this.toggleRunAutomatically}
+          onTraceabilityClick={this.toggleCaptureTrace}
+          onRunClick={this.handleRun}/>
+        <ColumnSplit height='calc(100% - 6em)'>
+          <ProgramEditor
+            program={this.state.currentProgram}
+            onProgramChange={this.handleProgramChange}
+            onValidProgram={noop}
+            nodeDecorations={this.state.captureTrace ? this.state.nodeDecorations : []}
+            onHoveredNode={this.handleHoveredNode}/>
+          <ResultsView
+            results={this.state.programResults}
+            resultDecorations={this.state.captureTrace ? this.state.resultDecorations : []}
+            onHoveredResultInstance={this.state.captureTrace ? this.handleHoveredResultInstance : null}/>
+        </ColumnSplit>
+        <StatusBar status={this.state.status}/>
+      </RowSplit>
     );
   }
 
@@ -123,8 +202,16 @@ class SuperEditor extends React.Component {
   }
 
   handleProgramChange(program) {
+    let stateChanges = {};
+    // update status
+    stateChanges = Object.assign({}, stateChanges, { 
+      status: validSource(program)
+        ? 'changed'
+        : 'invalid'
+    });
     // update the current program
-    this.setState({currentProgram: program});
+    stateChanges = Object.assign({}, stateChanges, {currentProgram: program});
+    this.setState(stateChanges);
     // propagate change to owner component
     this.props.onProgramChange(program);
   }
@@ -168,16 +255,22 @@ class SuperEditor extends React.Component {
   }
   
   performRun() {
-    if (this.state.captureTrace) {
-      let programResults = time("Traceability", () => runWithTraceability(this.state.currentProgram));
-      this.setState({
-        programResults
-      });
-    } else {
-      let programResults = time("Bare run", () => runNormally(this.state.currentProgram));
-      this.setState({
-        programResults
-      });
+    this.setState({status: 'running'});
+    try {
+      if (this.state.captureTrace) {
+        let programResults = time("Traceability", () => runWithTraceability(this.state.currentProgram));
+        this.setState({
+          programResults
+        });
+      } else {
+        let programResults = time("Bare run", () => runNormally(this.state.currentProgram));
+        this.setState({
+          programResults
+        });
+      }
+      this.setState({status: 'idle'});  
+    } catch (e) {
+      this.setState({status: 'error:' + e.message});
     }
     this.setState({
       nodeDecorations: [],
@@ -186,28 +279,9 @@ class SuperEditor extends React.Component {
   }
 }
 
-const styles = {
-  controls: {
-    display: "flex",
-    alignItems: "center",
-    height: "2em"
-  },
-  controlsItem: {
-    marginLeft: "1em",
-    marginRight: "1em"
-  },
-  splitParent: {
-    display: "flex",
-    height: "calc(100% - 2em)"
-  },
-  splitLeft: {
-    width: "50%",
-    height: "100%"
-  },
-  splitRight: {
-    width: "50%",
-    height: "100%"
-  }
-}
+SuperEditor.propTypes = {
+  program: PropTypes.string.isRequired,
+  onProgramChange: PropTypes.func.isRequired
+};
 
 export default SuperEditor;

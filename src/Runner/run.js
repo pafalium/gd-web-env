@@ -34,3 +34,7 @@ function ProgramResults(results, traceabilityInfo) {
 export {run as runNormally};
 export {runWithTraceability};
 export {ProgramResults};
+export const emptyResults = new ProgramResults(
+	{topLevelExprResults: new Map()},
+	{callTraces: new Map()}
+);
