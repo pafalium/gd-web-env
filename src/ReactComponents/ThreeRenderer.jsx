@@ -7,7 +7,7 @@ import THREE from 'three';
   A component that renders whatever camera and scene using a THREE.WebGLRenderer.
 */
 
-class ThreeRenderer extends React.Component {
+class ThreeRenderer extends React.PureComponent {
   componentDidMount() {
     const canvas = ReactDOM.findDOMNode(this.refs["canvas"]);
     const renderer = new THREE.WebGLRenderer({
@@ -16,18 +16,21 @@ class ThreeRenderer extends React.Component {
     this._renderer = renderer;
     this._draw();
   }
+
   componentWillUmmount() {
     this._renderer = null;
   }
+
   componentDidUpdate() {
     const {width, height} = this.props;
     this._renderer.setViewport(0, 0, width, height);
     this._draw();
   }
+
   _draw() {
-    //TODO: [Maybe] Move the drawing method out of the this component, like in apparatus.
     this._renderer.render(this.props.scene, this.props.camera);
   }
+
   render() {
     return ( 
       <canvas 

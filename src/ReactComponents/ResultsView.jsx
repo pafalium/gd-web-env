@@ -64,27 +64,30 @@ class ResultsView extends React.Component {
 		if(shouldUpdateDecorations) {
 			this.updateResultDecorations(threeConvertedResults, newProps.resultDecorations);
 		}
+		let threeScene = shouldComputeObjects || shouldUpdateDecorations
+			? this.computeThreeScene(threeConvertedResults.threeObjects)
+			: this.state.threeScene;
+
 		// Return the new complete state.
 		let shouldHandleHovers = !!newProps.onHoveredResultInstance;
 		return {
 			threeConvertedResults,
+			threeScene,
 			handleMouseMove: shouldHandleHovers 
 				? this.handleMouseMove
 				: noop
 		};
 	}
 
-	computeThreeScene() {
+	computeThreeScene(threeObjects) {
 		let scene = new THREE.Scene();
 		scene.add(
 			this.computeStaticThreeObjects(), 
-			this.computeResultInstanceThreeObjects());// or threeConvertedResults.getObjects()
+			this.computeResultInstanceThreeObjects(threeObjects));// or threeConvertedResults.getObjects()
 		return scene;
 	}
 
-	computeResultInstanceThreeObjects() {
-		// create three objects for the results
-		let threeObjects = this.state.threeConvertedResults.threeObjects;
+	computeResultInstanceThreeObjects(threeObjects) {
 		// The program's results are in Z is up coordinates.
 		// They need to be rotated back into Y is up coordinates to fit OpenGL's standard.
 		// We do this by rotating all results -pi/2 radians around the x axis.
@@ -206,7 +209,7 @@ class ResultsView extends React.Component {
 			<div onMouseMove={this.state.handleMouseMove}>
 				<OrbitThreeView 
 					ref="threeview"
-					scene={this.computeThreeScene()}/>
+					scene={this.state.threeScene}/>
 			</div>
 		);
 	}
