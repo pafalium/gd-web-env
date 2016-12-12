@@ -12,6 +12,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
+  text-rendering: optimizeLegibility;
   color: gray;
   background-color: rgb(39, 40, 34);
 }
