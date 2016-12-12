@@ -4,8 +4,8 @@ import OrbitThreeView from './OrbitThreeView.jsx';
 import {ProgramResults} from '../Runner/run.js';
 import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
-import {noop, isEqual, difference, flatten, map, forEach,
-				throttle} from 'lodash';
+import {noop, isEqual, differenceWith, flatten, map, forEach,
+				throttle, isEmpty} from 'lodash';
 
 import time from '../utils/time.js';
 
@@ -60,10 +60,13 @@ class ResultsView extends React.Component {
 			: this.state.threeConvertedResults;
 
 		// Apply resultInstance decorations.
-		let shouldUpdateDecorations = oldProps.resultDecorations !== newProps.resultDecorations
+		let shouldUpdateDecorations = !isEmpty(
+			differenceWith(newProps.resultDecorations, oldProps.resultDecorations,
+				isDecorationEqual));
 		if(shouldUpdateDecorations) {
 			this.updateResultDecorations(threeConvertedResults, newProps.resultDecorations);
 		}
+
 		let threeScene = shouldComputeObjects || shouldUpdateDecorations
 			? this.computeThreeScene(threeConvertedResults.threeObjects)
 			: this.state.threeScene;
@@ -127,8 +130,8 @@ class ResultsView extends React.Component {
 		const objectToOldMaterial = this.objectToOldMaterial;
 
 		let prevDecorations = Array.from(decorationToObjects.keys());
-		let enteringDecorations = difference(decorations, prevDecorations);
-		let leavingDecorations = difference(prevDecorations, decorations);
+		let enteringDecorations = differenceWith(decorations, prevDecorations, isDecorationEqual);
+		let leavingDecorations = differenceWith(prevDecorations, decorations, isDecorationEqual);
 
 		forEach(leavingDecorations, d=>{
 			//Restore decoration's objects materials.
@@ -385,6 +388,20 @@ function decorationMaterial(decoration) {
 	mat.depthWrite = false;
 	mat.side = THREE.DoubleSide;
 	return mat;
+}
+
+function isDecorationEqual(dec1, dec2) {
+	let areInstanceDecs = dec1 instanceof ResultInstanceDecoration
+		&& dec2 instanceof ResultInstanceDecoration;
+	let areOcorrenceDecs = dec1 instanceof ResultOcorrencesDecoration
+		&& dec2 instanceof ResultOcorrencesDecoration;
+	if (areInstanceDecs) {
+		return isEqual(dec1.path, dec2.path) && dec1.color.equals(dec2.color);
+	}
+	if (areOcorrenceDecs) {
+		return dec1.result === dec2.result && dec1.color.equals(dec2.color);
+	}
+	return false;
 }
 
 //888b     d888 d8b                   
