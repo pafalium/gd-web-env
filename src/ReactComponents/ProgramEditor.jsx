@@ -51,11 +51,12 @@ class ProgramEditor extends React.Component {
       - onHoveredNode
     State:
       - ast
+      - dragging
   */
   render() {
-    const {ast} = this.state;
+    const {ast, dragging} = this.state;
     return (
-      <div 
+      <div
         onMouseMove={ast !== null ? this.handleMouseMove : noop}
         onMouseDown={ast !== null ? this.handleMouseDown : noop}>
         <AceEditor
@@ -67,7 +68,8 @@ class ProgramEditor extends React.Component {
           width="100%"
           height="100%"
           editorProps={{$blockScrolling: Infinity}}
-          setOptions={{dragEnabled: false}}/>
+          setOptions={{dragEnabled: false}}
+          className={dragging ? 'prog-editor-no-selection' : ''}/>
       </div>
     );
   }
@@ -77,7 +79,8 @@ class ProgramEditor extends React.Component {
     this.state = {
       ast: validSource(props.program) 
         ? sourceToAst(props.program)
-        : null
+        : null,
+        dragging: false
     };
     // Initialize state.
     this.initializeDecorations();
@@ -181,6 +184,9 @@ class ProgramEditor extends React.Component {
     let {bottomUpNodes, pathToDeepest} = nodesContainingCoords(this.state.ast, programCoords);
     let shouldStart = NodeP.isNumericLiteral(bottomUpNodes[0]);
     if (shouldStart) {
+      // Update state
+      this.setState({dragging: true});
+      // Setup text adjustment
       let pathToNode = NodeP.isSignedNumericLiteral(bottomUpNodes[1]) 
         ? pathToDeepest.slice(0, -1)
         : pathToDeepest;
@@ -202,7 +208,10 @@ class ProgramEditor extends React.Component {
           getNodeRange(targetNode), 
           literalTextFromInt(newInt, fracDigitsNum));
       };
-      dragmanager.start(mouseDownEvent, {onMove});
+      const onUp = () => {
+        this.setState({dragging: false});
+      };
+      dragmanager.start(mouseDownEvent, {onMove, onUp});
     }
   }
 

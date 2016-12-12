@@ -8,6 +8,16 @@
 }
 
 
+/* from http://stackoverflow.com/questions/24757506/how-to-disable-in-ace-editor-the-selection */
+.prog-editor-no-selection .ace_marker-layer .ace_selection {
+  background: transparent !important;
+}
+
+.prog-editor-no-selection .ace_cursor {
+  color: transparent !important;
+}
+
+
 
 body {
   margin: 0;
