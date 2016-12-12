@@ -1,54 +1,12 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
+
 import Select from 'react-select';
+import {VerticalIconBar, Spacer, IconButton, Drawer} from '../ReactComponents/generic.jsx';
 
 import {selectProgram, setExportCads, doExportToCads, doClearCads} from './actions-reducers.js';
 
-//8888888                                         888                 888 
-//  888                                           888                 888 
-//  888                                           888                 888 
-//  888   88888b.d88b.  88888b.   .d88b.  888d888 888888 .d88b.   .d88888 
-//  888   888 "888 "88b 888 "88b d88""88b 888P"   888   d8P  Y8b d88" 888 
-//  888   888  888  888 888  888 888  888 888     888   88888888 888  888 
-//  888   888  888  888 888 d88P Y88..88P 888     Y88b. Y8b.     Y88b 888 
-//8888888 888  888  888 88888P"   "Y88P"  888      "Y888 "Y8888   "Y88888 
-//                      888                                               
-//                      888                                               
-//                      888                                               
-
-const VerticalIconBar = ({children}) => (
-  <div className="vertical-icon-bar">
-    {children}
-  </div>
-);
-
-const Spacer = ({width, height}) => (
-  <div style={{width, height}}/>
-);
-
-const IconButton = ({icon, onClick}) => (
-  <img className="icon-button" onClick={onClick} src={icon}/>
-);
-
-const Drawer = ({open, children}) => (
-  <div className="drawer" style={{display: open ? 'block' : 'none'}}>
-    {children}
-  </div>
-);
-
-
-//       d8888          888                      888 
-//      d88888          888                      888 
-//     d88P888          888                      888 
-//    d88P 888  .d8888b 888888 888  888  8888b.  888 
-//   d88P  888 d88P"    888    888  888     "88b 888 
-//  d88P   888 888      888    888  888 .d888888 888 
-// d8888888888 Y88b.    Y88b.  Y88b 888 888  888 888 
-//d88P     888  "Y8888P  "Y888  "Y88888 "Y888888 888 
-//                                                   
-//                                                   
-//                                                   
 
 //8888888b.                                                          .d8888b.           888 
 //888   Y88b                                                        d88P  Y88b          888 

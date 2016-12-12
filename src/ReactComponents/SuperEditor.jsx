@@ -1,8 +1,9 @@
 
-import React, {Children, PropTypes} from 'react';
+import React, {PropTypes} from 'react';
 import _, {partial, debounce, noop} from 'lodash';
 
 import color from '../SceneGraph/color.js';
+import {ColumnSplit, RowSplit, HorizontalBar, Checkbox} from './generic.jsx';
 import ProgramEditor, {makeNodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoration} from './ResultsView.jsx';
 
@@ -12,48 +13,6 @@ import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 import {validSource} from '../Runner/Parsing/program.js';
 
 import time from '../utils/time.js';
-
-
-//8888888                                         888                 888 
-//  888                                           888                 888 
-//  888                                           888                 888 
-//  888   88888b.d88b.  88888b.   .d88b.  888d888 888888 .d88b.   .d88888 
-//  888   888 "888 "88b 888 "88b d88""88b 888P"   888   d8P  Y8b d88" 888 
-//  888   888  888  888 888  888 888  888 888     888   88888888 888  888 
-//  888   888  888  888 888 d88P Y88..88P 888     Y88b. Y8b.     Y88b 888 
-//8888888 888  888  888 88888P"   "Y88P"  888      "Y888 "Y8888   "Y88888 
-//                      888                                               
-//                      888                                               
-//                      888                                               
-
-const ColumnSplit = ({children, height = '100%'}) => (
-  <div className='column-split' style={{height}}>
-    {Children.map(children, c => 
-      <div style={{width: 100/Children.count(children) + '%', height: '100%'}}>
-        {c}
-      </div>
-    )}
-  </div>
-);
-
-const RowSplit = ({children}) => (
-  <div className='row-split'>
-    {children}
-  </div>
-);
-
-const HorizontalBar = ({children}) => (
-  <div className='horizontal-bar'>
-    <div>{children}</div>
-  </div>
-);
-
-const Checkbox = ({label, checked, onClick}) => (
-  <label className='checkbox' onChange={onClick}>
-    <input type='checkbox' checked={checked}/>
-    <span>{label}</span>
-  </label>
-);
 
 
 //       d8888          888                      888 
