@@ -51,7 +51,12 @@ gulp.task('css', function () {
     .pipe(gulp.dest('./dist/'))
     .pipe(streamify(bust()))
     .pipe(gulp.dest('.'));
-})
+});
+
+gulp.task('icons', function () {
+  return gulp.src('./icons/**/*')
+    .pipe(gulp.dest('./dist/icons'));
+});
 
 gulp.task('html', function () {
   var busters = JSON.parse(fs.readFileSync('busters.json'));
@@ -71,7 +76,8 @@ gulp.task('watch', function(){
   gulp.watch('package.json', ['libs']);
   gulp.watch('src/**', ['scripts']);
   gulp.watch('styles/styles.css', ['css']);
+  gulp.watch('icons/**', ['icons']);
   gulp.watch('busters.json', ['html']);
 });
 
-gulp.task('default', ['libs', 'scripts', 'css', 'watch']);
+gulp.task('default', ['libs', 'scripts', 'css', 'icons', 'html', 'watch']);
