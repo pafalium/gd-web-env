@@ -18,8 +18,8 @@
     (parameterize ((current-out-backend backend))
       expr ...)))
 
-#;(for-backends (list autocad sketchup)
-                (sphere))
+;(for-backends (list autocad sketchup)
+;                (sphere))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -40,12 +40,46 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (convert-xyz xyz-jsexpr)
+  (xyz (first xyz-jsexpr) (second xyz-jsexpr) (third xyz-jsexpr)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define next-shape-id 0)
+(define (get-next-shape-id)
+  (let ([id next-shape-id])
+    (set! next-shape-id (+ next-shape-id 1))
+    id))
+
+(define shapes (make-hash))
+
+(define (set-shape-for-backend shape-id shape [backend (current-out-backend)])
+  (hash-update! shapes shape-id
+                (lambda (curr)
+                  (hash-set! curr backend shape)
+                  curr)
+                (make-hash)))
+
+(define (resolve-shape id-jsexpr)
+  (let ([id-shapes (hash-ref shapes (hash-ref id-jsexpr 'id))])
+    (hash-ref id-shapes (current-out-backend))))
+
+(define (clear-shapes)
+  (hash-clear! shapes))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-values (dispatch url)
   (dispatch-rules
    [("corners-box") #:method "post" corners-box]
+   [("right-cuboid") #:method "post" right-cuboid-handler]
    [("center-sphere") #:method "post" center-sphere]
    [("centers-cylinder") #:method "post" centers-cylinder]
-   [("echo-box") #:method "get" echo-box]
+   [("cone-frustum") #:method "post" cone-frustum-handler]
+   [("polygon") #:method "post" polygon-handler]
+   [("extrusion") #:method "post" extrusion-handler]
+   [("move") #:method "post" move-handler]
+   [("rotate") #:method "post" rotate-handler]
    [("erase-all") #:method "get" erase-all]
    [("active-backends") #:method "put" select-backends]))
 
@@ -69,46 +103,135 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (map-atoms fn lst)
+  (cond ((null? lst) lst)
+        ((list? lst) (map (lambda (el) (map-atoms fn el)) lst))
+        (else (fn lst))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (move-multiple shape vec)
+  (map-atoms (lambda (shape) (move shape vec)) shape))
+
+(define (rotate-multiple shape ang p0 p1)
+  (map-atoms (lambda (shape) (rotate shape ang p0 p1)) shape))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;;
+;; General procedure for these request handlers:
+; - Parse request's json
+; - Convert parsed json into Rosetta objects
+; - Do operation in each backend
+;   - Generate id for operation result
+;   - Actually perform the operation
+;   - Save results for future use
+; - Generate response with id of the operation's result
+;
+
 (define (corners-box req)
-  (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
-         [p1-lst (hash-ref req-json 'p1)]
-         [p2-lst (hash-ref req-json 'p2)])
-    (let ([p1 (xyz (first p1-lst) (second p1-lst) (third p1-lst))]
-          [p2 (xyz (first p2-lst) (second p2-lst) (third p2-lst))])
-      (for-backends selected-backends
-                   (box p1 p2))))
-  (response/jsexpr
-   #hasheq((id . 10))))
+  (let ([id (get-next-shape-id)])
+    (let ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([p1 (convert-xyz (hash-ref req-json 'p1))]
+            [p2 (convert-xyz (hash-ref req-json 'p2))])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (box p1 p2)))))
+    (response/jsexpr
+     (hasheq 'id id))))
 
 (define (center-sphere req)
-  (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
-         [c-lst (hash-ref req-json 'center)]
-         [radius (hash-ref req-json 'radius)])
-    (let ([c (xyz (first c-lst) (second c-lst) (third c-lst))])
-      (for-backends selected-backends
-                    (sphere c radius))))
-  (response/jsexpr
-   #hasheq((id . 11))))
+  (let ([id (get-next-shape-id)])
+    (let ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([c (convert-xyz (hash-ref req-json 'center))]
+            [radius (hash-ref req-json 'radius)])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (sphere c radius)))))
+    (response/jsexpr
+     (hasheq 'id id))))
 
 (define (centers-cylinder req)
-  (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
-         [p1-lst (hash-ref req-json 'p1)]
-         [p2-lst (hash-ref req-json 'p2)]
-         [radius (hash-ref req-json 'radius)])
-    (let ([p1 (xyz (first p1-lst) (second p1-lst) (third p1-lst))]
-          [p2 (xyz (first p2-lst) (second p2-lst) (third p2-lst))])
-      (for-backends selected-backends
-                    (cylinder p1 radius p2))))
-  (response/jsexpr
-   #hasheq((id . 12))))
+  (let ([id (get-next-shape-id)])
+    (let ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([p1 (convert-xyz (hash-ref req-json 'p1))]
+            [p2 (convert-xyz (hash-ref req-json 'p2))]
+            [radius (hash-ref req-json 'radius)])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (cylinder p1 radius p2)))))
+    (response/jsexpr
+     (hasheq 'id id))))
 
-(define (echo-box request)
-  (response/jsexpr
-   #hasheq((message . "Boxy box box"))))
+(define (cone-frustum-handler req)
+  (let ([id (get-next-shape-id)])
+    (let ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([p1 (convert-xyz (hash-ref req-json 'p1))]
+            [p2 (convert-xyz (hash-ref req-json 'p2))]
+            [r1 (hash-ref req-json 'radBot)]
+            [r2 (hash-ref req-json 'radTop)])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (cone-frustum p1 r1 p2 r2)))))
+    (response/jsexpr
+     (hasheq 'id id))))
+
+(define (right-cuboid-handler req)
+  (let ([id (get-next-shape-id)])
+    (let  ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([p1 (convert-xyz (hash-ref req-json 'p1))]
+            [p2 (convert-xyz (hash-ref req-json 'p2))]
+            [width (hash-ref req-json 'width)]
+            [height (hash-ref req-json 'height)])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (right-cuboid p1 width height p2)))))
+    (response/jsexpr
+     (hasheq 'id id))))
+
+(define (polygon-handler req)
+  (let ([id (get-next-shape-id)])
+    (let  ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([ps (map convert-xyz (hash-ref req-json 'vertices))])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (apply polygon ps)))))
+    (response/jsexpr
+     (hasheq 'id id))))
+
+(define (extrusion-handler req)
+  (let ([id (get-next-shape-id)])
+    (let  ([req-json (bytes->jsexpr (request-post-data/raw req))])
+      (let ([vec (convert-xyz (hash-ref req-json 'vec))])
+        (for-backends selected-backends
+                      (set-shape-for-backend id (extrusion (resolve-shape (hash-ref req-json 'shape)) vec)))))
+    (response/jsexpr
+     (hasheq 'id id))))
+
+
+(define (move-handler req)
+  (let ([id (get-next-shape-id)])
+    (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
+           [vec (convert-xyz (hash-ref req-json 'vec))])
+      (for-backends selected-backends
+                    (set-shape-for-backend id (map-atoms (lambda (shape)
+                                                           (move-multiple (resolve-shape shape) vec))
+                                                         (hash-ref req-json 'shape)))))
+    (response/jsexpr
+     (hasheq 'id id))))
+
+(define (rotate-handler req)
+  (let ([id (get-next-shape-id)])
+    (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
+           [ang (hash-ref req-json 'ang)]
+           [p (convert-xyz (hash-ref req-json 'p))]
+           [vec (convert-xyz (hash-ref req-json 'vec))])
+      (for-backends selected-backends
+                    (set-shape-for-backend id (map-atoms (lambda (shape) (rotate-multiple (resolve-shape shape)
+                                                                                 ang p (+c p vec)))
+                                                         (hash-ref req-json 'shape)))))
+    (response/jsexpr
+     (hasheq 'id id))))
 
 (define (erase-all request)
   (for-backends selected-backends
                 (delete-all-shapes))
+  (clear-shapes)
   (response/jsexpr
    #hasheq((succeeded . #t))))
 
