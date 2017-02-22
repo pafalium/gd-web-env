@@ -1,6 +1,8 @@
 
 import {combineReducers} from 'redux';
 
+import time from '../utils/time.js';
+
 const nullProgram = {name: 'untitled', program: ''};
 
 import {examples as examplePrograms} from '../example-programs/examples.js';
@@ -73,7 +75,7 @@ export function doExportToCads() {
     setTimeout(() => {
       try {
         selectCads(getState().exportCads);
-        runInCad(getState().activeProgram.program);
+        time("CAD export", ()=>runInCad(getState().activeProgram.program));
         dispatch({
           type: EXPORT_DONE
         });
