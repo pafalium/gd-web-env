@@ -1,5 +1,6 @@
 
-# GD web environment
+![Luna Moth's logo](favicons/android-chrome-192x192.png "Luna Moth's logo")
+# Luna Moth - GD web environment
 A Generative Design programming environment running in the web browser.
 
 This project is in a really rough state so feel free to make any suggestions.
