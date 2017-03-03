@@ -28,6 +28,3 @@ Finally, run `server/server.rkt` using Racket. It should open the index page in 
 
 __Note:__ If you don't need to export to CAD, you can just use a static http server like `http-serve`.
 
-
-## License
-__TODO__
