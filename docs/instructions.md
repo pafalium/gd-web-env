@@ -1,11 +1,11 @@
 
-# The environment
-![The environment.](web-page.PNG)
+# The Luna Moth environment
+![Luna Moth environment.](web-page.PNG)
 
 
-## Displayed results
-When the web page runs a program, it displays all the results of the expressions that are in the program's top-level.
-Put simply, it displays results of expressions that are "outside of everything".
+
+## Results
+When Luna Moth runs a program, it displays all results from expressions at the program's top-level, or put simply, it displays results of expressions that aren't inside of any function.
 
 ```javascript
 function foo() {
@@ -15,19 +15,17 @@ function foo() {
 foo();
 ```
 
-After running the previous program, the environment shows the result of the last line, `foo();`.
+After running the previous program, Luna Moth shows the result of the last line, `foo();`.
+If `foo();` was returned from another function and that function wasn't called, then the result of ``foo()`` wouldn't be shown.
 
 
-## Running
-The editor runs the program automatically after every change. This can be disabled by unchecking the _"Run automatically"_ checkbox. In this case, you can run the program by pressing the _"Run now"_ button.
+## Running controls
+Luna Moth can run programs in slightly different ways.
+By default, it will run them after every change. This can be disabled by unchecking the _"Run automatically"_ checkbox. In this case, you can run the program by pressing the _"Run now"_ button.
 
+Luna Moth also collects traceability data by default when it runs programs. You can enable and disable this by using the _"Capture Trace"_ checkbox.
 
-## Literal adjustment
-You can click and drag on any number in the source code to adjust its value. The editor does not change the amount of decimal digits of the number.
-
-Dragging right increases; dragging left decreases.
-
-![Image showing off literal adjustment.](literal-adjustment.gif)
+![Running controls.](running-controls.png)
 
 
 ## Traceability
@@ -40,8 +38,27 @@ If enabled, the editor highlights the results of functions under the mouse point
 ![Traceability from results to code.](traceability-results-code.gif)
 
 
+## Literal adjustment
+You can click and drag on any number in the source code to adjust its value. The editor does not change the amount of decimal digits of the number.
+
+Dragging right increases; dragging left decreases.
+
+![Image showing off literal adjustment.](literal-adjustment.gif)
+
+
 
 # From Racket to Javascript
+Luna Moth uses Javascript, a textual programming language like Racket.
+Javascript syntax takes inspiration from the C programming language.
+Unlike Racket, Javascript has more restrictions on how to use parenthesis. For example, curly braces (`{}`) can only be used in function definitions and for defining objects.
+
+Like C and Racket, Javascript does not enforce any particular way of indenting its programs. Although programs can take any shape you want, you may want to follow some indentation rules yourself for the sake of readability. As a wise man once said:
+>"With great power, comes great responsibility".
+
+Javascript supports higher-order functions so it should be straightforward to translate Racket programs to Javascript.
+Below are some remarks to have in mind if you are coming from Racket.
+
+
 ## Identifiers
 Javascript is similar to Processing and Python when it comes to identifiers.
 Javascript identifiers can only contain alphanumeric characters (and also `$` and `\_`) and may not start with a digit.
@@ -60,6 +77,10 @@ They are written in infix notation like in mathematical expressions, e.g. `1 + 1
 ```java
 (define (square x) (* x x))
 
+// Remark: The result of functions is given by return statements.
+// For example, "return x*x".
+// Remark: Functions stop being evaluated when they finish
+// a return statement.
 function square(x) {
   return x*x;
 }
@@ -69,10 +90,11 @@ function square(x) {
 ```java
 (lambda (x y) (sqrt (+ (* x x) (* y y))))
 
+// Just omit the function name in function declarations.
 function(x, y) {
   return Math.sqrt(x*x + y*y);
 }
-// or
+// or use the arrow function syntax
 (x, y) => Math.sqrt(x*x + y*y)
 ```
 
@@ -80,31 +102,31 @@ function(x, y) {
 ```java
 (square 2)
 
+// Just like calling a function in mathematics.
 square(2)
 ```
 
 
 ## Variables
 There three ways of declaring variables in Javascript:
-`var`,`let` and `const`.
+`var`, `let` and `const`.
 Variables declared with `var` are visible in the whole body of the function they are inside of.
+`let` and `const` are only visible in the block where they were declared, i.e. the last pair of `{` and `}`.
+`const` variables cannot be modified.
 ```javascript
 function func() {
   var a = "hello";
   let b = "there";
   const c = 42;
+  // a, b, and c can all be used inside of "func".
 }
 ```
-The variable `aVar` is only visible inside `func`.
-
-`let` and `const` are only visible in the block where they were declared, i.e. the last pair of `{` and `}`.
-`const` variables cannot be modified.
 
 ```javascript
 function func() {
   const cAnswer = 1100;
   cAnswer = 1000; // Error: cannot modify "cAnswer"
-  if (cAnswer === 1100) {
+  if (/* condition */) {
   	let deeperLet = "I'm inside!";
   }
   return deeperLet; // Error: "deeperLet" does not exist
@@ -125,7 +147,7 @@ for-of (/*variable*/ of /*javascript-iterable*/) {/*body*/}
 
 
 
-# Defined functions and variables
+# Predefined functions and variables
 ## Geometric primitives
 ```java
 (xyz)
@@ -267,8 +289,13 @@ Anything passed to `registry.provide()` calls will be available to programs run 
 
 
 # Debugging
-## Using Browser Devtools
+## Using the web browser's Devtools
 You may want to use the web browser's developer tools to debug your programs.
 
 If using Google Chrome, you can open the devtools by pressing `F12`.
 When Chrome has the devtools open, it will pause Javascript execution when it finds a `debugger;` statement.
+
+
+
+# Closing comments
+If you find that some information is missing, feel free to leave a comment or open an issue.
