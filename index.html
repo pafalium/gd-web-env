@@ -14,10 +14,24 @@
 	<meta name="theme-color" content="#ffffff">
 </head>
 <body>
+	<div id="splash" class="splash">
+		<img src="/icons/luna_moth_fill_light_512x512.png"/>
+		<h1>Luna Moth</h1>
+	</div>
 	<div id="container"></div>
 	<!-- build:js -->
 	<script src="./libs.js"></script>
 	<script src="./bundle.js"></script>
 	<!-- endbuild -->
+	<script type="text/javascript">
+		setTimeout(function() {
+			let splash = document.getElementById("splash");
+			splash.style = "opacity: 0;";
+
+			setTimeout(function () {
+				splash.parentNode.removeChild(splash);
+			}, 500);
+		}, 600);
+	</script>
 </body>
 </html>
