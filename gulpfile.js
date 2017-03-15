@@ -83,7 +83,7 @@ gulp.task('watch', function(){
   gulp.watch('styles/styles.css', ['css']);
   gulp.watch('icons/**', ['icons']);
   gulp.watch('favicons/**', ['favicons']);
-  gulp.watch('busters.json', ['html']);
+  gulp.watch(['busters.json', 'index.html'], ['html']);
 });
 
 gulp.task('default', ['libs', 'scripts', 'css', 'icons', 'favicons', 'html', 'watch']);
