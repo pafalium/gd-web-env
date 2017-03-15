@@ -8,7 +8,7 @@ import escodegen from 'escodegen';
 
 import {constructors as Nodes, recognizers as NodeP} from './Parsing/ast-utils.js';
 import {sourceToAst} from './Parsing/program.js';
-import {idGenerator} from '../id-generator.js';
+import {idGenerator} from './id-generator.js';
 
 import primitives from '../SceneGraph/primitives.js';
 

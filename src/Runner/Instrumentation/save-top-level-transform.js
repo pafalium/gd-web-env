@@ -1,6 +1,5 @@
 
 import {constructors as Nodes, recognizers as NodeP} from '../Parsing/ast-utils.js';
-import {idGenerator} from '../../id-generator.js';
 import {nodeId} from '../Parsing/node-id.js';
 
 const saveTopLevelExprsTransform = {
