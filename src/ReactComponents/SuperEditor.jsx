@@ -86,7 +86,7 @@ class SuperEditor extends React.Component {
     this.toggleCaptureTrace = this.toggleCaptureTrace.bind(this);
     this.handleRun = this.handleRun.bind(this);
     this.handleProgramChange = this.handleProgramChange.bind(this);
-    this.handleHoveredNode = this.handleHoveredNode.bind(this);
+    this.handleClickedNode = this.handleClickedNode.bind(this);
     this.handleHoveredResultInstance = this.handleHoveredResultInstance.bind(this);
     this.performRun = this.performRun.bind(this);
     this.scheduleRun = debounce(this.performRun, 100/*msec*/);
@@ -119,7 +119,8 @@ class SuperEditor extends React.Component {
             onProgramChange={this.handleProgramChange}
             onValidProgram={noop}
             nodeDecorations={this.state.captureTrace ? this.state.nodeDecorations : []}
-            onHoveredNode={this.handleHoveredNode}/>
+            onHoveredNode={noop}
+            onClickedNode={this.handleClickedNode}/>
           <ResultsView
             results={this.state.programResults}
             resultDecorations={this.state.captureTrace ? this.state.resultDecorations : []}
@@ -175,7 +176,7 @@ class SuperEditor extends React.Component {
     this.props.onProgramChange(program);
   }
 
-  handleHoveredNode({node, path}) {
+  handleClickedNode({node, path}) {
     // iff captureTrace -> highlight node (or parent) and its results
     if (this.state.captureTrace) {
       // Copied from: TraceabilityView.jsx

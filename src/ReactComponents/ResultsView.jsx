@@ -4,7 +4,8 @@ import OrbitThreeView from './OrbitThreeView.jsx';
 import {ProgramResults} from '../Runner/run.js';
 import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
-import {noop, isEqual, differenceWith, flatten, map, forEach,
+import {noop, isEqual, differenceWith, intersectionWith, 
+				flatten, map, forEach,
 				throttle, isEmpty} from 'lodash';
 
 import time from '../utils/time.js';
@@ -43,7 +44,7 @@ class ResultsView extends React.Component {
 		this.schedulePicking = throttle(this.performPicking, 100/*msec*/);
 		//Initialize state.
 		this.initializeResultDecorations();
-		this.state = this.computeState({}, props);
+		this.state = this.computeState({resultDecorations: []}, props);
 	}
 
 	componentWillReceiveProps(newProps) {
@@ -60,9 +61,13 @@ class ResultsView extends React.Component {
 			: this.state.threeConvertedResults;
 
 		// Apply resultInstance decorations.
-		let shouldUpdateDecorations = !isEmpty(
-			differenceWith(newProps.resultDecorations, oldProps.resultDecorations,
-				isDecorationEqual));
+		// Update if prev and curr are not equal
+		// nextDecs - intersection !== empty
+		let lengthsDiffer = newProps.resultDecorations.length !== oldProps.resultDecorations.length;
+		let interDecs = intersectionWith(newProps.resultDecorations, oldProps.resultDecorations,
+				isDecorationEqual);
+		let shouldUpdateDecorations = lengthsDiffer || !isEmpty(
+			differenceWith(newProps.resultDecorations, interDecs, isDecorationEqual));
 		if(shouldUpdateDecorations) {
 			this.updateResultDecorations(threeConvertedResults, newProps.resultDecorations);
 		}

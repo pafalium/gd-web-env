@@ -49,6 +49,7 @@ class ProgramEditor extends React.Component {
       - nodeDecorations {Array.<NodeDecoration>}
       - onValidProgram
       - onHoveredNode
+      - onClickedNode
     State:
       - ast
       - dragging
@@ -58,7 +59,8 @@ class ProgramEditor extends React.Component {
     return (
       <div
         onMouseMove={ast !== null ? this.handleMouseMove : noop}
-        onMouseDown={ast !== null ? this.handleMouseDown : noop}>
+        onMouseDown={ast !== null ? this.handleMouseDown : noop}
+        onClick={ast !== null ? this.handleClick : noop}>
         <AceEditor
           ref="aceEditor"
           onChange={this.handleChange}
@@ -89,6 +91,7 @@ class ProgramEditor extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   componentDidMount() {
@@ -120,6 +123,15 @@ class ProgramEditor extends React.Component {
     let programCoords = this.mouseEventToEsprimaCoords(mouseMoveEvent);
     let {deepestNode, bottomUpNodes} = nodesContainingCoords(this.state.ast, programCoords);
     this.props.onHoveredNode({
+      node: deepestNode,
+      path: bottomUpNodes
+    });
+  }
+
+  handleClick(clickEvent) {
+    let programCoords = this.mouseEventToEsprimaCoords(clickEvent);
+    let {deepestNode, bottomUpNodes} = nodesContainingCoords(this.state.ast, programCoords);
+    this.props.onClickedNode({
       node: deepestNode,
       path: bottomUpNodes
     });
@@ -246,7 +258,8 @@ ProgramEditor.propTypes = {
   nodeDecorations: PropTypes.arrayOf(PropTypes.instanceOf(NodeDecoration)).isRequired,
   onProgramChange: PropTypes.func,
   onValidProgram: PropTypes.func,
-  onHoveredNode: PropTypes.func
+  onHoveredNode: PropTypes.func,
+  onClickedNode: PropTypes.func
 };
 
 
