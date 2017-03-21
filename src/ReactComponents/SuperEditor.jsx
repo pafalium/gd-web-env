@@ -88,6 +88,7 @@ class SuperEditor extends React.Component {
     this.handleProgramChange = this.handleProgramChange.bind(this);
     this.handleClickedNode = this.handleClickedNode.bind(this);
     this.handleHoveredResultInstance = this.handleHoveredResultInstance.bind(this);
+    this.handleResultsViewClick = this.handleResultsViewClick.bind(this);
     this.performRun = this.performRun.bind(this);
     this.scheduleRun = debounce(this.performRun, 100/*msec*/);
     // Initialize state.
@@ -124,11 +125,12 @@ class SuperEditor extends React.Component {
           <ResultsView
             results={this.state.programResults}
             resultDecorations={this.state.captureTrace ? this.state.resultDecorations : []}
-            onHoveredResultInstance={this.state.captureTrace ? this.handleHoveredResultInstance : null}/>
+            onClick={this.state.captureTrace ? this.handleResultsViewClick : null}/>
         </ColumnSplit>
         <StatusBar status={this.state.status}/>
       </RowSplit>
     );
+    //onHoveredResultInstance={this.state.captureTrace ? this.handleHoveredResultInstance : null}
   }
 
   toggleRunAutomatically() {
@@ -211,6 +213,22 @@ class SuperEditor extends React.Component {
         nodeDecorations: [],
         resultDecorations: []
       });
+    }
+  }
+
+  handleResultsViewClick(resClickEvent) {
+    switch (resClickEvent.type) {
+      case ResultsView.VoidClick:
+        this.setState({
+          nodeDecorations: [],
+          resultDecorations: []
+        });
+        break;
+      case ResultsView.ResultInstanceClick:
+        this.handleHoveredResultInstance(resClickEvent);
+        break;
+      default:
+        throw new Error("Unhandled ResultsView event.");
     }
   }
   

@@ -32,6 +32,8 @@ class ResultsView extends React.Component {
 			- results: a list of the top level results of a program
 			- resultDecorations: a list of decorations to change appearence of some result instances
 			- onHoveredResultInstance: a function to be called when the current hovered result instance changes
+			- onClick: a callback receiving an object with structure {type, path, resultInstance}. 
+				Called when ResultsView is clicked
 		State:
 			- threeConvertedResults {ThreeConvertedResults}
 			- handleMouseMove {Function} either noop or detect result instance below mouse
@@ -39,9 +41,8 @@ class ResultsView extends React.Component {
 	constructor(props) {
 		super(props);
 		//Initialize bound methods.
-		this.handleMouseMove = this.handleMouseMove.bind(this);
-		this.performPicking = this.performPicking.bind(this);
-		this.schedulePicking = throttle(this.performPicking, 100/*msec*/);
+		this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 100/*msec*/);
+		this.handleClick = this.handleClick.bind(this);
 		//Initialize state.
 		this.initializeResultDecorations();
 		this.state = this.computeState({resultDecorations: []}, props);
@@ -51,6 +52,18 @@ class ResultsView extends React.Component {
 		const oldProps = this.props;
 		this.setState(this.computeState(oldProps, newProps));
 	}
+
+	//888     888               888          888            
+	//888     888               888          888            
+	//888     888               888          888            
+	//888     888 88888b.   .d88888  8888b.  888888 .d88b.  
+	//888     888 888 "88b d88" 888     "88b 888   d8P  Y8b 
+	//888     888 888  888 888  888 .d888888 888   88888888 
+	//Y88b. .d88P 888 d88P Y88b 888 888  888 Y88b. Y8b.     
+	// "Y88888P"  88888P"   "Y88888 "Y888888  "Y888 "Y8888  
+	//            888                                       
+	//            888                                       
+	//            888                                       
 
 	computeState(oldProps, newProps) {
 		// Compute threeObjects and relations between threeObjects and results.
@@ -78,11 +91,15 @@ class ResultsView extends React.Component {
 
 		// Return the new complete state.
 		let shouldHandleHovers = !!newProps.onHoveredResultInstance;
+		let shouldHandleClicks = !!newProps.onClick;
 		return {
 			threeConvertedResults,
 			threeScene,
 			handleMouseMove: shouldHandleHovers 
 				? this.handleMouseMove
+				: noop,
+			handleClick: shouldHandleClicks
+				? this.handleClick
 				: noop
 		};
 	}
@@ -184,16 +201,29 @@ class ResultsView extends React.Component {
 
 	handleMouseMove(mouseMoveEvent) {
 		let coords = mouseEventNormalizedDeviceCoords(mouseMoveEvent);
-		this.schedulePicking(coords);
+		let pickResult = this.pick(coords);
+		this.props.onHoveredResultInstance(pickResult);
 	}
 
-	performPicking(normDevCoords) {
+	handleClick(clickEvent) {
+		let coords = mouseEventNormalizedDeviceCoords(clickEvent);
+		let pickResult = this.pick(coords);
+		this.props.onClick({
+			type: pickResult.path.length === 0
+				? ResultsView.VoidClick
+				: ResultsView.ResultInstanceClick,
+			resultInstance: pickResult.resultInstance,
+			path: pickResult.path
+		})
+	}
+
+	pick(normDevCoords) {
 		let objectBelowMouse = pickClosest(normDevCoords, this.getCamera(), this.state.threeConvertedResults.threeObjects);
 		let path = buildResultInstancePath(objectBelowMouse, this.state.threeConvertedResults.threeObjectToResult);
-		this.props.onHoveredResultInstance({
+		return {
 			resultInstance: path[0],
 			path
-		});
+		};
 	}
 
 	//8888888b.                        888                  
@@ -214,7 +244,8 @@ class ResultsView extends React.Component {
 
 	render() {
 		return (
-			<div onMouseMove={this.state.handleMouseMove}>
+			<div onMouseMove={this.state.handleMouseMove}
+				onClick={this.state.handleClick}>
 				<OrbitThreeView 
 					ref="threeview"
 					scene={this.state.threeScene}/>
@@ -450,6 +481,10 @@ export default ResultsView;
 
 ResultsView.propTypes = {
 	onHoveredResultInstance: React.PropTypes.func,
+	onClick: React.PropTypes.func,
 	results: React.PropTypes.instanceOf(ProgramResults),
 	resultDecorations: React.PropTypes.arrayOf(React.PropTypes.instanceOf(ResultDecoration))
 };
+
+ResultsView.VoidClick = Symbol("VoidClick");
+ResultsView.ResultInstanceClick = Symbol("ResultInstanceClick");
