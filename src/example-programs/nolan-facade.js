@@ -65,7 +65,7 @@ function nolanPattern(p, n, nFaixas, l, angMax) {
 	const d = l/2,
 		ampSinusoide = 0.01, //amplitude varies between 0.01 and 0.15
 		freqSinusoide = 0.5,
-  		aSinusoide = ampSinusoide*Math.sin(freqSinusoide*nFaixas);
+  		aSinusoide = ampSinusoide + ampSinusoide*Math.sin(freqSinusoide*nFaixas);
     return nFaixas === 0
         ? []
         : [
