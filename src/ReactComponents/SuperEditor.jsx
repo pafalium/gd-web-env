@@ -182,7 +182,7 @@ class SuperEditor extends React.Component {
     // iff captureTrace -> highlight node (or parent) and its results
     if (this.state.captureTrace) {
       // Copied from: TraceabilityView.jsx
-      let isHoveringSomething = path.length !== 0;
+      let isHoveringSomething = path.length > 1;//[Program, SomeNode,...]
       if (isHoveringSomething) {
         let nodeColor = color.hsl(100.0/360.0, 0.5, 0.5);
         let nodeResults = getNodeResults(node, path, this.state.programResults);
@@ -192,7 +192,11 @@ class SuperEditor extends React.Component {
             partial(makeResultOcorrencesDecoration, _, nodeColor))
         });
       } else {
-        //Not hovering a node.
+          // Clicked somewhere in Program.
+          this.setState({
+          nodeDecorations: [],
+          resultDecorations: []
+        });
       }
     }
   }
