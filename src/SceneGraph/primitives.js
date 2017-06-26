@@ -230,6 +230,11 @@ const cylinder = {};
 cylinder.byRadiusHeight = function(radius, height) {
 	return cylinderPrimitive(radius, height);
 };
+cylinder.byBottomRadiusHeight = function (bottom, radius, height) {
+	let cylinder = cylinderPrimitive(radius, height);
+	let transformation = matrix.translation(bottom.x, bottom.y, bottom.z + height/2.0);
+	return transformObjectPrimitive(cylinder, transformation);
+};
 cylinder.byCentersRadius = function([baseCenter, topCenter], radius) {
 	let cylinderAxis = point.pointMinusPoint(topCenter, baseCenter);
 	let worldZAxis = vector.byXYZ(0.0,0.0,1.0);

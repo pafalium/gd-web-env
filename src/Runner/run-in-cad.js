@@ -222,6 +222,10 @@ const cylinder = {};
 cylinder.byCentersRadius = function([c1, c2], radius) {
 	return centersCylinderPrimitive(c1, c2, radius);
 };
+cylinder.byBottomRadiusHeight = function (bottom, radius, height) {
+	let top = vector.add(bottom, vector.byXYZ(0, 0, height));
+	return centersCylinderPrimitive(bottom, top, radius);
+};
 
 const sphere = {};
 sphere.byCenterRadius = function(center, radius) {
