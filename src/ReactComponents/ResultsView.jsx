@@ -125,7 +125,7 @@ class ResultsView extends React.Component {
 	computeStaticThreeObjects() {
 		// create lights
 		const sunLight = new THREE.DirectionalLight(0xffffca, 0.5);
-		sunLight.position.set(0.1, 1, 0.3);
+		sunLight.position.set(0.2, 1, 0.3);
 		const belowLight = new THREE.DirectionalLight(0xffffca, 0.1);
 		belowLight.position.set(-0.1, -1, -0.4)
 		const hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.4);
@@ -419,7 +419,7 @@ function decorationMaterial(decoration) {
 	let mat = new THREE.MeshPhongMaterial();
 	mat.emissive.set(decoration.color);
 	mat.transparent = true;
-	mat.opacity = 0.9;
+	mat.opacity = 0.6;
 	mat.depthTest = false;
 	mat.depthWrite = false;
 	mat.side = THREE.DoubleSide;
