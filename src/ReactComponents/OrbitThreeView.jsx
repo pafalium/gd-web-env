@@ -23,7 +23,8 @@ class OrbitThreeView extends React.Component {
     // Initialize state
     this.state = {
       canvasSize,
-      camera
+      camera,
+      zoom: 70.0
     };
     // Initialize bound methods
     this.updateSizeState = this.updateSizeState.bind(this);
@@ -59,14 +60,44 @@ class OrbitThreeView extends React.Component {
     return this.state.camera;
   }
   
+  updateZoom(delta) {
+    const {zoom} = this.state;
+    const camera = this.ctrlsCam;
+    let newZoom = zoom + delta;
+    if (newZoom <= 0) {
+      return;
+    } else {
+      camera.fov = newZoom;
+      camera.updateProjectionMatrix();
+      this.setState({
+        zoom: newZoom,
+        camera: camera.clone()
+      });
+    }
+  }
+
   render() {
+    const zoomPaletteStyle = {
+      zIndex: 10, 
+      position: "absolute", 
+      top: 0, 
+      left: 0
+    };
+    const containerStyle = {
+      position: "relative"
+    };
     return (
-      <div ref="anchor">
+      <div ref="anchor" style={containerStyle}>
         <ThreeRenderer 
           width={this.state.canvasSize.width} 
           height={this.state.canvasSize.height} 
           scene={this.props.scene} 
           camera={this.state.camera} />
+        <div style={zoomPaletteStyle}>
+          <button onClick={()=>this.updateZoom(-5.0)}>+</button>
+          <button onClick={()=>this.updateZoom(5.0)}>-</button>
+          <span>FOV: {this.state.zoom} degrees</span>
+        </div>
       </div>
     );
   }
