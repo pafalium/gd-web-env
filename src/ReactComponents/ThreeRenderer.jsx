@@ -41,6 +41,13 @@ class ThreeRenderer extends React.PureComponent {
       /> 
       );
   }
+
+  renderToImage() {
+    this._draw();
+    let img = new Image();
+    img.src = this._renderer.domElement.toDataURL("image/png");
+    return img;
+  }
 }
 
 const styles = {
