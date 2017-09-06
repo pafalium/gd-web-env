@@ -92,6 +92,7 @@ vector.bySpherical = function(radius, azimuthAngle, polarAngle) {
 		radius*Math.sin(azimuthAngle)*sinPolar,
 		radius*Math.cos(polarAngle));
 };
+
 vector.add = function(v1, v2) {
 	return v1.clone().add(v2);
 };
@@ -113,6 +114,13 @@ vector.length = function(vec) {
 }
 vector.normalized = function(vec) {
 	return vec.clone().normalize();
+};
+vector.coords = function(vec) {
+	return [vec.x, vec.y, vec.z];
+};
+vector.sphCoords = function(vec) {
+	let r = vec.length();
+	return [r, Math.atan2(vec.x, vec.y), Math.acos(vec.z/r)];
 };
 
 
