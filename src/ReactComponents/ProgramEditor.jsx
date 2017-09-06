@@ -218,7 +218,7 @@ class ProgramEditor extends React.Component {
       const startX = mouseDownEvent.clientX;
       const onMove = mouseMoveEvent => {
         let deltaX = mouseMoveEvent.clientX - startX;
-        let deltaInt = deltaX;
+        let deltaInt = Math.round(deltaX / 5);
         let newInt = startingInt + deltaInt;
 
         let targetNode = nodeAtPath(this.state.ast, pathToNode);
