@@ -15,6 +15,11 @@ import {recognizers as NodeP, constructors as Nodes} from '../Runner/Parsing/ast
 import * as dragmanager from './drag-manager.js';
 
 /*
+  Ace documentation: https://github.com/ajaxorg/ace/wiki
+*/
+
+
+/*
 ProgramEditor
   A component responsible for the UI of editing a program.
   It has to have a way of communicating/signaling that it produced a new version of the program.
@@ -69,8 +74,10 @@ class ProgramEditor extends React.Component {
           theme="monokai"
           width="100%"
           height="100%"
+          fontSize={16}
+          tabSize={2}
           editorProps={{$blockScrolling: Infinity}}
-          setOptions={{dragEnabled: false}}
+          setOptions={{dragEnabled: false, scrollPastEnd: 0.9/*screen size*/}}
           className={dragging ? 'prog-editor-no-selection' : ''}/>
       </div>
     );
@@ -343,7 +350,7 @@ function addColoredMarker(aceEditor, range, color) {
     renderer: drawColoredMarker,
     color: color.getStyle(),
     editor: aceEditor
-  });
+  }, true);
   return marker.id;
 }
 
