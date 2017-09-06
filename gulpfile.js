@@ -40,7 +40,7 @@ gulp.task('scripts', function () {
     .bundle()
     .on('error', handleErrors)
     .on('end', ()=>{console.log("ended")})
-    .pipe(source('bundle.js'))
+    .pipe(source('scripts.js'))
     .pipe(gulp.dest('./dist/'))
     .pipe(streamify(bust()))
     .pipe(gulp.dest('.'));
@@ -71,7 +71,7 @@ gulp.task('html', function () {
       'css': 'styles.css?v=' + busters['dist/styles.css'],
       'js': [
         'libs.js?v=' + busters['dist/libs.js'],
-        'bundle.js?v=' + busters['dist/bundle.js']
+        'scripts.js?v=' + busters['dist/scripts.js']
       ]
     }))
     .pipe(gulp.dest('./dist/'));
