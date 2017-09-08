@@ -1,5 +1,5 @@
 
-![Luna Moth's logo](favicons/android-chrome-192x192.png "Luna Moth's logo")
+![Luna Moth's logo](android-chrome-192x192.png "Luna Moth's logo")
 # Luna Moth - GD web environment
 A Generative Design programming environment running in the web browser.
 
@@ -7,10 +7,10 @@ This project is in a really rough state so feel free to make any suggestions.
 
 
 ## Live demo
-The Luna Moth live demo is here: [Luna Moth live demo](docs/demo/index.html).
+The Luna Moth live demo is here: [Luna Moth live demo](demo/index.html).
 
 ## Getting started
-If you already have the environment working, you may want to check the [instructions file](docs/instructions/instructions.md) to get started.
+If you already have the environment working, you may want to check the [instructions file](instructions/instructions.md) to get started.
 
 
 ## Building
