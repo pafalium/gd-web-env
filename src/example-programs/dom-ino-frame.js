@@ -6,7 +6,7 @@ const floors = 3;
 const floorWidth = 13.0;
 const floorDepth = 7.0;
 const floorToCeiling = 2.5;
-const slabHeight = 0.3;
+const slabThickness = 0.3;
 const stairWidth = 1.0;
 const stairStepNum = 18;
 
@@ -34,18 +34,18 @@ function slabs() {
   let floorSlab = [
     box.byCorners([ // living area portion
       point.byXYZ(0, 0, 0),
-      point.byXYZ(floorWidth, floorDepth, slabHeight)
+      point.byXYZ(floorWidth, floorDepth, slabThickness)
     ]),
     box.byCorners([ // stair landing extension
       point.byXYZ(floorWidth, 0, 0),
-      point.byXYZ(floorWidth + stairWidth, stairWidth, slabHeight)
+      point.byXYZ(floorWidth + stairWidth, stairWidth, slabThickness)
     ]),
     box.byCornerXYZ( // stair landing
         point.byXYZ(floorWidth, stairWidth, 0),
-        [2*stairWidth, stairWidth, slabHeight])
+        [2*stairWidth, stairWidth, slabThickness])
   ];
   return map(
-    i => translate(floorSlab).byZ(i*(slabHeight + floorToCeiling)),
+    i => translate(floorSlab).byZ(i*(slabThickness + floorToCeiling)),
     count(floors + 1));
 }
 
@@ -68,7 +68,7 @@ function columns() {
 }
 
 function column(pos) {
-  const height = slabHeight + (slabHeight + floorToCeiling)*floors;
+  const height = slabThickness + (slabThickness + floorToCeiling)*floors;
   return [
     box.byBottomWidthHeightZ(pos, [columnSide, columnSide], height),
     box.byCentersWidthHeight(
@@ -86,8 +86,8 @@ function stairs() {
         stairStepNum,
         stairWidth,
         stairStepNum*0.15,
-        floorToCeiling + slabHeight))
-      .byXYZ(floorWidth, 2*stairWidth, slabHeight + i*(slabHeight + floorToCeiling)),
+        floorToCeiling + slabThickness))
+      .byXYZ(floorWidth, 2*stairWidth, slabThickness + i*(slabThickness + floorToCeiling)),
     count(floors))
 }
 

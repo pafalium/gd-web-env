@@ -185,7 +185,7 @@ function arcTruss(p, apexR, baseR, phi, psi0, psi1, e, n) {
 }
 
 
-arcTruss(xyz(0,0,0), 10, 8, 0.0*Math.PI, -1.0*Math.PI/2, 1.0*Math.PI/2, 1.5, 10);
+//arcTruss(xyz(0,0,0), 10, 8, 0.0*Math.PI, -1.0*Math.PI/2, 1.0*Math.PI/2, 1.5, 10);
 
 
 
@@ -224,7 +224,7 @@ function waveTrussCs(p, apexR, baseR, l, phi, psi0, psi1, dpsi, alpha0, alpha1, 
   }
 }
 
-
+/*
 spatialTruss(
   waveTrussCs(
     xyz(0, 0, 0), 10, 8, 1.5, 0.0*Math.PI, 
@@ -233,7 +233,7 @@ spatialTruss(
   ),
   0.2, 0.1
 );
-
+*/
 
 
 
@@ -253,8 +253,10 @@ function wavyTruss(p, baseR, l, phi, psi0, psi1, psiN, alpha0, alpha1, alphaN, r
   return spatialTrussInsertApex(wavyCs(p, baseR, l, phi, psi0, psi1, psiN, alpha0, alpha1, alphaN, rAmpl));
 }
 
+/*
 wavyTruss(xyz(0, 0, 0),
   10, 1.5, 0.0*Math.PI,
   -1.0*Math.PI/2, 1.0*Math.PI/2, 15,
   0.0*Math.PI, 2.0*Math.PI, 30,
   4.0);
+*/
