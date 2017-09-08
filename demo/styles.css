@@ -1,0 +1,124 @@
+
+/*ProgramEditor styles*/
+/*Class for hinting that numeric literals are adjustable in ace.*/
+.adjustable-hint {
+  position: absolute;
+  cursor: ew-resize !important;
+  pointer-events: auto;
+}
+
+
+/* from http://stackoverflow.com/questions/24757506/how-to-disable-in-ace-editor-the-selection */
+.prog-editor-no-selection .ace_marker-layer .ace_selection {
+  background: transparent !important;
+}
+
+.prog-editor-no-selection .ace_cursor {
+  color: transparent !important;
+}
+
+
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+  color: gray;
+  background-color: rgb(39, 40, 34);
+}
+
+
+
+.vertical-icon-bar {
+  width: 80px;
+  height: 100%;
+  float: left;
+  background-color: rgb(47, 49, 41);
+  text-align: center;
+}
+
+.icon-button {
+  box-sizing: border-box;
+  width: 70px;
+  height: 70px;
+}
+
+.drawer-container {
+  float: left;
+}
+
+.drawer {
+  width: 300px;
+  height: 100%;
+  float: left;
+  background-color: rgb(47, 49, 41);
+  padding-top: 2em;
+  padding-left: 2em;
+  padding-right: 1em;
+  box-sizing: border-box;
+  position: absolute;
+}
+
+
+
+
+.column-split {
+  display: flex;
+  width: 100%;
+}
+
+.row-split {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.horizontal-bar {
+  width: 100%;
+  height: 3em;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  box-sizing: border-box;
+  padding-left: 1em;
+  padding-right: 1em;
+
+  background-color: rgb(47, 49, 41);
+}
+
+.horizontal-bar > div {
+  display: inline-block;
+}
+
+.horizontal-bar > div > * {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+
+
+
+
+.splash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background-color: rgb(39, 40, 34);
+
+  transition: opacity 0.5s ease-in;
+}
+
+.splash-hidden {
+  pointer-events: none;
+  opacity: 0;
+}

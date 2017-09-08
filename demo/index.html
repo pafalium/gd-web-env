@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title>Luna Moth</title>
+	<link rel="stylesheet" href="styles.css?v=7dc9b607e840dc131d74b0b45991625e">
+
+	<link rel="stylesheet" href="https://npmcdn.com/react-select/dist/react-select.css">
+	<!-- favicon links -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="/manifest.json">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="theme-color" content="#ffffff">
+</head>
+<body>
+	<div id="splash" class="splash">
+		<img src="/icons/luna_moth_fill_light_512x512.png"/>
+		<h1>Luna Moth</h1>
+	</div>
+	<div id="container"></div>
+	<script src="libs.js?v=b61846b97f10ecd6a1b10cfd2ae6545e"></script>
+	<script src="scripts.js?v=e49bba4a469377cee10bad4345d066bd"></script>
+
+	<script type="text/javascript">
+		setTimeout(function() {
+			let splash = document.getElementById("splash");
+			splash.style = "opacity: 0;";
+
+			setTimeout(function () {
+				splash.parentNode.removeChild(splash);
+			}, 500);
+		}, 600);
+	</script>
+</body>
+</html>
