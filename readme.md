@@ -7,7 +7,7 @@ This project is in a really rough state so feel free to make any suggestions.
 
 
 ## Live demo
-The Luna Moth live demo is here: [Luna Moth live demo](docs/demo/index.html).
+The Luna Moth live demo is here: [Luna Moth live demo](https://pafalium.github.io/gd-web-env/demo/index.html).
 
 
 ## Getting started
