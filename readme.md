@@ -6,8 +6,12 @@ A Generative Design programming environment running in the web browser.
 This project is in a really rough state so feel free to make any suggestions.
 
 
+## Live demo
+The Luna Moth live demo is here: [Luna Moth live demo](docs/demo/index.html).
+
+
 ## Getting started
-If already have the environment working, you may want to check the [instructions file](docs/instructions.md) to get started.
+If already have the environment working, you may want to check the [instructions file](docs/instructions/instructions.md) to get started.
 
 
 ## Building
