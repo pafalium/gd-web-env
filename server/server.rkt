@@ -41,7 +41,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (convert-xyz xyz-jsexpr)
-  (xyz (first xyz-jsexpr) (second xyz-jsexpr) (third xyz-jsexpr)))
+  (vxyz (first xyz-jsexpr) (second xyz-jsexpr) (third xyz-jsexpr)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -223,7 +223,7 @@
            [vec (convert-xyz (hash-ref req-json 'vec))])
       (for-backends selected-backends
                     (set-shape-for-backend id (map-atoms (lambda (shape) (rotate-multiple (resolve-shape shape)
-                                                                                 ang p (+c p vec)))
+                                                                                 ang p vec))
                                                          (hash-ref req-json 'shape)))))
     (response/jsexpr
      (hasheq 'id id))))
