@@ -1,6 +1,6 @@
 #lang racket
 
-(require rosetta)
+(require rosetta/autocad-server)
 
 (require json)
 
@@ -15,8 +15,9 @@
 (define-syntax-rule
   (for-backends backends expr ...)
   (for ([backend (in-list backends)])
-    (parameterize ((current-out-backend backend))
-      expr ...)))
+    #;(parameterize ((current-out-backend backend))
+      expr ...)
+    expr ...))
 
 ;(for-backends (list autocad sketchup)
 ;                (sphere))
@@ -53,7 +54,7 @@
 
 (define shapes (make-hash))
 
-(define (set-shape-for-backend shape-id shape [backend (current-out-backend)])
+(define (set-shape-for-backend shape-id shape [backend "autocad" #;(current-out-backend)])
   (hash-update! shapes shape-id
                 (lambda (curr)
                   (hash-set! curr backend shape)
@@ -62,7 +63,7 @@
 
 (define (resolve-shape id-jsexpr)
   (let ([id-shapes (hash-ref shapes (hash-ref id-jsexpr 'id))])
-    (hash-ref id-shapes (current-out-backend))))
+    (hash-ref id-shapes "autocad" #;(current-out-backend))))
 
 (define (clear-shapes)
   (hash-clear! shapes))
@@ -81,13 +82,15 @@
    [("move") #:method "post" move-handler]
    [("rotate") #:method "post" rotate-handler]
    [("erase-all") #:method "get" erase-all]
-   [("active-backends") #:method "put" select-backends]))
+   [("active-backends") #:method "put" select-backends]
+   [("json-shapes") #:method "post" json-shapes-handler]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define selected-backends (list autocad))
+(define selected-backends '("autocad") #;(list autocad))
 (define (str->backend str)
-  (case str
+  str
+  #;(case str
     [("autocad") autocad]
     [("sketchup") sketchup]
     [("rhino") rhino]
@@ -234,6 +237,36 @@
   (clear-shapes)
   (response/jsexpr
    #hasheq((succeeded . #t))))
+
+;; receives: a json array with the serialized results from a program
+;; returns:  a json array with the ids of the created results
+;;; TEMPORARY: traverse the serialized generating every shape
+;;; TODO:      keep track of already generated shapes
+;;; TODO:      set-shape-for-backend...
+(define (json-shapes-handler req)
+  (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
+         [shapes (map realize-shape req-json)])
+    (map (lambda (s) (get-next-shape-id)) shapes)
+    (println req-json))
+  (response/jsexpr
+     (hasheq 'id 'null)))
+    
+(define (realize-shape jsexpr)
+  (cond ((list? jsexpr) (map realize-shape jsexpr))
+        ((right-cuboid? jsexpr) (realize-right-cuboid jsexpr))
+        ((cone-frustum? jsexpr) (realize-cone-frustum jsexpr))
+        ((rotate? jsexpr) (realize-rotate jsexpr))
+        (())
+        (else 'null)))
+
+(define (right-cuboid? jsexpr)
+  (eq (hash-ref )))
+
+#;(define-client-primitive right-cuboid ; type-str
+  ([p1 vec] [p2 vec] [height num] [width num])
+  realizer
+  recognizer)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

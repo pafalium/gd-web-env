@@ -17,10 +17,10 @@ function synchronousHttpRequest(url, params, method="POST") {
 //We do this because everything we call in the CAD will be displayed.
 
 
-import {PrimitiveProp} from '../SceneGraph/primitives.js';
+//import {PrimitiveProp} from '../SceneGraph/primitives.js';
 
 function isPrimitive(result) {
-	return isSomething(result) && renderableFunctions[result[PrimitiveProp]] !== undefined;
+	return isSomething(result) && renderableFunctions[result.type] !== undefined;
 }
 function isSomething(result) {
 	return result !== undefined && result !== null;
@@ -38,7 +38,7 @@ function resultsToCAD(results) {
 function toCAD(result) {
 	let cadRef; 
 	if(isPrimitive(result)){
-		cadRef = renderableFunctions[result[PrimitiveProp]](result);
+		cadRef = renderableFunctions[result.type](result);
 	} else if(Array.isArray(result)) {
 		cadRef = arrayToCAD(result);
 	} else {
@@ -141,7 +141,7 @@ import {transform as saveTopLevelTransform} from './Instrumentation/save-top-lev
 
 function centersCylinderPrimitive(p1, p2, radius) {
 	return {
-		[PrimitiveProp]: "centersCylinder",
+		type: "centersCylinder",
 		p1,
 		p2,
 		radius
@@ -149,21 +149,21 @@ function centersCylinderPrimitive(p1, p2, radius) {
 }
 function centerSpherePrimitive(center, radius) {
 	return {
-		[PrimitiveProp]: "centerSphere",
+		type: "centerSphere",
 		center,
 		radius
 	};
 }
 function cornersBoxPrimitive(p1, p2) {
 	return {
-		[PrimitiveProp]: "cornersBox",
+		type: "cornersBox",
 		p1,
 		p2
 	};
 }
 function rightCuboidPrimitive(p1, width, height, p2) {
 	return {
-		[PrimitiveProp]: "rightCuboid",
+		type: "rightCuboid",
 		p1,
 		width,
 		height,
@@ -172,7 +172,7 @@ function rightCuboidPrimitive(p1, width, height, p2) {
 }
 function coneFrustumPrimitive(p1, radBot, radTop, p2) {
 	return {
-		[PrimitiveProp]: "coneFrustum",
+		type: "coneFrustum",
 		p1, 
 		radBot,
 		radTop,
@@ -181,27 +181,27 @@ function coneFrustumPrimitive(p1, radBot, radTop, p2) {
 }
 function polygonPrimitive(verts) {
 	return {
-		[PrimitiveProp]: "polygon",
+		type: "polygon",
 		vertices: verts
 	};
 }
 function extrusionPrimitive(shape, vec) {
 	return {
-		[PrimitiveProp]: "extrusion",
+		type: "extrusion",
 		shape,
 		vec
 	};
 }
 function translatePrimitive(shape, vec) {
 	return {
-		[PrimitiveProp]: "move",
+		type: "move",
 		shape,
 		vec
 	};
 }
 function rotatePrimitive(shape, ang, p, vec) {
 	return {
-		[PrimitiveProp]: "rotate",
+		type: "rotate",
 		shape,
 		ang,
 		p,
@@ -388,24 +388,32 @@ let predefinedBindings = [
 // Runner
 //
 
-function runInCad(program) {
+function runInCadDiscrete(program) {
 	// use different predefined functions and primitives (primitives)
 	// run the program locally (running-idea)
 	let [saveTopLevelContext] = runProgramPrime2(program, [saveTopLevelTransform], predefinedBindings);
-	let results = saveTopLevelContext.topLevelExprResults.values();
+	let results = saveTopLevelContext.topLevelExprResults;
 	// execute the top-level results with the CAD API (to-three)
 	let {cadRefs} = resultsToCAD(results);
 }
 
+function runInCadJSON(program) {
+	let [saveTopLevelContext] = runProgramPrime2(program, [saveTopLevelTransform], predefinedBindings);
+	let results = saveTopLevelContext.topLevelExprResults;
+	window.lastResults = results;
+	console.log("Saved results", results);
+	synchronousHttpRequest("json-shapes", [...results.values()], "POST");
+}
+
 function clearCad() {
-	synchronousHttpRequest("erase-all", {}, "GET");
+	//synchronousHttpRequest("erase-all", {}, "GET");
 }
 
 function selectCads(cads) {
-	synchronousHttpRequest("active-backends", {
-		backends: cads
-	}, "PUT");
+	//synchronousHttpRequest("active-backends", {
+	//	backends: cads
+	//}, "PUT");
 }
 
-export {runInCad, clearCad, selectCads};
+export {runInCadJSON as runInCad, clearCad, selectCads};
 
