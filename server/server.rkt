@@ -16,7 +16,7 @@
   (for-backends backends expr ...)
   (for ([backend (in-list backends)])
     #;(parameterize ((current-out-backend backend))
-      expr ...)
+        expr ...)
     expr ...))
 
 ;(for-backends (list autocad sketchup)
@@ -40,11 +40,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; json to rosetta
+;;
 
 (define (convert-xyz xyz-jsexpr)
   (vxyz (first xyz-jsexpr) (second xyz-jsexpr) (third xyz-jsexpr)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; Store results of previous calls so they can be referenced in later
+;;
 
 (define next-shape-id 0)
 (define (get-next-shape-id)
@@ -69,6 +75,9 @@
   (hash-clear! shapes))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Map URL paths to handler functions
+;;
 
 (define-values (dispatch url)
   (dispatch-rules
@@ -91,10 +100,10 @@
 (define (str->backend str)
   str
   #;(case str
-    [("autocad") autocad]
-    [("sketchup") sketchup]
-    [("rhino") rhino]
-    [("revit") revit]))
+      [("autocad") autocad]
+      [("sketchup") sketchup]
+      [("rhino") rhino]
+      [("revit") revit]))
 
 (define (select-backends req)
   (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
@@ -105,6 +114,18 @@
      #hasheq((succeeded . #t)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (erase-all request)
+  (for-backends selected-backends
+                (delete-all-shapes))
+  (clear-shapes)
+  (response/jsexpr
+   #hasheq((succeeded . #t))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Helpers for geometric transformations that may be applied to many shapes
+;;
 
 (define (map-atoms fn lst)
   (cond ((null? lst) lst)
@@ -226,17 +247,11 @@
            [vec (convert-xyz (hash-ref req-json 'vec))])
       (for-backends selected-backends
                     (set-shape-for-backend id (map-atoms (lambda (shape) (rotate-multiple (resolve-shape shape)
-                                                                                 ang p vec))
+                                                                                          ang p vec))
                                                          (hash-ref req-json 'shape)))))
     (response/jsexpr
      (hasheq 'id id))))
 
-(define (erase-all request)
-  (for-backends selected-backends
-                (delete-all-shapes))
-  (clear-shapes)
-  (response/jsexpr
-   #hasheq((succeeded . #t))))
 
 ;; receives: a json array with the serialized results from a program
 ;; returns:  a json array with the ids of the created results
@@ -246,31 +261,128 @@
 (define (json-shapes-handler req)
   (let* ([req-json (bytes->jsexpr (request-post-data/raw req))]
          [shapes (map realize-shape req-json)])
-    (map (lambda (s) (get-next-shape-id)) shapes)
-    (println req-json))
+    ;; TODO return ids for created shapes
+    (map (lambda (s) (get-next-shape-id)) shapes))
   (response/jsexpr
-     (hasheq 'id 'null)))
+   (hasheq 'id 'null)))
     
-(define (realize-shape jsexpr)
-  (cond ((list? jsexpr) (map realize-shape jsexpr))
-        ((right-cuboid? jsexpr) (realize-right-cuboid jsexpr))
-        ((cone-frustum? jsexpr) (realize-cone-frustum jsexpr))
-        ((rotate? jsexpr) (realize-rotate jsexpr))
-        (())
+(define (realize-shape json)
+  (cond ((list? json) (map realize-shape json))
+        ((rightCuboid? json) (realize-rightCuboid json))
+        ((corners-box? json) (realize-corners-box json))
+        ((cone-frustum? json) (realize-cone-frustum json))
+        ((center-sphere? json) (realize-center-sphere json))
+        ((centers-cylinder? json) (realize-centers-cylinder json))
+        ((translate? json) (realize-translate json))
+        ((rotate? json) (realize-rotate json))
+        ((polygon? json) (realize-polygon json))
+        ((extrusion? json) (realize-extrusion json))
+        #;(())
         (else 'null)))
 
-(define (right-cuboid? jsexpr)
-  (eq (hash-ref )))
 
-#;(define-client-primitive right-cuboid ; type-str
-  ([p1 vec] [p2 vec] [height num] [width num])
-  realizer
-  recognizer)
+(define (type-equal? json-obj type)
+  (equal? (hash-ref json-obj 'type) type))
 
+(define (make-point json)
+  (let ((x (hash-ref json 'x))
+        (y (hash-ref json 'y))
+        (z (hash-ref json 'z)))
+    (vxyz x y z)))
+
+
+(define (corners-box? json)
+  (type-equal? json "cornersBox"))
+
+(define (realize-corners-box json)
+  (let ([p1 (make-point (hash-ref json 'p1))]
+        [p2 (make-point (hash-ref json 'p2))])
+    (box p1 p2)))
+
+
+(define (rightCuboid? json)
+  (type-equal? json "rightCuboid"))
+
+(define (realize-rightCuboid json)
+  (let ([p1 (make-point (hash-ref json 'p1))]
+        [width (identity (hash-ref json 'width))]
+        [height (identity (hash-ref json 'height))]
+        [p2 (make-point (hash-ref json 'p2))])
+    (right-cuboid p1 width height p2)))
+
+
+(define (translate? json)
+  (type-equal? json "move"))
+
+(define (realize-translate json)
+  (let ([shape (realize-shape (hash-ref json 'shape))]
+        [vec (make-point (hash-ref json 'vec))])
+    (move-multiple shape vec)))
+
+
+(define (rotate? json)
+  (type-equal? json "rotate"))
+
+(define (realize-rotate json)
+  (let ([shape (realize-shape (hash-ref json 'shape))]
+        [ang (hash-ref json 'ang)]
+        [p (make-point (hash-ref json 'p))]
+        [vec (make-point (hash-ref json 'vec))])
+    (rotate-multiple shape ang p vec)))
+
+
+(define (cone-frustum? json)
+  (type-equal? json "coneFrustum"))
+
+(define (realize-cone-frustum json)
+  (let ([p1 (make-point (hash-ref json 'p1))]
+        [p2 (make-point (hash-ref json 'p2))]
+        [r1 (hash-ref json 'radBot)]
+        [r2 (hash-ref json 'radTop)])
+    (cone-frustum p1 r1 p2 r2)))
+
+
+(define (center-sphere? json)
+  (type-equal? json "centerSphere"))
+
+(define (realize-center-sphere json)
+  (let ([c (make-point (hash-ref json 'center))]
+        [r (hash-ref json 'radius)])
+    (sphere c r)))
+
+
+(define (centers-cylinder? json)
+  (type-equal? json "centersCylinder"))
+
+(define (realize-centers-cylinder json)
+  (let ([p1 (make-point (hash-ref json 'p1))]
+        [r (hash-ref json 'radius)]
+        [p2 (make-point (hash-ref json 'p2))])
+    (cylinder p1 r p2)))
+
+
+(define (polygon? json)
+  (type-equal? json "polygon"))
+
+(define (realize-polygon json)
+  (let ([verts (map make-point (hash-ref json 'vertices))])
+    (apply polygon verts)))
+
+
+(define (extrusion? json)
+  (type-equal? json "extrusion"))
+
+(define (realize-extrusion json)
+  (let ([shape (realize-shape (hash-ref json 'shape))]
+        [vec (make-point (hash-ref json 'vec))])
+    (extrusion shape vec))) 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Start the servlet 
+;;
 
 (serve/servlet dispatch
                #:extra-files-paths (list (build-path 'same "../dist"))

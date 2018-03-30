@@ -406,13 +406,13 @@ function runInCadJSON(program) {
 }
 
 function clearCad() {
-	//synchronousHttpRequest("erase-all", {}, "GET");
+	synchronousHttpRequest("erase-all", {}, "GET");
 }
 
 function selectCads(cads) {
-	//synchronousHttpRequest("active-backends", {
-	//	backends: cads
-	//}, "PUT");
+	synchronousHttpRequest("active-backends", {
+		backends: cads
+	}, "PUT");
 }
 
 export {runInCadJSON as runInCad, clearCad, selectCads};
