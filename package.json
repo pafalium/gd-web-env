@@ -1,7 +1,7 @@
 {
-  "name": "proto-node",
+  "name": "gd-web-env",
   "version": "0.0.1",
-  "description": "Another proto.",
+  "description": "GD web environment prototype",
   "main": "index.js",
   "scripts": {
     "serve": "http-server ./dist"
