@@ -17,7 +17,7 @@ var packageJson = require('./package.json');
 var dependencies = Object.keys(packageJson && packageJson.dependencies || {});
 
 function handleErrors(error) {
-  console.error(error.stack);
+  console.error(error, error.stack);
   // Emit 'end' as the stream wouldn't do it itself.
   // Without this, the gulp task won't end and the watch stops working.
   this.emit('end');
@@ -77,13 +77,14 @@ gulp.task('html', function () {
     .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('watch', function(){
-  gulp.watch('package.json', ['libs']);
-  gulp.watch('src/**', ['scripts']);
-  gulp.watch('styles/styles.css', ['css']);
-  gulp.watch('icons/**', ['icons']);
-  gulp.watch('favicons/**', ['favicons']);
-  gulp.watch(['busters.json', 'index.html'], ['html']);
+gulp.task('watch', (done) => {
+  gulp.watch('package.json', gulp.series('libs'));
+  gulp.watch('src/**', gulp.series('scripts'));
+  gulp.watch('styles/styles.css', gulp.series('css'));
+  gulp.watch('icons/**', gulp.series('icons'));
+  gulp.watch('favicons/**', gulp.series('favicons'));
+  gulp.watch(['busters.json', 'index.html'], gulp.series('html'));
+  done();
 });
 
-gulp.task('default', ['libs', 'scripts', 'css', 'icons', 'favicons', 'html', 'watch']);
+gulp.task('default', gulp.series('libs', 'scripts', 'css', 'icons', 'favicons', 'html', 'watch'));
