@@ -1,4 +1,3 @@
-"use strict";
 
 import _ from 'lodash';
 import esprima from 'esprima';
@@ -12,22 +11,28 @@ import {idGenerator} from './id-generator.js';
 
 import primitives from '../SceneGraph/primitives.js';
 
+/**
+ * @typedef {object} Transform - A program transformation
+ * @prop {(node: any, parent: any) => boolean} select - Selector for AST nodes affected by the transform
+ * @prop {(node: any, ctxId: string) => any} transform - Returns the transformed version of the given AST node
+ * @prop {() => object} makeContext - Creates context variables/functions required by the transformation
+ */
+/**
+ * @typedef {object} Binding - A primitive binding (name and value)
+ * @property {string} name
+ * @property {any} value - The primitive's function, value, or namespace object.
+ */
 
-function generatePrimitiveImportCode(primitives) {
-	return (
-		"var " 
-		+ primitives.map(function(primitive, i){
-				return ""+primitive.name+"="+"primitives["+i+"].value";
-			}).join(",") 
-		+	";\n");
-}
 
-//
-// ***************
-// Main function!!
-// ***************
-//
-function runProgramPrime2(program, transforms, predefinedBindings=primitives) {
+/**
+ * Runs the *program*, applying the given *tranforms*.
+ *  The program has access to bindings from *predefinedBindings*.
+ * @param {string} program 
+ * @param {Transform[]} transforms 
+ * @param {Binding[]} predefinedBindings 
+ * @returns {object[]} List of transform contexts after running the program
+ */
+function runProgram(program, transforms, predefinedBindings=primitives) {
 	//
 	// TODO: Map nodeIds to AstNodes.
 	//       - Option 1: Convert nodeIds to AstNodes after running.
@@ -64,18 +69,29 @@ function runProgramPrime2(program, transforms, predefinedBindings=primitives) {
 	});
 
 	// generate program code
-	var primitiveImportCode = generatePrimitiveImportCode(predefinedBindings);
+	const primitivesId = "primitives";
+	var primitiveImportCode = generatePrimitiveImportCode(predefinedBindings, primitivesId);
 	var instrumentedProgram = escodegen.generate(programAst);
 	
 	var body = primitiveImportCode+instrumentedProgram;
 
-	//create contexts
+	//create contexts and actually run the program
 	var contexts = transforms.map(t=>t.makeContext());
-	var args = Array.from(contextIds.values()).concat("primitives");
+	var args = Array.from(contextIds.values()).concat(primitivesId);
 	var programFunction = new Function(args, body);
 	programFunction.apply(null, contexts.concat([predefinedBindings]));
+
 	return contexts;
 }
 
-export default runProgramPrime2;
-export {runProgramPrime2};
+function generatePrimitiveImportCode(primitives, primitivesId) {
+	return (
+		"var " 
+		+ primitives.map(function(primitive, i){
+				return ""+primitive.name+"="+primitivesId+"["+i+"].value";
+			}).join(",") 
+		+	";\n");
+}
+
+export default runProgram;
+export {runProgram};

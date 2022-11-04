@@ -2,6 +2,7 @@
 import {constructors as Nodes, recognizers as NodeP} from '../Parsing/ast-utils.js';
 import {nodeId} from '../Parsing/node-id.js';
 
+/** @type {import('../run-base.js').Transform} Transform */
 const saveTopLevelExprsTransform = {
 	select: function(node, parent) {
 		return NodeP.isExpressionStatement(node) && NodeP.isProgram(parent);

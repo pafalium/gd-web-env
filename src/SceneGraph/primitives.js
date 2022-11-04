@@ -28,6 +28,8 @@ import _ from 'lodash';
 const PrimitiveProp = Symbol("PrimitiveName");
 
 const registry = {
+	/** @typedef {import('../Runner/run-base.js').Binding} Binding */
+	/** @type {Binding[]} */
 	primitives: [],
 	provide: function(name, value) {
 		this.primitives.push({
@@ -35,6 +37,11 @@ const registry = {
 			value
 		});
 	},
+	/**
+	 * Create a function that will return objects of the type
+	 * `{[PrimitiveProp]: name, args: callArgs}`. 
+	 * These objects can then be used for generating 3D primitives in the backend.
+	 */
 	defPrimitive: function(name, args) {
 		return function() {
 			var realArguments = arguments;

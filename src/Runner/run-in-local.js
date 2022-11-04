@@ -1,5 +1,5 @@
 
-import runProgram from './running-idea.js';
+import runProgram from './run-base.js';
 import {transform as traceCall} from './Instrumentation/trace-call-transform.js';
 import {transform as saveTopLevel} from './Instrumentation/save-top-level-transform.js';
 

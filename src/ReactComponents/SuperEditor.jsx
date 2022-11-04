@@ -7,7 +7,7 @@ import {ColumnSplit, RowSplit, HorizontalBar, Checkbox} from './generic.jsx';
 import ProgramEditor, {makeNodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoration} from './ResultsView.jsx';
 
-import {runWithTraceability, runNormally, emptyResults} from '../Runner/run.js';
+import {runWithTraceability, runNormally, emptyResults} from '../Runner/run-in-local.js';
 import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 
 import {validSource} from '../Runner/Parsing/program.js';

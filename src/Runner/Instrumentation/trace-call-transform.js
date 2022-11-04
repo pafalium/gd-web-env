@@ -3,6 +3,7 @@ import {constructors as Nodes, recognizers as NodeP} from '../Parsing/ast-utils.
 import {idGenerator} from '../id-generator.js';
 import {nodeId} from '../Parsing/node-id.js';
 
+/** @type {import('../run-base.js').Transform} Transform */
 const traceCallTransform = {
 	/*
 		foo.bar(a, b, c) -> 

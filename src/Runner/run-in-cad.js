@@ -136,7 +136,7 @@ export {resultsToCAD};
 
 
 
-import {runProgramPrime2} from './running-idea.js';
+import {runProgram} from './run-base.js';
 import {transform as saveTopLevelTransform} from './Instrumentation/save-top-level-transform.js';
 
 function centersCylinderPrimitive(p1, p2, radius) {
@@ -390,15 +390,15 @@ let predefinedBindings = [
 
 function runInCadDiscrete(program) {
 	// use different predefined functions and primitives (primitives)
-	// run the program locally (running-idea)
-	let [saveTopLevelContext] = runProgramPrime2(program, [saveTopLevelTransform], predefinedBindings);
+	// run the program locally (run-base)
+	let [saveTopLevelContext] = runProgram(program, [saveTopLevelTransform], predefinedBindings);
 	let results = saveTopLevelContext.topLevelExprResults;
 	// execute the top-level results with the CAD API (to-three)
 	let {cadRefs} = resultsToCAD(results);
 }
 
 function runInCadJSON(program) {
-	let [saveTopLevelContext] = runProgramPrime2(program, [saveTopLevelTransform], predefinedBindings);
+	let [saveTopLevelContext] = runProgram(program, [saveTopLevelTransform], predefinedBindings);
 	let results = saveTopLevelContext.topLevelExprResults;
 	window.lastResults = results;
 	console.log("Saved results", results);

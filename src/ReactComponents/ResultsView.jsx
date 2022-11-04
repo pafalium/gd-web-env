@@ -1,7 +1,7 @@
 
 import React from 'react';
 import OrbitThreeView from './OrbitThreeView.jsx';
-import {ProgramResults} from '../Runner/run.js';
+import {ProgramResults} from '../Runner/run-in-local.js';
 import toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
 import {noop, isEqual, differenceWith, intersectionWith, 
