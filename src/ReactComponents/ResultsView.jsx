@@ -8,7 +8,7 @@ import {noop, isEqual, differenceWith, intersectionWith,
 				flatten, map, forEach,
 				throttle, isEmpty} from 'lodash';
 
-import time from '../utils/time.js';
+import {time} from '../utils/time.js';
 
 //8888888b.                            888 888            888     888 d8b                        
 //888   Y88b                           888 888            888     888 Y8P                        

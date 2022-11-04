@@ -158,10 +158,8 @@ function convertNormally(resultsIterable) {
 	return {threeObjects};
 }
 
-module.exports = {
-	isRenderable: isRenderable,
-	convert: {
-		keepingCorrespondence: convertKeepingCorrespondence,
-		normally: convertNormally
-	}
+export {isRenderable};
+export const convert = {
+	keepingCorrespondence: convertKeepingCorrespondence,
+	normally: convertNormally
 };

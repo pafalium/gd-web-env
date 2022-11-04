@@ -1,4 +1,3 @@
-"use strict";
 
 const isExpression = (function () {
 	var exprTypes = new Set([
@@ -78,7 +77,7 @@ function isSignedNumericLiteral(node) {
 		|| (isSignUnaryExpression(node) && isNumericLiteral(node.argument));
 }
 
-var u = {
+export const recognizers = {
 	isExpression,
 	isMemberExpression,
 	isVariableDeclarator,
@@ -95,7 +94,7 @@ var u = {
 	isSignedNumericLiteral
 };
 
-var n = {
+export const constructors = {
 	exprStmt: function(expr) {
 		return {
 			type: "ExpressionStatement",
@@ -192,10 +191,4 @@ var n = {
 			prefix
 		};
 	}
-};
-
-
-module.exports = {
-	recognizers: u,
-	constructors: n
 };

@@ -1,7 +1,7 @@
 
 import {combineReducers} from 'redux';
 
-import time from '../utils/time.js';
+import {time} from '../utils/time.js';
 
 const nullProgram = {name: 'untitled', program: ''};
 

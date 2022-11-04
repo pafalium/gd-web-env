@@ -6,7 +6,7 @@ import SuperEditor from './SuperEditor.jsx';
 import {examples} from '../example-programs/examples.js';
 import {runInCad, clearCad, selectCads} from '../Runner/run-in-cad.js';
 
-import time from '../utils/time.js';
+import {time} from '../utils/time.js';
 
 const defaultAvailableCads = [
 	{value: "AutoCad", label: "AutoCAD"},

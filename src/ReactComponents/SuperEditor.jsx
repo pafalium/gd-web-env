@@ -12,7 +12,7 @@ import {getNodeResults, getResultCreatorNode} from '../Runner/run-queries.js';
 
 import {validSource} from '../Runner/Parsing/program.js';
 
-import time from '../utils/time.js';
+import {time} from '../utils/time.js';
 
 
 //       d8888          888                      888 

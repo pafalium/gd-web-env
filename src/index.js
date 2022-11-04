@@ -1,4 +1,2 @@
 
-//require('./page');
-
-require('./actions-reducers/components-test.jsx');
+import './actions-reducers/components-test.jsx';
