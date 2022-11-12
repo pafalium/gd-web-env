@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-import SidePanels from './components.jsx';
+import SidePanels from './SidePanels.jsx';
 import CurrentProgramEditor from './CurrentProgramEditor.jsx';
 
 

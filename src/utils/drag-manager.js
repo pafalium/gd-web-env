@@ -5,7 +5,7 @@
   @param {Function} drag.onMove
   @param {Function} drag.onUp
 */
-export function start(mouseDown, drag) {
+export function startDrag(mouseDown, drag) {
   currentDrag = drag;
 }
 

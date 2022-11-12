@@ -3,7 +3,8 @@ import React, {PropTypes} from 'react';
 import _, {partial, debounce, noop} from 'lodash';
 
 import color from '../SceneGraph/color.js';
-import {ColumnSplit, RowSplit, HorizontalBar, Checkbox} from './generic.jsx';
+import {ColumnSplit, RowSplit, HorizontalBar} from './Common/layout.jsx';
+import {Checkbox} from './Common/input.jsx';
 import ProgramEditor, {makeNodeDecoration} from './ProgramEditor.jsx';
 import ResultsView, {makeResultInstanceDecoration, makeResultOcorrencesDecoration} from './ResultsView.jsx';
 

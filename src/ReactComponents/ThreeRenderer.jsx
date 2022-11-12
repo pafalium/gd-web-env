@@ -3,10 +3,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import THREE from 'three';
 
-/*
+/**
   A component that renders whatever camera and scene using a THREE.WebGLRenderer.
 */
-
 class ThreeRenderer extends React.PureComponent {
   componentDidMount() {
     const canvas = ReactDOM.findDOMNode(this.refs["canvas"]);
@@ -57,4 +56,4 @@ const styles = {
   }
 };
 
-  export default ThreeRenderer;
+export default ThreeRenderer;

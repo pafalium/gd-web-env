@@ -2,10 +2,10 @@
 import React from 'react';
 import {connect} from 'react-redux';
 
-import {HorizontalBar} from '../ReactComponents/generic.jsx';
+import {HorizontalBar} from '../ReactComponents/Common/layout.jsx';
 
 import SuperEditor from '../ReactComponents/SuperEditor.jsx';
-import {changeProgram} from './actions-reducers.js';
+import {changeProgram} from '../app-redux-store/editor-state.js';
 
 
 const ProgramName = ({name}) => (

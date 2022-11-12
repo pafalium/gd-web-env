@@ -12,7 +12,7 @@ import 'brace/ext/language_tools';// this module is imported to get rid of "misp
 import {validSource, sourceToAst} from '../Runner/Parsing/program.js';
 import {nodesContainingCoords, signedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';
 import {recognizers as NodeP, constructors as Nodes} from '../Runner/Parsing/ast-utils.js';
-import * as dragmanager from './drag-manager.js';
+import * as dragmanager from '../utils/drag-manager.js';
 
 /*
   Ace documentation: https://github.com/ajaxorg/ace/wiki
@@ -230,7 +230,7 @@ class ProgramEditor extends React.Component {
       const onUp = () => {
         this.setState({dragging: false});
       };
-      dragmanager.start(mouseDownEvent, {onMove, onUp});
+      dragmanager.startDrag(mouseDownEvent, {onMove, onUp});
     }
   }
 

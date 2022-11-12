@@ -6,7 +6,7 @@ import {Provider} from 'react-redux';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 
-import editorState from './actions-reducers.js';
+import editorState from '../app-redux-store/editor-state.js';
 import EditorPage from './EditorPage.jsx';
 
 const loggerMiddleware = createLogger();

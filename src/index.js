@@ -1,2 +1,2 @@
 
-import './actions-reducers/components-test.jsx';
+import './actions-reducers/redux-entrypoint.jsx';

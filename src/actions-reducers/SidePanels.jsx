@@ -3,9 +3,10 @@ import React from 'react';
 import {connect} from 'react-redux';
 
 import Select from 'react-select';
-import {VerticalIconBar, Spacer, IconButton, Drawer} from '../ReactComponents/generic.jsx';
+import {VerticalIconBar, Spacer, Drawer} from '../ReactComponents/Common/layout.jsx';
+import {IconButton} from '../ReactComponents/Common/input.jsx';
 
-import {selectProgram, setExportCads, doExportToCads, doClearCads} from './actions-reducers.js';
+import {selectProgram, setExportCads, doExportToCads, doClearCads} from '../app-redux-store/editor-state.js';
 
 
 //8888888b.                                                          .d8888b.           888 

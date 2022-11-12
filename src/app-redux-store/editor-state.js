@@ -3,8 +3,6 @@ import {combineReducers} from 'redux';
 
 import {time} from '../utils/time.js';
 
-const nullProgram = {name: 'untitled', program: ''};
-
 import {examples as examplePrograms} from '../example-programs/examples.js';
 
 import {runInCad, clearCad, selectCads} from '../Runner/run-in-cad.js';
@@ -159,6 +157,7 @@ function exportingToCAD(state = false, action = {}) {
 /**
   Program management logic module.
  */
+const nullProgram = {name: 'untitled', program: ''};
 
 /**
   Actions

@@ -23,14 +23,6 @@ export const HorizontalBar = ({children}) => (
   </div>
 );
 
-export const Checkbox = ({label, checked, onClick}) => (
-  <label className='checkbox' onChange={onClick}>
-    <input type='checkbox' checked={checked}/>
-    <span>{label}</span>
-  </label>
-);
-
-
 export const VerticalIconBar = ({children}) => (
   <div className="vertical-icon-bar">
     {children}
@@ -41,14 +33,8 @@ export const Spacer = ({width, height}) => (
   <div style={{width, height}}/>
 );
 
-export const IconButton = ({icon, onClick}) => (
-  <img className="icon-button" onClick={onClick} src={icon}/>
-);
-
 export const Drawer = ({open, children}) => (
   <div className="drawer" style={{display: open ? 'block' : 'none'}}>
     {children}
   </div>
 );
-
-
