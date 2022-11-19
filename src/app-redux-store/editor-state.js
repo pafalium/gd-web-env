@@ -3,8 +3,6 @@ import {combineReducers} from 'redux';
 
 import {time} from '../utils/time.js';
 
-import {examples as examplePrograms} from '../example-programs/examples.js';
-
 import {runInCad, clearCad, selectCads} from '../Runner/run-in-cad.js';
 
 // .d8888b.           888                   888                             
@@ -197,13 +195,13 @@ export function changeProgram(program) {
 /**
  Reducers 
  */
-function programs(state = examplePrograms, action = {}) {
+function programs(state = [], action = {}) {
   switch (action.type) {
       // Do program storage stuff.
     case CREATE_PROGRAM:
       return [
         {name: action.name, program: action.source},
-        ...examplePrograms
+        ...state
       ];
     case SAVE_PROGRAM:
       return [
