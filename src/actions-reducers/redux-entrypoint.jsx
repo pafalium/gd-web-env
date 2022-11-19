@@ -1,6 +1,6 @@
 
 import React from 'react';
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import {createStore, applyMiddleware} from 'redux';
 import {Provider} from 'react-redux';
 import thunkMiddleware from 'redux-thunk';
@@ -10,21 +10,21 @@ import editorState from '../app-redux-store/editor-state.js';
 import EditorPage from './EditorPage.jsx';
 import { loadExamples } from '../examples.js';
 
-const loggerMiddleware = createLogger();
 
 const store = createStore(
   editorState, 
   applyMiddleware(
     thunkMiddleware,
-    loggerMiddleware
+    createLogger()
   )
 );
 
 loadExamples(store).then(_ => console.log('Examples loaded'));
 
-render(
+
+const container = document.getElementById('container');
+const root = createRoot(container);
+root.render(
   <Provider store={store}>
     <EditorPage/>
-  </Provider>,
-  document.getElementById('container')
-);
+  </Provider>);

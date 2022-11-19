@@ -1,13 +1,14 @@
 
 import {noop, times, constant, difference} from 'lodash';
-import React, {PropTypes} from 'react';
-import brace from 'brace';
+import React from 'react';
+import PropTypes from 'prop-types';
+import ace from 'ace-builds/src-noconflict/ace';
 import AceEditor from 'react-ace';
-const Range = brace.acequire('ace/range').Range;
+const Range = ace.require('ace/range').Range;
 
-import 'brace/mode/javascript';
-import 'brace/theme/monokai';
-import 'brace/ext/language_tools';// this module is imported to get rid of "mispelled options" warning from react-ace
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/theme-monokai';
+import 'ace-builds/src-noconflict/ext-language_tools';// this module is imported to get rid of "mispelled options" warning from react-ace
 
 import {validSource, sourceToAst} from '../Runner/Parsing/program.js';
 import {nodesContainingCoords, signedLiteralNodes, nodeAtPath} from '../Runner/Parsing/program-queries.js';

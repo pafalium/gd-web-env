@@ -1,8 +1,9 @@
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import OrbitThreeView from './OrbitThreeView.jsx';
 import {ProgramResults} from '../Runner/run-in-local.js';
-import toThree from '../SceneGraph/to-three.js';
+import * as toThree from '../SceneGraph/to-three.js';
 import THREE from 'three';
 import {noop, isEqual, differenceWith, intersectionWith, 
 				flatten, map, forEach,
@@ -480,10 +481,10 @@ export default ResultsView;
 
 
 ResultsView.propTypes = {
-	onHoveredResultInstance: React.PropTypes.func,
-	onClick: React.PropTypes.func,
-	results: React.PropTypes.instanceOf(ProgramResults),
-	resultDecorations: React.PropTypes.arrayOf(React.PropTypes.instanceOf(ResultDecoration))
+	onHoveredResultInstance: PropTypes.func,
+	onClick: PropTypes.func,
+	results: PropTypes.instanceOf(ProgramResults),
+	resultDecorations: PropTypes.arrayOf(PropTypes.instanceOf(ResultDecoration))
 };
 
 ResultsView.VoidClick = Symbol("VoidClick");

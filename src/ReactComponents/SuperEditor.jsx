@@ -1,5 +1,6 @@
 
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import _, {partial, debounce, noop} from 'lodash';
 
 import color from '../SceneGraph/color.js';
