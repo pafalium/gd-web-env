@@ -1,5 +1,5 @@
 
-import { createProgram } from "./app-redux-store/editor-state";
+import { createProgram } from "./app-redux-store/programs";
 
 
 function fetchCode(url) {
@@ -25,7 +25,7 @@ export function loadExamples(reduxStore) {
   //Add programs as they arrive
   let loads = exampleData.map(({name, sourceCode})=>
 	sourceCode.then(source =>
-		reduxStore.dispatch(createProgram(name, source))))
+		reduxStore.dispatch(createProgram({name, source}))))
   //Return promise when all are loaded
   return Promise.all(loads);
 }

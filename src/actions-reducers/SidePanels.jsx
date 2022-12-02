@@ -1,12 +1,23 @@
 
-import React from 'react';
-import {connect} from 'react-redux';
-
+import React, { useState } from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import Select from 'react-select';
+
 import {VerticalIconBar, Spacer, Drawer} from '../ReactComponents/Common/layout.jsx';
 import {IconButton} from '../ReactComponents/Common/input.jsx';
 
-import {selectProgram, setExportCads, doExportToCads, doClearCads} from '../app-redux-store/editor-state.js';
+import {setActiveProgram} from '../app-redux-store/programs.js';
+import { 
+  setExportCads,
+  doExportToCads, 
+  doClearCads,
+} from '../app-redux-store/export-to-cad.js';
+import {
+  selectSavedPrograms,
+  selectAvailableCads,
+  selectExportCads
+} from '../app-redux-store/editor-state.js';
+
 
 
 //8888888b.                                                          .d8888b.           888 
@@ -26,14 +37,17 @@ const ProgramSelectionItem = ({program, onClick}) => (
   <p onClick={onClick}>{program.name}</p>
 );
 
-const ProgramSelectionPanel = ({programs, onProgramClick}) => (
+const ProgramSelectionPanel = () => {
+  const programs = useSelector(selectSavedPrograms);
+  const dispatch = useDispatch();
+  return (
   <div>
     <h3>All Programs</h3>
     {programs.map(program => 
       <ProgramSelectionItem
         key={program.name}
         program={program} 
-        onClick={() => onProgramClick(program)}/>
+        onClick={() => dispatch(setActiveProgram({name: program.name, program: program.source}))}/>
     )}
 
     <h3>Search</h3>
@@ -43,12 +57,7 @@ const ProgramSelectionPanel = ({programs, onProgramClick}) => (
     <h3>Examples</h3>
 
   </div>
-);
-
-const ProgramSelectionContainer = connect(
-  state => ({programs: state.programs}),
-  dispatch => ({onProgramClick: program => dispatch(selectProgram(program.name, program.program))})
-)(ProgramSelectionPanel);
+)};
 
 
 // .d8888b.        d8888 8888888b.   .d8888b.           888 
@@ -65,21 +74,22 @@ const ProgramSelectionContainer = connect(
 
 const ActiveCadsSelector = ({availableCads, activeCads, onActiveCadsChange}) => (
   <Select 
-      multi={true}
+      isMulti
       options={availableCads.map(cadName => ({label: cadName, value: cadName}))}
-      value={activeCads}
+      value={activeCads.map(cadName => ({label: cadName, value: cadName}))}
       onChange={(vals) => onActiveCadsChange(vals ? vals.map((({value}) => value)) : [])}
       placeholder="destination CADs"
     />
 );
 
-const RunInCadPanel = ({
-  availableCads, 
-  activeCads, 
-  onActiveCadsChange,
-  onRunInCadClicked,
-  onClearCadClicked
-}) => (
+const RunInCadPanel = () => {
+  const availableCads = useSelector(selectAvailableCads);
+  const activeCads = useSelector(selectExportCads);
+  const dispatch = useDispatch();
+  const onActiveCadsChange = (activeCads) => dispatch(setExportCads(activeCads));
+  const onRunInCadClicked = () => dispatch(doExportToCads());
+  const onClearCadClicked = () => dispatch(doClearCads());
+  return (
   <div>
     <h3>Export to CAD</h3>
     <ActiveCadsSelector 
@@ -89,19 +99,8 @@ const RunInCadPanel = ({
     <button onClick={onRunInCadClicked}>Run in CAD</button>
     <button onClick={onClearCadClicked}>Clear CAD</button>
   </div>
-);
-
-const RunInCadContainer = connect(
-  state => ({
-    availableCads: state.availableCads, 
-    activeCads: state.exportCads
-  }),
-  dispatch => ({
-    onActiveCadsChange: (activeCads) => dispatch(setExportCads(activeCads)),
-    onRunInCadClicked: () => dispatch(doExportToCads()),
-    onClearCadClicked: () => dispatch(doClearCads())
-  })
-)(RunInCadPanel);
+  )
+};
 
 
 // .d8888b.  d8b      888          8888888b.                            888 
@@ -131,42 +130,25 @@ const SidePanel = ({onProgramSelectionIconClicked, onRunInCadIconClicked}) => (
 const SidePanelDrawers = ({activePanel}) => (
   <div className='drawer-container'>
     <Drawer open={activePanel === 'programSelection'}>
-      <ProgramSelectionContainer/>
+      <ProgramSelectionPanel/>
     </Drawer>
     <Drawer open={activePanel === 'runInCad'}>
-      <RunInCadContainer/>
+      <RunInCadPanel/>
     </Drawer>
   </div>
 );
 
-class SidePanels extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activePanel: null
-    };
-  }
-
-  toggleOrMakeActive(panel) {
-    let {activePanel} = this.state;
-    this.setState({
-      activePanel: activePanel === panel ? null : panel
-    });
-  }
-
-  render() {
-    const {activePanel} = this.state;
-    const activateProgSelectPanel = () => this.toggleOrMakeActive('programSelection');
-    const activateRunInCadPanel = () => this.toggleOrMakeActive('runInCad');
-    return (
-      <div>
+const SidePanels = () => {
+  const [activePanel, setActivePanel] = useState(null);
+  const toggleOrMakeActive = panel => setActivePanel(activePanel === panel ? null : panel);
+  return (
+    <div>
         <SidePanel 
-          onProgramSelectionIconClicked={activateProgSelectPanel}
-          onRunInCadIconClicked={activateRunInCadPanel}/>
+          onProgramSelectionIconClicked={() => toggleOrMakeActive('programSelection')}
+          onRunInCadIconClicked={() => toggleOrMakeActive('runInCad')}/>
         <SidePanelDrawers activePanel={activePanel}/>
       </div>
-    );
-  }
+  )
 }
 
 

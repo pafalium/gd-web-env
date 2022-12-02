@@ -1,45 +1,39 @@
 
 import React from 'react';
-import {connect} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+
+import {selectActiveProgram} from '../app-redux-store/editor-state.js';
+import { updateActiveProgram } from '../app-redux-store/programs.js';
 
 import {HorizontalBar} from '../ReactComponents/Common/layout.jsx';
-
 import SuperEditor from '../ReactComponents/SuperEditor.jsx';
-import {changeProgram} from '../app-redux-store/editor-state.js';
 
 
-const ProgramName = ({name}) => (
-  <HorizontalBar>
-    <h1>{name}</h1>
-  </HorizontalBar>
-);
-
-const ProgramNameContainer = connect(
-  state => ({name: state.activeProgram.name})
-)(ProgramName);
-
+function ProgramName() {
+  const name = useSelector(state => selectActiveProgram(state).name);
+  return (
+    <HorizontalBar>
+      <h1>{name}</h1>
+    </HorizontalBar>
+  );
+}
 
 
-const SuperEditorContainer = connect(
-  state => ({
-    program: state.activeProgram.program
-  }),
-  dispatch => ({
-    onProgramChange: (program) => dispatch(changeProgram(program))
-  })
-)(SuperEditor);
-
-
-
-export const CurrentProgramEditor = () => (
+export function CurrentProgramEditor() {
+  const activeProgramSource = useSelector(state => selectActiveProgram(state).program);
+  const dispatch = useDispatch();
+  return (
   <div>
     <div style={{}}>
-      <ProgramNameContainer/>
+      <ProgramName/>
     </div>
     <div style={{width: '100%', height: 'calc(100% - 3em)'}}>
-      <SuperEditorContainer/>
+      <SuperEditor 
+        program={activeProgramSource}
+        onProgramChange={newSource => dispatch(updateActiveProgram({program: newSource}))}/>
     </div>
   </div>
-);
+  );
+}
 
 export default CurrentProgramEditor;
