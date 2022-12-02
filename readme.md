@@ -15,11 +15,11 @@ If already have the environment working, you may want to check the [instructions
 
 
 ## Building
-You need to have [node.js](https://nodejs.org/en/) and [gulp](http://gulpjs.com/) installed.
+You need to have [node.js](https://nodejs.org/en/) installed.
 
 Then open up a console in the repository's root directory and run `npm install`. This will install all dependencies required for the web page itself and for the rest of the build process.
 
-Run `gulp` to build the web page.
+Run `npm run watch` and `npm run serve` to build the web page and serve it locally.
 
 
 ## Running
